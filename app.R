@@ -1,0 +1,79 @@
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+library(shinydashboard)
+library(shinydashboardPlus)
+library(devtools)
+library(ContDataQC)
+library(shinyjs)
+library(shinyWidgets)
+library(dplyr)
+library(plotly)
+library(grDevices)
+library(xts)
+library(readr)
+library(rmarkdown)
+library(DT)
+library(mnsentinellakes)
+source("functions/dashboard.R")
+
+# function definitions are located in the dashboard.R file
+ui <- dashboardPagePlus(
+    header = dashboardHeaderPlus(
+        #Title
+        title = "Data Logger Processing",
+        titleWidth = 275,
+        enable_rightsidebar = TRUE,
+        rightSidebarIcon = "gear",
+        left_menu = dropdownmenus("dropdown")
+    ),
+    rightsidebar = uiOutput("rtsidebar"),
+    sidebar = dashboardSidebar(
+        logprocsidebar("leftsidebarmenu")
+    ),
+    body = dashboardBody(
+        #Defined in the maintable.R file
+        source("functions/maintabs.R",local = TRUE)$value
+    )
+)
+
+# Define server logic 
+server <- function(input,output,session) {
+    
+    #code for rightsidebar
+    source("functions/rightsidebar.R",local = TRUE)$value
+    
+    #code for QC processing and data formatting
+    source("functions/processing.R", local = TRUE)$value
+    
+    #code for the depths table
+    source("functions/depthstable.R",local = TRUE)$value
+    
+    #code for alerts
+    source("functions/alerts.R",local = TRUE)$value
+    
+    #code for miscellaneous reactives and functions
+    source("functions/misc.R",local = TRUE)$value
+    
+    #code for VisQC UI
+    source("functions/visqcUI.R",local = TRUE)$value
+    
+    #Code for VisQC Plot
+    source("functions/visqcPlot.R",local = TRUE)$value
+    
+    #Code for data export
+    source("functions/dataexport.R",local = TRUE)$value
+    
+    #Code for QC configuration settings
+    source("functions/configsettings.R",local = TRUE)$value
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
