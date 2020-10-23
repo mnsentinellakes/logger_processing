@@ -1,8 +1,6 @@
 
 output$saveconfigUI = renderUI({
-  
   tagList(
-    
     textInput(
       inputId = "saveconfigname",
       label = NULL,

@@ -50,30 +50,6 @@ server <- function(input,output,session) {
     #Code for loading baseconfig data, holding all metadata and configuration data
     source("functions/baseconfigload.R",local = TRUE)$value
     
-    #code for QC processing and data formatting UI
-    source("functions/processingUI.R", local = TRUE)$value
-    
-    #code for QC processing and data formatting
-    source("functions/processing.R", local = TRUE)$value
-    
-    #code for the depths table
-    source("functions/depthstable.R",local = TRUE)$value
-    
-    #code for alerts
-    source("functions/alerts.R",local = TRUE)$value
-
-    #code for VisQC UI
-    source("functions/visqcUI.R",local = TRUE)$value
-    
-    #Code for VisQC Plot
-    source("functions/visqcPlot.R",local = TRUE)$value
-    
-    #Code for data export
-    source("functions/dataexport.R",local = TRUE)$value
-    
-    #Code for QC configuration settings
-    source("functions/configsettings.R",local = TRUE)$value
-    
     #Code for configuration setup
     source("functions/qcconfig.R",local = TRUE)$value
     
@@ -88,6 +64,28 @@ server <- function(input,output,session) {
     
     #Code for saving the configuration file
     source("functions/saveconfigfile.R",local = TRUE)$value
+    
+    
+    #code for QC processing and data formatting UI
+    source("functions/processingUI.R", local = TRUE)$value
+    
+    #code for QC processing and data formatting
+    source("functions/processing.R", local = TRUE)$value
+    
+    #code for the depths table
+    source("functions/depthstable.R",local = TRUE)$value
+    
+    #code for alerts
+    source("functions/alerts.R",local = TRUE)$value
+    
+    #code for VisQC UI
+    source("functions/visqcUI.R",local = TRUE)$value
+    
+    #Code for VisQC Plot
+    source("functions/visqcPlot.R",local = TRUE)$value
+    
+    #Code for data export
+    source("functions/dataexport.R",local = TRUE)$value
 }
 
 # Run the application 
