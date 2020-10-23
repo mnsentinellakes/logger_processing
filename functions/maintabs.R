@@ -1,87 +1,226 @@
 #Setup and Processing Tab----
 #Interface for setting up the data for processing and processing
 tabItems(
+  #Home Tab----
   tabItem(
-    #Setup tab where serial numbers and their associated depths are added, deleted, or reset
-    tabName = "setup",
+    tabName = "home",
+    useSweetAlert()
+  ),
+  #Programs and Waterbodies Tab----
+  tabItem(
+    tabName = "programsandwaterbodies",
+    fluidRow(
+      column(
+        width = 7,
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Load Configuration File",
+          uiOutput("loadconfigfileUI")
+        )
+      ),
+      column(
+        width = 5,
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "",
+          uiOutput("loadconfigfiledescUI")
+        )
+      )
+    ),
+    fluidRow(
+      column(
+        width = 7,
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Add/Edit/Delete Programs",
+          uiOutput("aedprogramsUI")
+        )
+      ),
+      column(
+        width = 5,
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "",
+          uiOutput("aedprogramsdescUI")
+        )
+      )
+    ),
+    fluidRow(
+      column(
+        width = 7,
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Add/Edit/Delete Waterbodies",
+          uiOutput("aedwaterbodiesUI")
+        )
+      ),
+      column(
+        width = 5,
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "",
+          uiOutput("aedwaterbodiesdescUI")
+        )
+      )
+    ),
+    fluidRow(
+      column(
+        width = 7,
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Add/Edit/Delete Stations",
+          uiOutput("aedstationsUI")
+        )
+      ),
+      column(
+        width = 5,
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = ""
+        )
+      )
+    )
+  ),
+  #QC Configuration Tab----
+  tabItem(
+    tabName = "configqc",
     fluidRow(
       column(
         width = 3,
         box(
-          title = "Depths Input",
           solidHeader = TRUE,
-          collapsible = TRUE,
           status = "primary",
           width = NULL,
-          HTML("<CENTER>"),
-          fluidRow(
-            column(
-              width = 6,
-              #Serial Number Text Input
-              textInput(
-                inputId = "inputsn",
-                label = "Serial Number"
-              )
-            ),
-            column(
-              width = 6,
-              #Depth Text Input
-              textInput(
-                inputId = "inputdepth",
-                label = "Depth"
-              )
-            )
-          ),
-          #Add serial number and depth data to lookup table
-          actionBttn(
-            inputId = "add",
-            label = "Add",
-            color = "success",
-            style = "fill",
-            icon = icon("plus")
-          ),
-          HTML("</CENTER>"),
-          useSweetAlert()
+          title = "Program",
+          uiOutput("selectprogramsUI"),
         ),
         box(
-          title = "Delete/Reset Rows",
           solidHeader = TRUE,
-          collapsible = TRUE,
-          collapsed = TRUE,
           status = "primary",
           width = NULL,
-          HTML("<CENTER>"),
-          #Text input for row number to be deleted or reset
-          textInput(
-            inputId = "RowID",
-            label = "RowID",
-            width = 60),
-          fluidRow(
-            HTML("<CENTER>"),
-            column(
-              width = 6,
-              #Delete row indicated in text input
-              actionBttn(
-                inputId = "delete",
-                label = "Delete",
-                color = "danger",
-                style = "fill",
-                icon = icon("minus")
-              )
-            ),
-            column(
-              width = 6,
-              #Reset processed status of row indicated in the text input
-              actionBttn(
-                inputId = "reset",
-                label = "Reset",
-                color = "danger",
-                style = "fill",
-                icon = icon("redo")
-              )
-            )
-          )
+          title = "Waterbodies",
+          uiOutput("selectwbsUI")
         ),
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Logger",
+          uiOutput("loggerconfigselectUI")
+        )
+      ),
+      column(
+        width = 6,
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "QC Configuration",
+          uiOutput("configUI")
+          # tableOutput("test")
+        )
+        
+      ),
+      column(
+        width = 3,
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "",
+          uiOutput("configdescUI")
+        )
+      )
+    )
+  ),
+  #Logger File Definitions Tab----
+  tabItem(
+    tabName = "logfiledefs",
+    fluidRow(
+      column(
+        width = 9,
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Manage Logger Models",
+          collapsible = TRUE,
+          collapsed = FALSE,
+          uiOutput("aedoptionsUI")
+        )
+      ),
+      column(
+        width = 3,
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "",
+          uiOutput("aedoptionsdescUI"),
+        ),
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "",
+          uiOutput("lfloggerconfigdescUI")
+        )
+      )
+    )
+  ),
+  #Save Config File Tab----
+  tabItem(
+    tabName = "saveconfigfile",
+    fluidRow(
+      column(
+        width = 6,
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Save Configuration File",
+          uiOutput("saveconfigUI")
+        )
+      ),
+      column(
+        width = 6,
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "",
+          uiOutput("saveconfigdescUI")
+        )
+      )
+    )
+  ),
+  #Setup and Processing Tab----
+  tabItem(
+    tabName = "setup",
+    uiOutput("pwlmUI"),
+    fluidRow(
+      column(
+        width = 5,
+        uiOutput("depthstableoutputUI")
+      ),
+      column(
+        width = 4,
         box(
           title = "Upload logger data",
           solidHeader = TRUE,
@@ -102,43 +241,39 @@ tabItems(
             )
           ),
           #UI output for ui section rendered in the server side of the app
-          uiOutput("loggerstring"),
+          uiOutput("procmetadata"),
           actionBttn(
             inputId = "processing",
             label = "Process Data",
             color = "success",
             style = "fill",
+            size = "lg",
             icon = icon("desktop")
+          ),
+          tags$br(),
+          tags$hr(),
+          tags$br(),
+          progressBar(
+            "processprogress",
+            value = 0,
+            display_pct = TRUE,
+            status = "success",
+            title = "Begin Processing"
           )
         )
-      ),
-      column(
-        width = 7,
-        box(
-          title = "Depths Table",
-          solidHeader = TRUE,
-          collapsible = TRUE,
-          status = "primary",
-          width = NULL,
-          HTML("<CENTER>"),
-          #Table output for lookup table
-          DTOutput("depthstableoutput"),
-          HTML("</CENTER>"),
-          textOutput("testx")
-        )
-      )
-    ),
-    box(
-      title = "Progress",
-      solidHeader = TRUE,
-      status = "primary",
-      width = 12,
-      #Processing progress bar
-      progressBar(
-        "processprogress",
-        value = 0,
-        display_pct = TRUE,
-        status = "success"
+        # box(
+        #   title = "Progress",
+        #   solidHeader = TRUE,
+        #   status = "primary",
+        #   width = NULL,
+        #   #Processing progress bar
+        #   progressBar(
+        #     "processprogress",
+        #     value = 0,
+        #     display_pct = TRUE,
+        #     status = "success"
+        #   )
+        # )
       )
     ),
     box(
@@ -176,7 +311,7 @@ tabItems(
           status = "primary",
           width = NULL,
           #output for Visual QC plotly graph
-          plotlyOutput("VisQCplot")
+          plotlyOutput("VisQCplot",height = 800)
         )
       )
     )

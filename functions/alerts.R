@@ -25,31 +25,3 @@ observeEvent(
       )
     }
   })
-
-#Observes the add button. If the lake name text input is blank, an alert will popup, telling the user to fill out the input
-observeEvent(
-  input$add,{
-    if(nchar(input$lakeinput)==0){
-      sendSweetAlert(
-        session,
-        title = "Missing Lake Name",
-        text = "",
-        type = "error"
-      )
-    }
-  })
-
-#Data Editing Alerts----
-#Missing RowID
-#Observes the Delete button If the row id text input is blank, an alert will popup, telling the user to fill out the input
-observeEvent(
-  input$delete,{
-    if (nchar(input$RowID)==0){
-      sendSweetAlert(
-        session,
-        title = "Missing RowID",
-        text = "",
-        type = "error"
-      )
-    }
-  })

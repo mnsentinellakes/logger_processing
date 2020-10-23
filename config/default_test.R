@@ -41,7 +41,7 @@ ContData.env <- new.env(parent = emptyenv())
 # Delimiter in File Names (e.g., test2_AW_201301_20131231.csv)
 ContData.env$myDelim <- "_"
 ContData.env$myDelim_LakeID <- "~"
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Acceptable column names for the data ####
 ## Basic
 ContData.env$myName.SiteID        <- "SiteID"
@@ -63,7 +63,7 @@ ContData.env$myUnits.Turbidity  <- "NTU"
 ContData.env$myUnits.Chlorophylla <- "g.cm3"
 ContData.env$myUnits.GageHeight <- "ft"
 ## Logger Fields
-ContData.env$myName.RowID.Water   <- "Water.RowID"
+ContData.env$myName.RowID.Water   <- "RowID"
 ContData.env$myName.LoggerID.Water<- "Water.LoggerID"
 ContData.env$myName.RowID.Air     <- "Air.RowID"
 ContData.env$myName.LoggerID.Air  <- "Air.LoggerID"
@@ -76,6 +76,7 @@ ContData.env$myName.SensorDepth   <- paste0("Sensor.Depth.",ContData.env$myUnits
 ContData.env$myName.Discharge     <- paste0("Discharge.",ContData.env$myUnits.Discharge)
 ContData.env$myName.Cond          <- paste0("Conductivity.",ContData.env$myUnits.Cond)
 ContData.env$myName.DO            <- paste0("DO.",ContData.env$myUnits.DO)
+print(ContData.env$myName.DO)
 ContData.env$myName.pH            <- paste0("pH.",ContData.env$myUnits.pH)
 ContData.env$myName.Turbidity     <- paste0("Turbidity.",ContData.env$myUnits.DO)
 ContData.env$myName.Chlorophylla   <- paste0("Chlorophylla.",ContData.env$myUnits.pH)
@@ -264,8 +265,8 @@ ContData.env$myThresh.Gross.Fail.Hi.Discharge  <-  10^5 #dependant upon stream s
 ContData.env$myThresh.Gross.Fail.Lo.Discharge  <-  -1  #dependant upon stream size
 ContData.env$myThresh.Gross.Fail.Hi.Cond       <- 1500 # this threshold has not been closely evaluated
 ContData.env$myThresh.Gross.Fail.Lo.Cond       <- 10   # this threshold has not been closely evaluated
-ContData.env$myThresh.Gross.Fail.Hi.DO         <- 20   # this threshold has not been closely evaluated
-ContData.env$myThresh.Gross.Fail.Lo.DO         <- 1    # this threshold has not been closely evaluated
+ContData.env$myThresh.Gross.Fail.Hi.DO         <- 10   # this threshold has not been closely evaluated
+ContData.env$myThresh.Gross.Fail.Lo.DO         <- 5    # this threshold has not been closely evaluated
 ContData.env$myThresh.Gross.Fail.Hi.pH         <- 12   # this threshold has not been closely evaluated
 ContData.env$myThresh.Gross.Fail.Lo.pH         <- 3    # this threshold has not been closely evaluated
 ContData.env$myThresh.Gross.Fail.Hi.Turbidity         <- 10^5     # this threshold has not been closely evaluated
@@ -291,8 +292,8 @@ ContData.env$myThresh.Gross.Suspect.Hi.Discharge  <-  10^3 #dependant upon strea
 ContData.env$myThresh.Gross.Suspect.Lo.Discharge  <-  -1   #dependant upon stream size
 ContData.env$myThresh.Gross.Suspect.Hi.Cond       <- 1200  # this threshold has not been closely evaluated
 ContData.env$myThresh.Gross.Suspect.Lo.Cond       <- 20    # this threshold has not been closely evaluated
-ContData.env$myThresh.Gross.Suspect.Hi.DO         <- 18    # this threshold has not been closely evaluated
-ContData.env$myThresh.Gross.Suspect.Lo.DO         <- 2     # this threshold has not been closely evaluated
+ContData.env$myThresh.Gross.Suspect.Hi.DO         <- 9    # this threshold has not been closely evaluated
+ContData.env$myThresh.Gross.Suspect.Lo.DO         <- 6    # this threshold has not been closely evaluated
 ContData.env$myThresh.Gross.Suspect.Hi.pH         <- 11    # this threshold has not been closely evaluated
 ContData.env$myThresh.Gross.Suspect.Lo.pH         <- 4     # this threshold has not been closely evaluated
 ContData.env$myThresh.Gross.Suspect.Hi.Turbidity         <- 10^3     # this threshold has not been closely evaluated

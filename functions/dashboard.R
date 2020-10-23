@@ -42,9 +42,27 @@ logprocsidebar=function(id){
     #Processing steps, to be followed sequentially----
     sidebarMenu(
       id=id,
-      menuItem("Setup/Processing (1)",tabName = "setup",icon = icon("edit")),
-      menuItem("Visual QC (2)",tabName = "visqc",icon = icon("eye")),
-      menuItem("Export (3)",tabName = "export",icon = icon("download"))
+      menuItem(
+        "Home",
+        tabName = "home",
+        icon = icon("home")
+      ),
+      menuItem(
+        "Configuration",
+        icon = icon("sliders-h"),
+        startExpanded = TRUE,
+        menuSubItem("Programs and Waterbodies",tabName = "programsandwaterbodies"),
+        menuSubItem("QC Settings",tabName = "configqc"),
+        menuSubItem("Logger File Definitions",tabName = "logfiledefs"),
+        menuSubItem("Save Configuration File",tabName = "saveconfigfile")
+      ),
+      menuItem(
+        "Processing and QC", 
+        icon = icon("laptop"),
+        menuSubItem("Setup/Processing (1)",tabName = "setup"),
+        menuSubItem("Visual QC (2)",tabName = "visqc"),
+        menuSubItem("Export (3)",tabName = "export")
+      )
     )
   )
 }

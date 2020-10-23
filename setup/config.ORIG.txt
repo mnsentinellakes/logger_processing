@@ -41,7 +41,7 @@ ContData.env <- new.env(parent = emptyenv())
 # Delimiter in File Names (e.g., test2_AW_201301_20131231.csv)
 ContData.env$myDelim <- "_"
 ContData.env$myDelim_LakeID <- "~"
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Acceptable column names for the data ####
 ## Basic
 ContData.env$myName.SiteID        <- "SiteID"
@@ -166,7 +166,7 @@ ContData.env$myNames.DataFields <- c(ContData.env$myName.WaterTemp
                                      , ContData.env$myName.Discrete.Turbidity
                                      , ContData.env$myName.Discrete.Chlorophylla
                                      , ContData.env$myName.Discrete.GageHeight
-)
+                                     )
 ContData.env$myNames.DataFields.Lab <- c(ContData.env$myLab.WaterTemp
                                          , ContData.env$myLab.AirTemp
                                          , ContData.env$myLab.WaterP
@@ -191,7 +191,7 @@ ContData.env$myNames.DataFields.Lab <- c(ContData.env$myLab.WaterTemp
                                          , ContData.env$myLab.Discrete.Turbidity
                                          , ContData.env$myLab.Discrete.Chlorophylla
                                          , ContData.env$myLab.Discrete.GageHeight
-)
+                                         )
 ContData.env$myNames.DataFields.Col <- c("blue","green","gray","gray","black","brown"
                                          ,"purple","orange","salmon","rosybrown","aquamarine1")
 #
@@ -228,7 +228,7 @@ ContData.env$myNames.Order <- c(ContData.env$myName.SiteID
                                 , ContData.env$myName.Discrete.Turbidity
                                 , ContData.env$myName.Discrete.Chlorophylla
                                 , ContData.env$myName.Discrete.GageHeight
-)
+                                )
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Data Quality Flag Values ####
 ContData.env$myFlagVal.Pass    <- "P"
@@ -413,7 +413,7 @@ ContData.env$myThresh.Flat.MaxComp    <- max(ContData.env$myThresh.Flat.Hi.Water
                                              , ContData.env$myThresh.Flat.Hi.Turbidity
                                              , ContData.env$myThresh.Flat.Hi.Chlorophylla
                                              , ContData.env$myThresh.Flat.Hi.GageHeight
-)
+                                             )
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data Fields with Flags ####
 ContData.env$myName.Flag        <- "Flag" # flag prefix
@@ -475,12 +475,12 @@ ContData.env$myName.Season   <- "Season"
 ContData.env$myName.YrSeason <- "YearSeason"
 # for summary stats
 ContData.env$myNames.Fields.TimePeriods <- c(ContData.env$myName.Yr
-                                             ,ContData.env$myName.YrMo
-                                             ,ContData.env$myName.Mo
-                                             ,ContData.env$myName.MoDa
-                                             ,ContData.env$myName.JuDa
-                                             ,ContData.env$myName.Season
-                                             ,ContData.env$myName.YrSeason)
+											,ContData.env$myName.YrMo
+											,ContData.env$myName.Mo
+											,ContData.env$myName.MoDa
+											,ContData.env$myName.JuDa
+											,ContData.env$myName.Season
+											,ContData.env$myName.YrSeason)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Exclude Trigger ####
 # Trigger for Stats to exclude (TRUE) or include (FALSE) where flag = "fail"

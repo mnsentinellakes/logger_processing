@@ -1,135 +1,114 @@
 #Plot Data for Visual QC---------------
-output$VisQCplot=renderPlotly({
-  QCdata=VisQCdata()
-  QCdata=QCdata[QCdata$Serial_Number == input$siteidchoice,]
-  
-  flagvcolors=c("P"="navyblue",
-                "F"="red",
-                "S"="orange")
-  if (input$Type=="Temperature"){
-    plot_ly(
-      source = "VQCselect",
-      x=QCdata$Date_Time,
-      y=QCdata$Water_Temp_C,
-      type = "scattergl",
-      key = QCdata$Date_Time,
-      symbols = 16,
-      color = QCdata$FlagV,
-      colors = flagvcolors,
-      mode = "markers"
-    ) %>%
-      layout(
-        xaxis = list(
-          title = "Date",
-          showticklabels=FALSE), 
-        yaxis = list(
-          title = "Temperature"
-        )
-      )
-  }else if (input$Type=="Dissolved Oxygen"){
-    validate(
-      need(input$DOmeasure,"Loading...")
-    )
-    if (input$DOmeasure=="DO"){
-      plot_ly(
-        source = "VQCselect",
-        x=QCdata$Date_Time,
-        y=QCdata$DO,
-        type = "scattergl",
-        key = QCdata$Date_Time,
-        symbols = 16,
-        color = QCdata$DO_FlagV,
-        colors = flagvcolors,
-        mode = "markers"
-      )%>%
-        layout(
-          xaxis = list(
-            title = "Date",
-            showticklabels=FALSE), 
-          yaxis = list(
-            title = "DO"
-          )
-        )
-    }else if(input$DOmeasure=="Temperature"){
-      plot_ly(
-        source = "VQCselect",
-        x=QCdata$Date_Time,
-        y=QCdata$Water_Temp_C,
-        type = "scattergl",
-        key = QCdata$Date_Time,
-        symbols = 16,
-        color = QCdata$Temp_FlagV,
-        colors = flagvcolors,
-        mode = "markers"
-      )%>%
-        layout(
-          xaxis = list(
-            title = "Date",
-            showticklabels=FALSE
-          ), 
-          yaxis = list(
-            title = "Temperature"
-          )
-        )
-    }
+# VQCselect = reactiveVal()
+
+flagtype = reactive({
+  if(input$flagselect == "Visual"){
+    flagfield = "FlagVis"
+  }else if (input$flagselect == "Gross"){
+    flagfield = "FlagGross"
+  }else if (input$flagselect == "Spike"){
+    flagfield = "FlagSpike"
+  }else if (input$flagselect == "Rate of Change"){
+    flagfield = "FlagRoC"
+  }else if (input$flagselect == "Flat"){
+    flagfield = "FlagFlat"
   }
+  
+  return(flagfield)
+  
 })
+
+output$VisQCplot = renderPlotly({
+  QCdata = datatypedf()
+  
+  QCdata = QCdata[which(QCdata$SiteId == input$siteidchoice),]
+
+  flagfield = sym(flagtype())
+    
+  flagcolors=c("P"="royalblue1",
+                "F"="red",
+                "S"="orange",
+                "X" = "slategray3")
+
+
+
+  Theme = theme(
+    panel.border = element_rect(color = "black",fill = NA,size = 1),
+    panel.grid.major.x = element_line(color = "lightgray",size = 0.5,linetype = 3),
+    panel.grid.major.y = element_line(color = "lightgray",size = 0.5,linetype = 3),
+    panel.grid.minor.x = element_blank(),
+    panel.background = element_blank(),
+    title = element_text(size = 12),
+    axis.text = element_text(size = 10),
+    # panel.ontop = T,
+    legend.key = element_blank(),
+    legend.key.height = unit(20,"mm"),
+    legend.key.width = unit(12,"mm")
+  )
+  
+  ggplotly(
+    dynamicTicks = TRUE,
+    
+    source = "V",
+    ggplot(
+      data = QCdata
+    ) +
+      geom_point(
+        aes(
+          x = DateTime,
+          y = Data,
+          color = !!flagfield,
+          key = DateTime
+        ),
+        size = 2.5
+        
+      ) +
+      xlab("Date and Time") +
+      ylab(input$visqcloggerchoices) +
+      scale_color_manual(values = flagcolors) +
+      Theme
+  )
+})
+
+VisQCdataupdate = function(updatedata){
+  VisQCdataselect = VisQCdata()
+  VisQCdataselect[[input$visqcloggerchoices]] = updatedata
+  VisQCdata(VisQCdataselect)
+}
 
 #FlagV=Fail for selected data-----
 observeEvent(
-  input$visfail,{
-    VQCfaildataF=event_data(
+  input$fail,{
+    VQCfaildataF = event_data(
       event = "plotly_selected",
-      source = "VQCselect"
+      source = "V"
     )
-    VQCFail=VisQCdata()
-    if (input$Type=="Temperature"){
-      VQCFail$FlagV[which(VQCFail$Serial_Number==input$siteidchoice & VQCFail$Date_Time %in% VQCfaildataF$key)]="F"
-    }else if (input$Type=="Dissolved Oxygen"){
-      if (input$DOmeasure=="DO"){
-        VQCFail$DO_FlagV[which(VQCFail$Serial_Number==input$siteidchoice & VQCFail$Date_Time %in% VQCfaildataF$key)]="F"
-      }else if (input$DOmeasure=="Temperature"){
-        VQCFail$Temp_FlagV[which(VQCFail$Serial_Number==input$siteidchoice & VQCFail$Date_Time %in% VQCfaildataF$key)]="F"
-      }
-    }
-    VisQCdata(VQCFail)
+    
+    VQCFail = datatypedf()
+    
+    VQCFail[which(VQCFail$SiteId == input$siteidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),flagtype()] = "F"
+    VisQCdataupdate(VQCFail)
   })
 
 #FlagV=Suspect for selected data------
 observeEvent(
-  input$vissusp,{
-    VQCfaildataS=event_data(
+  input$susp,{
+    VQCfaildataS = event_data(
       event = "plotly_selected",
-      source = "VQCselect"
+      source = "V"
     )
-    VQCSusp=VisQCdata()
-    if (input$Type=="Temperature"){
-      VQCSusp$FlagV[which(VQCSusp$Serial_Number==input$siteidchoice & VQCSusp$Date_Time %in% VQCfaildataS$key)]="S"
-    }else if (input$Type=="Dissolved Oxygen"){
-      if (input$DOmeasure=="DO"){
-        VQCSusp$DO_FlagV[which(VQCSusp$Serial_Number==input$siteidchoice & VQCSusp$Date_Time %in% VQCfaildataS$key)]="S"
-      }else if (input$DOmeasure=="Temperature"){
-        VQCSusp$Temp_FlagV[which(VQCSusp$Serial_Number==input$siteidchoice & VQCSusp$Date_Time %in% VQCfaildataS$key)]="S"
-      }
-    }
-    VisQCdata(VQCSusp)
+    VQCSusp = datatypedf()
+    VQCSusp[which(VQCSusp$SiteId == input$siteidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),flagtype()] = "S"
+    VisQCdataupdate(VQCSusp)
   })
 
 #FlagV=Pass for selected data-----
 observeEvent(
-  input$vispass,{
-    VQCfaildataP=event_data(
+  input$pass,{
+    VQCfaildataP = event_data(
       event = "plotly_selected",
-      source = "VQCselect")
-    VQCPass=VisQCdata()
-    if (input$Type=="Temperature"){
-      VQCPass$FlagV[which(VQCPass$Serial_Number==input$siteidchoice & VQCPass$Date_Time %in% VQCfaildataP$key)]="P"
-    }else if (input$Type=="Dissolved Oxygen"){
-      if (input$DOmeasure=="DO"){
-        VQCPass$DO_FlagV[which(VQCPass$Serial_Number==input$siteidchoice & VQCPass$Date_Time %in% VQCfaildataP$key)]="P"
-      }else if (input$DOmeasure=="Temperature"){
-        VQCPass$Temp_FlagV[which(VQCPass$Serial_Number==input$siteidchoice & VQCPass$Date_Time %in% VQCfaildataP$key)]="P"
-      }
-    }
-    VisQCdata(VQCPass)
+      source = "V")
+    VQCPass = datatypedf()
+    VQCPass[which(VQCPass$SiteId == input$siteidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),flagtype()] = "P"
+    VisQCdataupdate(VQCPass)
   })

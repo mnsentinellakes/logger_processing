@@ -22,17 +22,17 @@ library(readr)
 library(rmarkdown)
 library(DT)
 library(mnsentinellakes)
+library(ids)
+library(lubridate)
 source("functions/dashboard.R")
-
+options(scipen = 999)
 # function definitions are located in the dashboard.R file
 ui <- dashboardPagePlus(
     header = dashboardHeaderPlus(
         #Title
         title = "Data Logger Processing",
         titleWidth = 275,
-        enable_rightsidebar = TRUE,
-        rightSidebarIcon = "gear",
-        left_menu = dropdownmenus("dropdown")
+        enable_rightsidebar = FALSE
     ),
     rightsidebar = uiOutput("rtsidebar"),
     sidebar = dashboardSidebar(
@@ -47,8 +47,11 @@ ui <- dashboardPagePlus(
 # Define server logic 
 server <- function(input,output,session) {
     
-    #code for rightsidebar
-    source("functions/rightsidebar.R",local = TRUE)$value
+    #Code for loading baseconfig data, holding all metadata and configuration data
+    source("functions/baseconfigload.R",local = TRUE)$value
+    
+    #code for QC processing and data formatting UI
+    source("functions/processingUI.R", local = TRUE)$value
     
     #code for QC processing and data formatting
     source("functions/processing.R", local = TRUE)$value
@@ -58,10 +61,7 @@ server <- function(input,output,session) {
     
     #code for alerts
     source("functions/alerts.R",local = TRUE)$value
-    
-    #code for miscellaneous reactives and functions
-    source("functions/misc.R",local = TRUE)$value
-    
+
     #code for VisQC UI
     source("functions/visqcUI.R",local = TRUE)$value
     
@@ -73,6 +73,21 @@ server <- function(input,output,session) {
     
     #Code for QC configuration settings
     source("functions/configsettings.R",local = TRUE)$value
+    
+    #Code for configuration setup
+    source("functions/qcconfig.R",local = TRUE)$value
+    
+    #Code for qc values update
+    source("functions/qcvalues.R",local = TRUE)$value
+    
+    #Code for program management
+    source("functions/programmanagement.R",local = TRUE)$value
+    
+    #Code for logger file definitions
+    source("functions/logfiledefs.R",local = TRUE)$value
+    
+    #Code for saving the configuration file
+    source("functions/saveconfigfile.R",local = TRUE)$value
 }
 
 # Run the application 

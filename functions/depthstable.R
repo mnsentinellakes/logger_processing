@@ -1,153 +1,200 @@
-#Load lake metadata
-lakeid=reactive({
-  lakemeta=mnsentinellakes::sentinellakesmetadata
-  lakeidselect=lakemeta$LakeId[which(formatlakename(lakemeta$Lake)==lakeinput())]
-  return(lakeidselect)
-})
+##!!!Potential Future Update - Read the data files in first to collect list of serial numbers and then associate depths with each
 
-#Load depthdata file
-load("data/depthdata")
 
-#Create reactive value table for the depths data
-depthsfile = reactiveVal()
-
-#Select which depthdata dataframe to use depending on input choice
-observe(
-  if (input$Type=="Temperature"){
-    depthsfile(depthdata[[1]])
-    
-  }else if (input$Type=="Dissolved Oxygen"){
-    depthsfile(depthdata[[2]])
+#A column of delete buttons for each row in the data frame for the first column
+deleteButtonColumn = function(df, id, ...) {
+  # function to create one action button as string
+  f = function(i) {
+    # https://shiny.rstudio.com/articles/communicating-with-js.html
+    as.character(actionButton(paste(id, i, sep="_"), label = NULL, icon = icon('trash'),
+                              onclick = 'Shiny.setInputValue(\"deletePressed\",  this.id, {priority: "event"})'))
   }
-)
-
-#Format Lake Name
-formatlakename=function(lakename){
-  lakename=gsub(" ","_",lakename)
-  lakename=gsub("[:.:]","",lakename)
-  return(lakename)
+  
+  deleteCol = unlist(lapply(seq_len(nrow(df)), f))
+  
+  # Return a data table
+  DT::datatable(
+    cbind(df,Delete = deleteCol),
+    # Need to disable escaping for html as string to work
+    escape = FALSE,
+    options = list(
+      # Disable sorting for the delete column
+      columnDefs = list(list(targets = 1, sortable = FALSE),
+                        list(visible = FALSE, targets = c(3:7))),
+      # dom = 't',
+      scrollY = "250px",
+      searching = FALSE,
+      paging = FALSE
+    ),
+    colnames = c("Serial Number" = "Serial_Number","Depth" = "Depth")
+  )
 }
 
-#Create event reactive lake name---------------
-lakeinput=eventReactive(
-  input$lakeapply,{
-    isolate(as.character(formatlakename(input$lakeinput)))
-  }) 
+# Extracts the row id number from the id string
+parseDeleteEvent = function(idstr) {
+  res = as.integer(sub(".*_([0-9]+)", "\\1", idstr))
+  if (! is.na(res)) res
+}
 
-#observes the add button on the setup page, when pressed it adds the values in the Serial Number and Depth text inputs into the lookup table
-observeEvent(
-  input$add,{
-    if (nchar(lakeinput())>0){
-      if (nchar(input$inputsn)>0){
-        Rowcalc=depthsfile()
-        RID=as.numeric(Rowcalc[nrow(Rowcalc),1])+1
-        lakename=as.character(formatlakename(lakeinput()))
-        WB_ID=lakeid()
-        SN=as.character(input$inputsn)
-        print(SN)
-        if (!is.na(input$inputdepth)){
-          depthnew=input$inputdepth
-        }else{
-          depthnew=NA
-        }
-        
-        newrow=data.frame("RowID"=RID,"Lake"=lakename,"LakeId"=WB_ID,"Serial_Number"=SN,"Depth"=depthnew,"Processed"=NA)
-        Rowcalc=rbind(Rowcalc,newrow)
-        depthsfile(Rowcalc)
-      }else{}
-    }else{}
-  })
+output$depthstableoutputUI = renderUI({
+  box(
+    title = "Depths Table",
+    solidHeader = TRUE,
+    collapsible = TRUE,
+    status = "primary",
+    width = NULL,
+    tags$table(
+      tags$tr(
+        tags$td(
+          style="vertical-align:center; border:1px solid lightgray; padding:5px; background-color:ghostwhite;",
+          fluidRow(
+            column(
+              width = 4,
+              #Serial Number Text Input
+              textInput(
+                inputId = "inputsn",
+                label = "Serial Number"
+              )
+            ),
+            column(
+              width = 4,
+              #Depth Text Input
+              textInput(
+                inputId = "inputdepth",
+                label = "Depth"
+              )
+            ),
+            column(
+              width = 3,
+              #Add serial number and depth data to lookup table
+              tags$br(),
+              actionBttn(
+                inputId = "add",
+                label = "Add",
+                color = "success",
+                style = "fill",
+                icon = icon("plus")
+              )
+            )
+          )
+        )
+      )
+    ),
+    tags$br(),
+    HTML("<CENTER>"),
+    #Table output for lookup table
+    DTOutput("depthstableoutput"),
+    HTML("</CENTER>"),
+    textOutput("testx")
+  )
+})
 
-#observes the add button on the setup page, when pressed it adds the values in the Serial Number and Depth text inputs into the lookup table
-#Delete Rows-----------
-#Observes the Delete button and deletes the row indicated in the text input
-observeEvent(
-  input$delete,{
-    dftest=depthsfile()
-    # dftest=dftest[dftest$Lake==lakeinput(),]
-    if (nchar(input$RowID)>0 & input$RowID %in% dftest$RowID){
-      rownum=as.numeric(input$RowID)
-      depthsfile(dftest[!(dftest$RowID==rownum),])
-    }
-  })
-
-observeEvent(
-  input$reset,{
-    resettest=depthsfile()
-    
-    if (nchar(input$RowID)>0 & input$RowID %in% resettest$RowID){
-      resetrownum=as.numeric(input$RowID)
-      resettest$Processed[which(resettest$RowID==resetrownum)]=NA
-      depthsfile(resettest)
-    }
-  })
-
-#Observes the add button and clears text inputs after a value has been entered
-observeEvent(
-  input$add,{
-    updateTextInput(
-      session,
-      "inputsn",
-      value = NA
-    )
-    updateTextInput(
-      session,
-      inputId = "inputdepth",
-      value = NA)
-    updateTextInput(
-      session,
-      inputId = "startdate",
-      value = NA
-    )
-    updateTextInput(
-      session,
-      inputId = "enddate",
-      value = NA
-    )
-  })
-
-#Observes the Delete button and clears text inputs after a value has been entered
-observeEvent(
-  input$delete,{
-    updateTextInput(
-      session,
-      inputId = "RowID",
-      value = NA
-    )
-  })
-
-#Observes the Reset button and clears text inputs after a value has been entered
-observeEvent(
-  input$reset,{
-    updateTextInput(
-      session,
-      inputId = "RowID",
-      value=NA
-    )
-  })
+depthstablefilter = reactive({
+  validate(
+    need(input$procwaterbody,"Loading...")
+  )
+  proclogs = processinglogs()
+  
+  proclogs = proclogs[which(proclogs$StationID == input$procstationname & proclogs$ModelID == input$procmodel & is.na(proclogs$Processed)),]
+  
+  
+  return(proclogs)
+})
 
 #Depths Table UI Display
-output$depthstableoutput=renderDT(
-  rownames=FALSE,{
-    datadepths=depthsfile()
+output$depthstableoutput = renderDataTable({
     
-    if (input$lakeapply==0){
-      datadepths
+  deleteButtonColumn(depthstablefilter(),"delete_button")
+  
+  })
+
+#In-table delete
+observeEvent(input$deletePressed, {
+  rowNum = parseDeleteEvent(input$deletePressed)
+  allproclogs = processinglogs()
+  depthstableselect = depthstablefilter()
+  depthstabledel = depthstableselect$ProcID[rowNum]
+  
+  allproclogs = allproclogs[which(allproclogs$ProcID != depthstabledel),]
+
+  processinglogs(allproclogs)
+  
+  updatebaseconfig()
+  
+})
+
+observeEvent(
+  input$add,
+  {
+    if (!is.null(input$procmodel)){
+      if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) > 0){
+        
+        addproclogs = processinglogs()
+        
+        addproclogsrow = data.frame("Serial_Number" = input$inputsn,"Depth" = input$inputdepth,"Processed" = NA,
+                                    "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,"ProcID" = random_id(n=1,bytes = 12),
+                                    stringsAsFactors = FALSE)
+        
+        addproclogs = rbind(addproclogs,addproclogsrow)
+        
+        processinglogs(addproclogs)
+        
+        updatebaseconfig()
+        
+        updateTextInput(
+          session = session,
+          inputId = "inputsn",
+          value = ""
+        )
+        
+        updateNumericInput(
+          session = session,
+          inputId = "inputdepth",
+          value = ""
+        )
+        
+      }else if (nchar(input$inputsn) == 0 & nchar(input$inputdepth) > 0){
+        
+      }else if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) == 0){
+        
+        addproclogs = processinglogs()
+        addproclogsrow = data.frame("Serial_Number" = input$inputsn,"Depth" = NA,"Processed" = NA,
+                                    "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,"ProcID" = random_id(n=1,bytes = 12),
+                                    stringsAsFactors = FALSE)
+        addproclogs = rbind(addproclogs,addproclogsrow)
+        
+        processinglogs(addproclogs)
+        updatebaseconfig()
+        
+        updateTextInput(
+          session = session,
+          inputId = "inputsn",
+          value = ""
+        )
+        
+        updateNumericInput(
+          session = session,
+          inputId = "inputdepth",
+          value = ""
+        )
+      }
     }else{
-      datadepths=datadepths[datadepths$Lake==lakeinput(),]
+      sendSweetAlert(
+        session = session,
+        title = "Missing Logger Model",
+        text = "A Logger Model must be created and selected for this logger type before processing.",
+        type = "error"
+      )
     }
-    datadepths
   })
 
 #Updates the Processed date in the depthsfile when the "Process Data" button is clicked
-observeEvent(
-  input$processing,{
-    updatedates=depthsfile()
-    updatedates$Processed[which(is.na(updatedates$Processed))]=Sys.Date()
-    if(input$Type=="Temperature"){
-      depthdata[[1]]=updatedates
-    }else if(input$Type=="Dissolved Oxygen"){
-      depthdata[[2]]=updatedates
-    }
-    save(depthdata,file = "data/depthdata")
-  })
+# observeEvent(
+#   input$processing,
+#   {
+#     updatedates = processinglogs()
+#     updatedates$Processed[which(updatedates$StationID == input$procstationname &
+#                                   updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
+#     processinglogs(updatedates)
+#     updatebaseconfig()
+#   })
