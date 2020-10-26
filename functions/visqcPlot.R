@@ -76,6 +76,32 @@ VisQCdataupdate = function(updatedata){
   VisQCdata(VisQCdataselect)
 }
 
+#Update the deployment table dates
+deploydatesupdate = function(){
+  
+  deployqcdata = datatypedf()
+  deployupdate = deploylogs()
+  
+  minrecorddt = min(deployqcdata$DateTime)
+  maxrecorddt = max(deployqcdata$DateTime)
+  minvaliddt = min(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])
+  maxvaliddt = max(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])
+  
+  message(paste("StartDateTimeRecord = ",minrecorddt))
+  message(paste("EndDateTimeRecord = ",maxrecorddt))
+  message(paste("StartDateTimeValid = ",minvaliddt))
+  message(paste("EndDateTimeValid = ",maxvaliddt))
+  
+  deployupdate$StartDateTimeRecord[which(deployupdate$DeployID == deployid())] = minrecorddt
+  deployupdate$EndDateTimeRecord[which(deployupdate$DeployID == deployid())] = maxrecorddt
+  deployupdate$StartDateTimeValid[which(deployupdate$DeployID == deployid())] = minvaliddt
+  deployupdate$EndDateTimeValid[which(deployupdate$DeployID == deployid())] = maxvaliddt
+  
+  deploylogs(deployupdate)
+  
+  updatebaseconfig()
+}
+
 #FlagV=Fail for selected data-----
 observeEvent(
   input$fail,{
@@ -83,11 +109,11 @@ observeEvent(
       event = "plotly_selected",
       source = "V"
     )
-    
     VQCFail = datatypedf()
-    
     VQCFail[which(VQCFail$SiteId == input$siteidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),flagtype()] = "F"
+    VQCFail[which(VQCFail$SiteId == input$siteidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),paste0(flagtype(),"chng")] = "F"
     VisQCdataupdate(VQCFail)
+    deploydatesupdate()
   })
 
 #FlagV=Suspect for selected data------
@@ -99,7 +125,9 @@ observeEvent(
     )
     VQCSusp = datatypedf()
     VQCSusp[which(VQCSusp$SiteId == input$siteidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),flagtype()] = "S"
+    VQCSusp[which(VQCSusp$SiteId == input$siteidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),paste0(flagtype(),"chng")] = "S"
     VisQCdataupdate(VQCSusp)
+    deploydatesupdate()
   })
 
 #FlagV=Pass for selected data-----
@@ -110,5 +138,7 @@ observeEvent(
       source = "V")
     VQCPass = datatypedf()
     VQCPass[which(VQCPass$SiteId == input$siteidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),flagtype()] = "P"
+    VQCPass[which(VQCPass$SiteId == input$siteidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),paste0(flagtype(),"chng")] = "P"
     VisQCdataupdate(VQCPass)
+    deploydatesupdate()
   })
