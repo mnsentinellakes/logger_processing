@@ -1,3 +1,5 @@
+turnoffprocessupdate = TRUE
+
 
 procwbs = reactive({
   wbs = programwbs()
@@ -169,33 +171,59 @@ compileQCdata = function(qcinfo,depthstable){
   
   siteids = depthstable$Serial_Number
   
+  stopprocess = FALSE
   datalist = list()
   for (i in loggertypes){
     loggertypecompile = NULL
     for (j in siteids){
+      
+      if (stopprocess == FALSE){
       qcpath = paste0("processing/",i,"/QC/")
       qcfiles = list.files(qcpath,full.names = TRUE)
       qcfile = qcfiles[which(grepl(j,qcfiles))]
       
+      if(length(qcfile)>0){
       readdata = read.csv(qcfile,stringsAsFactors = FALSE)
-      
       
       datacompile = data.frame("SiteId" = j,"DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
                                "Data" = readdata[,ncol(readdata)],"Depth" = depthstable$Depth[which(depthstable$Serial_Number == j)],
+                               "FlagGrossorig" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
+                               "FlagSpikeorig" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
+                               "FlagRoCorig" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
+                               "FlagFlatorig" = readdata[,which(grepl("Flag.Flat",names(readdata)))],
+                               "FlagVisorig" = "P",
+                               "FlagGrosschng" = as.character(NA),
+                               "FlagSpikechng" = as.character(NA),
+                               "FlagRoCchng" = as.character(NA),
+                               "FlagFlatchng" = as.character(NA),
+                               "FlagVischng" = as.character(NA),
                                "FlagGross" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
                                "FlagSpike" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
                                "FlagRoC" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
                                "FlagFlat" = readdata[,which(grepl("Flag.Flat",names(readdata)))],
+                               "FlagVis" = "P",
                                stringsAsFactors = FALSE)
-      datacompile$FlagVis = "P"
       
       loggertypecompile = rbind(loggertypecompile,datacompile)
+      }else{
+        
+        sendSweetAlert(
+          session = session,
+          title = paste("No file with Serial Number:",j),
+          text = "Ensure the Serial Numbers in the Depths Table match the file names",
+          type = "error"
+        )
+        stopprocess = TRUE
     }
     datalist[[i]] = loggertypecompile
+      }else{}
+    }
   }
   
+  finaloutput = list(datalist,stopprocess)
+  
   # save(datalist,file = "C:/Projects/Shiny_App_Development/Logger_Processing/Test/datalisttest.RDATA")
-  return(datalist)
+  return(finaloutput)
 }
 
 #Create Reactive Value for VisQCdata step
@@ -299,7 +327,10 @@ observeEvent(
         depthstable = depthstableselect
       )
       
+      if(compiledata[[2]] == FALSE){
       
+        compiledata = compiledata[[1]]
+        
       VisQCdata(compiledata)
       
       unlink("processing/*",recursive = TRUE,force = TRUE)
@@ -320,10 +351,12 @@ observeEvent(
       stationupdate = stations()
       
       #Update the depths table processed date
-      updatedates$Processed[which(updatedates$StationID == input$procstationname &
-                                    updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
-      processinglogs(updatedates)
       
+      if (turnoffprocessupdate == FALSE){
+        updatedates$Processed[which(updatedates$StationID == input$procstationname &
+                                      updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
+        processinglogs(updatedates)
+      }
       #Update deploy table
       deployidcreate = random_id(n = 1,bytes = 16)
       deployid(deployidcreate)
@@ -368,6 +401,15 @@ observeEvent(
         status = "success",
         title = paste("Processing and QC complete")
       )
+      }else{
+        updateProgressBar(
+          id = "processprogress",
+          session = session,
+          value = 90,
+          status = "danger",
+          title = paste("Delete and Re-enter Serial Numbers")
+        )
+      }
     }else{
       sendSweetAlert(
         session,
@@ -376,6 +418,7 @@ observeEvent(
         type = "error"
       )
     }
+    
   })
 
 #Re-enable disabled Processing button upon uploading new data
