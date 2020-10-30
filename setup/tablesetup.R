@@ -46,8 +46,9 @@ wbloggertypes=data.frame(
              "616a11390a7dfd5c","6f6a51b6bc6bfc08","b42738f95726b801","8b344c8fc841aa88","060e6635ba61e764","94b8f9392de0e1e4","eee0004fab488142",
              "0b5b5fa17e292943","465d2a6a91b0e8d7","04dba61814935855","a9bee292e0bfdb30","9bdb6858cac527ca","69e9d3e395c46a02","1e91b2f7caad6893",
              "73280c0f065388e9","9a4bf92c5101e10c","4ef33316ac29d54e","572f8736891678a8"),
-  "Loggers" = c("WaterTemp;DO","WaterTemp","WaterTemp","WaterTemp;DO","WaterTemp","WaterTemp","WaterTemp","WaterTemp","WaterTemp;DO","WaterTemp;DO","WaterTemp","WaterTemp;DO",
-                "WaterTemp","WaterTemp","WaterTemp","WaterTemp","WaterTemp","WaterTemp;DO","WaterTemp","WaterTemp","WaterTemp","WaterTemp","WaterTemp;DO","WaterTemp","WaterTemp;DO"),
+  "Loggers" = c("WaterTemp;DO","WaterTemp","WaterTemp","WaterTemp;DO","WaterTemp","WaterTemp","WaterTemp","WaterTemp","WaterTemp;DO","WaterTemp;DO",
+                "WaterTemp","WaterTemp;DO","WaterTemp","WaterTemp","WaterTemp","WaterTemp","WaterTemp","WaterTemp;DO","WaterTemp","WaterTemp",
+                "WaterTemp","WaterTemp","WaterTemp;DO","WaterTemp","WaterTemp;DO"),
   stringsAsFactors = FALSE
 )
 
@@ -76,14 +77,18 @@ processinglogs = data.frame("Serial_Number" = as.character(NA),"Depth" = as.nume
 
 # depcounts = unique(data.frame("DeployID"=processinglogs$DeployID,"Deployment"=processinglogs$Deployment,stringsAsFactors = FALSE))
 # 
-# deploylogs = data.frame("DeployID" = unique(processinglogs$DeployID),"Site" = "Primary","Lat" = NA, "Lon" = NA,"StartDate"=NA,"EndDate"=NA,stringsAsFactors = FALSE)
+# deploylogs = data.frame("DeployID" = unique(processinglogs$DeployID),"Site" = "Primary","Lat" = NA, "Lon" = NA,
+# "StartDate"=NA,"EndDate"=NA,stringsAsFactors = FALSE)
 # deploylogs$Units = c("C","C","C","C","C","C","C","C","C","C","C","C","C","C","C","mg/L","mg/L","mg/L","mg/L","mg/L")
 # deploylogs$Logger_Count = NA
 # deploylogs = left_join(deploylogs,depcounts)
 
-deploylogs = data.frame("DeployID" = as.character(NA),"Lat" = as.numeric(NA),"Lon" = as.numeric(NA),"StartDate" = as.Date(as.character(NA)),
-                        "EndDate" = as.Date(as.character(NA)),"Units" = as.character(NA),"Logger_Count" = as.numeric(NA),
-                        "Deployment_Count" = as.numeric(NA),stringsAsFactors = FALSE)
+deploylogs = data.frame("DeployID" = as.character(NA),"Logger_Type" = as.character(NA),"Lat" = as.numeric(NA),"Lon" = as.numeric(NA),
+                        "StartDateTimeRecord" = as.character(NA),
+                        "EndDateTimeRecord" = as.character(NA),"StartDateTimeValid" = as.character(NA),
+                        "EndDateTimeValid" = as.character(NA),"Units" = as.character(NA),"Logger_Count" = as.numeric(NA),
+                        "Deployment_Count" = as.numeric(NA),"ProcessedDate" = as.character(NA),"Processedby" = as.character(NA),
+                        stringsAsFactors = FALSE)
 
 
 #Add Units to deploylogs

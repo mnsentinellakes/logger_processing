@@ -1,330 +1,478 @@
 #Export Data----
 
-exportdata=reactiveVal()
-# exportdata=VisQCdata()
-#Process data for download-----------
-observeEvent(
-  input$processexport,{
-    if(input$exporttype=="All Data"){
-      updateProgressBar(
-        session,
-        "exportprogress",
-        value = 50,
-        status = "primary"
-      )
-      exportdata=VisQCdata()
-      
-      updateProgressBar(
-        session,
-        "exportprogress",
-        value = 100,
-        status = "primary"
-      )
-    }else if(input$exporttype=="Remove Failed Visual QC"){
-      updateProgressBar(
-        session,
-        "exportprogress",
-        value = 50,
-        status = "primary"
-      )
-      exportdata=VisQCdata()
-      if (input$Type == "Temperature"){
-        exportdata=exportdata[which(exportdata$FlagV=="P"),]
-      }else if (input$Type =="Dissolved Oxygen"){
-        exportdata=exportdata[which(exportdata$DO_FlagV=="P" & exportdata$Temp_FlagV=="P"),]
-      }
-      updateProgressBar(
-        session,
-        "exportprogress",
-        value = 100,
-        status = "primary"
-      )
-    }else if(input$exporttype=="Daily Summary"){
-      updateProgressBar(
-        session,
-        "exportprogress",
-        value = 2,
-        status = "primary"
-      )
-      exportdata=VisQCdata()
-      
-      if (input$Type=="Temperature"){
-        
-        exportdata=exportdata[exportdata$FlagV=="P",]
-        exportdata$Depth_m=as.numeric(exportdata$Depth_m)
-        
-        #Remove unneeded fields-------
-        
-        exportdata$LakeId=NULL
-        exportdata$FlagG=NULL
-        exportdata$FlagS=NULL
-        exportdata$FlagR=NULL
-        exportdata$FlagF=NULL
-        exportdata$FlagV=NULL
-        message("Removed unnecessary fields")
-        
-        updateProgressBar(
-          session,
-          "exportprogress",
-          value = 5,
-          status = "primary"
-        )
-        
-        #Get max and min depths and create list of depths in between-----
-        MaxDepth=round(max(exportdata$Depth_m),digits=0)
-        MinDepth=round(min(exportdata$Depth_m),digits=0)
-        Standard_Depths=c(MinDepth:MaxDepth)
-        laketempdepths=sort(unique(exportdata$Depth_m))
-        message("Standardized depths")
-        
-        updateProgressBar(
-          session,
-          "exportprogress",
-          value = 10,
-          status = "primary"
-        )
-        dailydepths=NULL
-        #Temperature stats by day-----
-        for (i in laketempdepths){
-          depth=exportdata[exportdata$Depth_m==i,]
-          message(paste("Summarizing Depth",i))
-          depth.xts=as.xts(as.numeric(as.numeric(depth[,3])),order.by=as.POSIXct(depth[,2],format='%Y-%m-%d %H:%M:%S',tz="UTC"))
-          depth.mean.xts=apply.daily(depth.xts,mean)
-          depth.max.xts=apply.daily(depth.xts,max)
-          depth.min.xts=apply.daily(depth.xts,min)
-          depth.sd.xts=apply.daily(depth.xts,sd)
-          depthmean=data.frame("datetime"=index(depth.mean.xts),"Depth"=i,"Mean_Temp"=coredata(depth.mean.xts))
-          depthmax=data.frame("datetime"=index(depth.max.xts),"Depth"=i,"Max_Temp"=coredata(depth.max.xts))
-          depthmin=data.frame("datetime"=index(depth.min.xts),"Depth"=i,"Min_Temp"=coredata(depth.min.xts))
-          depthsd=data.frame("datetime"=index(depth.sd.xts),"Depth"=i,"Stand_Dev"=coredata(depth.sd.xts))
-          
-          depthday=left_join(depthmean,depthmax,by=c("datetime","Depth"))
-          depthday=left_join(depthday,depthmin,by=c("datetime","Depth"))
-          depthday=left_join(depthday,depthsd,by=c("datetime","Depth"))
-          
-          dailydepths=rbind(dailydepths,depthday)
-          
-          updateProgressBar(
-            session,
-            "exportprogress",
-            value = 60/length(laketempdepths),
-            status = "info"
+#Updated Valuebox from: https://jkunst.com/blog/posts/2020-06-26-valuebox-and-sparklines/
+# valueBoxSpark <- function(value, title, sparkobj = NULL, subtitle, info = NULL, 
+#                           icon = NULL, color = "aqua", width = 4, href = NULL){
+#   shinydashboard:::validateColor(color)
+#   
+#   if (!is.null(icon))
+#     shinydashboard:::tagAssert(icon, type = "i")
+#   
+#   info_icon <- tags$small(
+#     tags$i(
+#       class = "fa fa-info-circle fa-lg",
+#       title = info,
+#       `data-toggle` = "tooltip",
+#       style = "color: rgba(255, 255, 255, 0.75);"
+#     ),
+#     # bs3 pull-right 
+#     # bs4 float-right
+#     class = "pull-right float-right"
+#   )
+#   
+#   boxContent <- div(
+#     class = paste0("small-box bg-", color),
+#     div(
+#       class = "inner",
+#       tags$small(title),
+#       if (!is.null(sparkobj))
+#       h3(value),
+#       if (!is.null(sparkobj)) sparkobj,
+#       p(subtitle)
+#     ),
+#     # bs3 icon-large
+#     # bs4 icon
+#     if (!is.null(icon)) div(class = "icon-large icon", icon, style = "z-index; 0")
+#   )
+#   
+#   if (!is.null(href)) 
+#     boxContent <- a(href = href, boxContent)
+#   
+#   div(
+#     class = if (!is.null(width)) paste0("col-sm-", width), 
+#     boxContent
+#   )
+# }
+# 
+summaryloggertypes = reactive({
+  summaryloggernames = VisQCdata()
+  summaryloggernames = names(summaryloggernames)
+  return(summaryloggernames)
+})
+
+valueBox2 <- function(value, title, subtitle, icon = NULL, color = "aqua", width = 4, href = NULL){
+  
+  shinydashboard:::validateColor(color)
+  
+  if (!is.null(icon))
+    shinydashboard:::tagAssert(icon, type = "i")
+  
+  boxContent <- div(
+    class = paste0("small-box bg-", color),
+    div(
+      class = "inner",
+      tags$small(title),
+      h3(value),
+      p(subtitle)
+    ),
+    if (!is.null(icon)) div(class = "icon-large", icon)
+  )
+  
+  if (!is.null(href)) 
+    boxContent <- a(href = href, boxContent)
+  
+  div(
+    class = if (!is.null(width)) paste0("col-sm-", width), 
+    boxContent
+  )
+}
+
+output$exportUI = renderUI({
+  validate(
+    need(summaryloggertypes(),"Loading...")
+  )
+  
+  #Get Program Name
+  programname = programs()
+  programname = programname$Program_Name[which(programname$ProgramID == input$procprogram)]
+  
+  #Get Waterbody Name
+  waterbodyname = wbnames()
+  waterbodyname = waterbodyname$Waterbody_Name[which(waterbodyname$AppID == input$procwaterbody)]
+  
+  #Get Waterbody ID
+  waterbody = programwbs()
+  waterbodyid = waterbody$ProgramWaterbodyID[which(waterbody$AppID == input$procwaterbody)]
+  
+  #Get Waterbody Type
+  waterbodytype = waterbody$WB_Type[which(waterbody$AppID == input$procwaterbody)]
+  
+  #Get Station Info
+  station = stations()
+  stationname = station$Station_Name[which(station$StationID == input$procstationname)]
+  stationlat = as.character(station$Lat[which(station$StationID == input$procstationname)])
+  stationlon = as.character(station$Lon[which(station$StationID == input$procstationname)])
+  
+  if ((length(stationlat) > 0 & length(stationlon) > 0) | !is.na(stationlat) & !is.na(stationlon)){
+    loc = paste("<font size = 4><b>",stationlat,",",stationlon,"</b></font>")
+  }else{
+    loc = ""
+  }
+  
+  #Logger Model Type
+  loggermodeltype = loggerfiledefs()
+  loggermodeltype = loggermodeltype$Logger_Model[which(loggermodeltype$ModelID == input$procmodel)]
+  
+  tablestyletop = "padding-right: 20px; padding-left: 10px; padding-bottom: 10px; border-right: 1px solid #3c8dbc"
+  tablestyleendtop = "padding-left: 10px; padding-bottom: 10px;"
+  tablestylebottom = "padding-right: 20px; padding-left:10px; border-right: 1px solid #3c8dbc"
+  tablestyleendbottom = "padding-left: 10px"
+  
+  deploydata = deploylogs()
+  deploydata = deploydata[which(deploydata$DeployID == deployid()),]
+  filestartdate = deploydata$StartDateTimeRecord
+  fileenddate = deploydata$EndDateTimeRecord
+  datastartdate = deploydata$StartDateTimeValid
+  dataenddate = deploydata$EndDateTimeValid
+  
+  tagList(
+    box(
+      title = NULL,
+      status = "primary",
+      width = 12,
+      tags$table(
+        tags$tr(
+          tags$td(
+            style = tablestyletop,
+            HTML("<font size = 3>Program</font>")
+          ),
+          tags$td(
+            style = tablestyletop,
+            HTML("<font size = 3>Waterbody</font>")
+          ),
+          tags$td(
+            style = tablestyletop,
+            HTML("<font size = 3>ID</font>")
+          ),
+          tags$td(
+            style = tablestyletop,
+            HTML("<font size = 3>Type</font>")
+          ),
+          tags$td(
+            style = tablestyletop,
+            HTML("<font size = 3>Station</font>")
+          ),
+          tags$td(
+            style = tablestyletop,
+            HTML("<font size = 3>Location</font>")
+          ),
+          tags$td(
+            style = tablestyleendtop,
+            HTML("<font size = 3>Logger Model</font>")
           )
-        }
-        
-        dailydepths$datetime=as.Date(dailydepths$datetime)
-        
-        #Get a list of dates-----
-        meandays=unique(dailydepths$datetime)
-        Standardized.temp.data=NULL
-        for (j in meandays){
-          Daysubset=dailydepths[dailydepths$datetime==j,]
-
-          if (nrow(Daysubset)>1){
-            inter.mean=approx(Daysubset$Depth,Daysubset$Mean_Temp,method="linear",xout=Standard_Depths)
-            inter.max=approx(Daysubset$Depth,Daysubset$Max_Temp,method="linear",xout=Standard_Depths)
-            inter.min=approx(Daysubset$Depth,Daysubset$Min_Temp,method="linear",xout=Standard_Depths)
-            inter.sd=approx(Daysubset$Depth,Daysubset$Stand_Dev,method="linear",xout=Standard_Depths)
-            Standardized.row.mean=data.frame("Date"=unique(Daysubset$datetime),"Depth"=inter.mean$x,"Temperature"=round(inter.mean$y,digits = 3))
-            Standardized.row.max=data.frame("Date"=unique(Daysubset$datetime),"Depth"=inter.max$x,"Temperature_Max"=round(inter.max$y,digits = 3))
-            Standardized.row.min=data.frame("Date"=unique(Daysubset$datetime),"Depth"=inter.min$x,"Temperature_Min"=round(inter.min$y,digits = 3))
-            Standardized.row.sd=data.frame("Date"=unique(Daysubset$datetime),"Depth"=inter.sd$x,"Standard_Deviation"=round(inter.sd$y,digits = 3))
-            Standardized.row=left_join(Standardized.row.mean,Standardized.row.max,by="Date")
-            Standardized.row=left_join(Standardized.row,Standardized.row.min,by="Date")
-            Standardized.row=left_join(Standardized.row,Standardized.row.sd,by="Date")
-            Standardized.row$LakeId=lakeid()
-            Standardized.row=Standardized.row[,c(7,1,2,3,4,5,6)]
-            message(paste(j,"interpolated"))
-          }else{
-            Standardized.row=data.frame("LakeId"=lakeid(),"Date"=unique(Daysubset$datetime),"Depth"=round(Daysubset$Depth,digits=0),
-                                        "Temperature"=Daysubset$Mean_Temp,"Temperature_Max"=Daysubset$Max_Temp,
-                                        "Temperature_Min"=Daysubset$Min_Temp,"Standard_Deviation"=Daysubset$Stand_Dev)
-          }
-          Standardized.temp.data=rbind(Standardized.temp.data,Standardized.row)
-        }
-        Standardized.temp.data$Date=as.Date(Standardized.temp.data$Date)
-        Standardized.temp.data=Standardized.temp.data[order(Standardized.temp.data$Date),]
-        exportdata=Standardized.temp.data
-        updateProgressBar(
-          session,
-          "exportprogress",
-          value = 100,
-          status = "success"
-        )
-      }else if (input$Type=="Dissolved Oxygen"){
-        
-        # exportdata=read.csv("C:/Users/timarti1/Downloads/Greenwood_DO_2019_10_15.csv",stringsAsFactors = FALSE)
-        exportdata=exportdata[exportdata$DO_FlagV=="P",]
-        exportdata=exportdata[exportdata$Temp_FlagV=="P",]
-        # exportdata=exportdata[!is.na(exportdata$Date_Time),]
-        exportdata$Depth_m=as.numeric(exportdata$Depth_m)
-        
-        #Remove unneeded fields-------
-        # exportdata$DOWLKNUM=NULL
-        exportdata$LakeId=NULL
-        exportdata$DO_FlagG=NULL
-        exportdata$DO_FlagS=NULL
-        exportdata$DO_FlagR=NULL
-        exportdata$DO_FlagF=NULL
-        exportdata$DO_FlagV=NULL
-        exportdata$Temp_FlagG=NULL
-        exportdata$Temp_FlagS=NULL
-        exportdata$Temp_FlagR=NULL
-        exportdata$Temp_FlagF=NULL
-        exportdata$Temp_FlagV=NULL
-        message("Removed unnecessary fields")
-        
-        updateProgressBar(
-          session,
-          "exportprogress",
-          value = 5,
-          status = "primary"
-        )
-        
-        #Get max and min depths and create list of depths in between-----
-        MaxDepth=round(max(exportdata$Depth_m),digits=0)
-        MinDepth=round(min(exportdata$Depth_m),digits=0)
-        Standard_Depths=c(MinDepth:MaxDepth)
-        laketempdepths=sort(unique(exportdata$Depth_m))
-        message("Standardized depths")
-        
-        updateProgressBar(
-          session,
-          "exportprogress",
-          value = 10,
-          status = "primary"
-        )
-        DOdailydepths=NULL
-        Tempdailydepths=NULL
-        
-        #Summarize temperature and DO by day-----
-        for (i in laketempdepths){
-          message(paste("Summarizing depth",i))
-          depth=exportdata[exportdata$Depth_m==i,]
-          DOdepth.xts=as.xts(as.numeric(depth[,3]),order.by=as.POSIXct(depth[,2],format='%Y-%m-%d %H:%M',tz="UTC"))
-          DOdepth.mean.xts=apply.daily(DOdepth.xts,mean)
-          DOdepth.max.xts=apply.daily(DOdepth.xts,max)
-          DOdepth.min.xts=apply.daily(DOdepth.xts,min)
-          DOdepth.sd.xts=apply.daily(DOdepth.xts,sd)
-          DOdepthmean=data.frame("datetime"=index(DOdepth.mean.xts),"Depth"=i,"Mean_DO"=coredata(DOdepth.mean.xts))
-          DOdepthmax=data.frame("datetime"=index(DOdepth.max.xts),"Depth"=i,"Max_DO"=coredata(DOdepth.max.xts))
-          DOdepthmin=data.frame("datetime"=index(DOdepth.min.xts),"Depth"=i,"Min_DO"=coredata(DOdepth.min.xts))
-          DOdepthsd=data.frame("datetime"=index(DOdepth.sd.xts),"Depth"=i,"Stand_Dev_DO"=coredata(DOdepth.sd.xts))
-          
-          DOdepthday=left_join(DOdepthmean,DOdepthmax,by=c("datetime","Depth"))
-          DOdepthday=left_join(DOdepthday,DOdepthmin,by=c("datetime","Depth"))
-          DOdepthday=left_join(DOdepthday,DOdepthsd,by=c("datetime","Depth"))
-          
-          DOdailydepths=rbind(DOdailydepths,DOdepthday)
-          
-          Tempdepth.xts=as.xts(as.numeric(depth[,4]),order.by=as.POSIXct(depth[,2],format='%Y-%m-%d %H:%M',tz="UTC"))
-          Tempdepth.mean.xts=apply.daily(Tempdepth.xts,mean)
-          Tempdepth.max.xts=apply.daily(Tempdepth.xts,max)
-          Tempdepth.min.xts=apply.daily(Tempdepth.xts,min)
-          Tempdepth.sd.xts=apply.daily(Tempdepth.xts,sd)
-          Tempdepthmean=data.frame("datetime"=index(Tempdepth.mean.xts),"Depth"=i,"Mean_Temp"=coredata(Tempdepth.mean.xts))
-          Tempdepthmax=data.frame("datetime"=index(Tempdepth.max.xts),"Depth"=i,"Max_Temp"=coredata(Tempdepth.max.xts))
-          Tempdepthmin=data.frame("datetime"=index(Tempdepth.min.xts),"Depth"=i,"Min_Temp"=coredata(Tempdepth.min.xts))
-          Tempdepthsd=data.frame("datetime"=index(Tempdepth.sd.xts),"Depth"=i,"Stand_Dev_Temp"=coredata(Tempdepth.sd.xts))
-          
-          Tempdepthday=left_join(Tempdepthmean,Tempdepthmax,by=c("datetime","Depth"))
-          Tempdepthday=left_join(Tempdepthday,Tempdepthmin,by=c("datetime","Depth"))
-          Tempdepthday=left_join(Tempdepthday,Tempdepthsd,by=c("datetime","Depth"))
-          
-          Tempdailydepths=rbind(Tempdailydepths,Tempdepthday)
-          
-          updateProgressBar(
-            session,
-            "exportprogress",
-            value = 60/length(laketempdepths),
-            status = "info"
+        ),
+        tags$tr(
+          tags$td(
+            style = tablestylebottom,
+            HTML(paste("<font size = 4><b>",programname,"</b></font>"))
+          ),
+          tags$td(
+            style = tablestylebottom,
+            HTML(paste("<font size = 4><b>",waterbodyname,"</b></font>"))
+          ),
+          tags$td(
+            style = tablestylebottom,
+            HTML(paste("<font size = 4><b>",waterbodyid,"</b></font>"))
+          ),
+          tags$td(
+            style = tablestylebottom,
+            HTML(paste("<font size = 4><b>",waterbodytype,"</b></font>"))
+          ),
+          tags$td(
+            style = tablestylebottom,
+            HTML(paste("<font size = 4><b>",stationname,"</b></font>"))
+          ),
+          tags$td(
+            style = tablestylebottom,
+            HTML(loc)
+          ),
+          tags$td(
+            style = tablestyleendbottom,
+            HTML(paste("<font size = 4><b>",loggermodeltype,"</b></font>"))
           )
-        }
-        
-        
-        dailydepths=left_join(DOdailydepths,Tempdailydepths,by=c("datetime","Depth"))
-        
-        #Get a list of dates-----
-        meandays=unique(dailydepths$datetime)
-        Standardized.temp.data=NULL
-        
-        for (j in meandays){
-          Daysubset=dailydepths[dailydepths$datetime==j,]
-          
-          if (nrow(Daysubset)>1){
-            # DOStandardized.row=NULL
-            # TempStandardized.row=NULL
-            
-            DOinter.mean=approx(Daysubset$Depth,Daysubset$Mean_DO,method="linear",xout=Standard_Depths)
-            DOinter.max=approx(Daysubset$Depth,Daysubset$Max_DO,method="linear",xout=Standard_Depths)
-            DOinter.min=approx(Daysubset$Depth,Daysubset$Min_DO,method="linear",xout=Standard_Depths)
-            
-            if(nrow(Daysubset[which(!is.na(Daysubset$Stand_Dev_DO)),])>2){
-              DOinter.sd=approx(Daysubset$Depth,Daysubset$Stand_Dev_DO,method="linear",xout=Standard_Depths)
-              DOsd=DOinter.sd$y
-            }else{
-              DOsd=NA
-            }
-            Tempinter.mean=approx(Daysubset$Depth,Daysubset$Mean_Temp,method="linear",xout=Standard_Depths)
-            Tempinter.max=approx(Daysubset$Depth,Daysubset$Max_Temp,method="linear",xout=Standard_Depths)
-            Tempinter.min=approx(Daysubset$Depth,Daysubset$Min_Temp,method="linear",xout=Standard_Depths)
-            if(nrow(Daysubset[which(!is.na(Daysubset$Stand_Dev_Temp)),])>2){
-              Tempinter.sd=approx(Daysubset$Depth,Daysubset$Stand_Dev_Temp,method="linear",xout=Standard_Depths) 
-              Tempsd=Tempinter.sd$y
-            }else{
-              Tempsd=NA
-            }
-            Standardized.row=data.frame("LakeId"=lakeid(),"Date"=unique(Daysubset$datetime),"Depth"=DOinter.mean$x,"DO"=round(DOinter.mean$y,digits = 3),
-                                        "DO_Max"=round(DOinter.max$y,digits = 3),"DO_Min"=round(DOinter.min$y,digits = 3),"DO_Standard_Deviation"=round(DOsd,digits = 3),
-                                        "Temperature"=round(Tempinter.mean$y,digits = 3),"Temperature_Max"=round(Tempinter.max$y,digits = 3),
-                                        "Temperature_Min"=round(Tempinter.min$y,digits = 3),"Temperature_Standard_Deviation"=round(Tempsd,digits = 3))
-            message(paste(j,"interpolated"))
-          }else{
-            Standardized.row=data.frame("LakeId"=lakeid(),"Date"=unique(Daysubset$datetime),"Depth"=round(Daysubset$Depth,digits=0),
-                                        "DO"=Daysubset$Mean_DO,"DO_Max"=Daysubset$Max_DO,"DO_Min"=Daysubset$Min_DO,
-                                        "DO_Standard_Devation"=Daysubset$Stand_Dev_DO,
-                                        "Temperature"=Daysubset$Mean_Temp,"Temperature_Max"=Daysubset$Max_Temp,
-                                        "Temperature_Min"=Daysubset$Min_Temp,
-                                        "Temperature_Standard_Deviation"=Daysubset$Stand_Dev_Temp)
-          }
-          Standardized.temp.data=rbind(Standardized.temp.data,Standardized.row)
-        }
-        Standardized.temp.data$Date=as.Date(Standardized.temp.data$Date)
-        Standardized.temp.data=Standardized.temp.data[order(Standardized.temp.data$Date),]
-        exportdata=Standardized.temp.data
-        updateProgressBar(
-          session,
-          "exportprogress",
-          value = 100,
-          status = "success"
         )
-      }
-    }
-    exportdata(exportdata)
-  })
+      )
+    ),
+    box(
+      title = NULL,
+      status = "success",
+      width = 8,
+      fluidRow(
+        column(
+          width = 6,
+          tags$table(
+            tags$tr(
+              tags$td(
+                style = tablestyletop,
+                HTML("<font size = 3>Data Start</font>")
+              ),
+              tags$td(
+                style = tablestyleendtop,
+                HTML("<font size = 3>Valid Data Start</font>")
+              )
+            ),
+            tags$tr(
+              tags$td(
+                style = tablestylebottom,
+                HTML(paste("<font size = 4>",filestartdate,"</font>"))
+              ),
+              tags$td(
+                style = tablestyleendbottom,
+                HTML(paste("<font size = 4>",datastartdate,"</font>"))
+              )
+            )
+          )
+        ),
+        column(
+          width = 6,
+          tags$table(
+            tags$tr(
+              tags$td(
+                style = tablestyletop,
+                HTML("<font size = 3>Valid Data End</font>")
+              ),
+              tags$td(
+                style = tablestyleendtop,
+                HTML("<font size = 3>Data End</font>")
+              )
+            ),
+            tags$tr(
+              tags$td(
+                style = tablestylebottom,
+                HTML(paste("<font size = 4>",dataenddate,"</font>"))
+              ),
+              tags$td(
+                style = tablestyleendbottom,
+                HTML(paste("<font size = 4>",fileenddate,"</font>"))
+              )
+            )
+          )
+        )
+      )
+    ),
+    box(
+      title = NULL,
+      status = "primary",
+      width = 12,
+      fluidRow(
+        column(
+          width = 2,
+          pickerInput(
+            inputId = "summaryloggerchoices",
+            choices = summaryloggertypes(),
+            label = "Data Type"
+          ),
+          uiOutput("summarysnchoicesUI")
+        ),
+        column(
+          width = 3,
+          uiOutput("vbfail")
+          
+        ),
+        column(
+          width = 3,
+          uiOutput("vbsuspect")
+          
+        ),
+        column(
+          width = 3,
+          uiOutput("vbpass")
+          
+        )
+
+        
+      )
+    )
+  )
+})
 
 
-output$exportpreview=renderDT(
-  options=list(
-    lengthChange = FALSE
-  ),
-  rownames = FALSE,
-  extensions = 'Responsive',{
-    datapreview=exportdata()
-    datapreview
-  })
+summarydatatypes = reactive({
+  # validate(
+  #   need(input$summaryloggerchoices,"Loading...")
+  # )
+  
+  summarydataselect = VisQCdata()
+  print(paste("VisQCdata names:",names(summarydataselect)))
+  print(paste("input$summaryloggerchoices:",input$summaryloggerchoices))
+  summarydata = summarydataselect[[input$summaryloggerchoices]]
+  
+  return(summarydata)
+})
+
+output$summarysnchoicesUI = renderUI({
+
+  summarysn = summarydatatypes()
+  summarysn = unique(summarysn$SiteId)
+  
+  pickerInput(
+    inputId = "summarysnchoices",
+    choices = summarysn,
+    label = "Serial Numbers"
+  )
+})
+
+summaryselectdata = reactive({
+  summaryselect = summarydatatypes()
+  summaryselect = summaryselect[which(summaryselect$SiteId == input$summarysnchoices),]
+  
+  return(summaryselect)
+})
 
 
-#Download Data----
-output$download <- downloadHandler(
-  filename = function() { 
-    if (input$Type=="Temperature"){
-      paste0(lakeinput(),"_Temperature_",gsub("-","_",as.character(Sys.Date())),".csv")
-    }else if (input$Type=="Dissolved Oxygen"){
-      paste0(lakeinput(),"_DO_",gsub("-","_",as.character(Sys.Date())),".csv")
-    }
-  },
-  content = function(file) {
-    dataforexport=exportdata()
-    write.csv(dataforexport,file,row.names=F)
-  })
+valueBoxFlags = function(inputdata,flagfield,status){
+  
+  print(paste(flagfield,status,"1"))
+  if (status == 'F'){
+    statusupdate = c('F','X')
+  }else{
+    statusupdate = status
+  }
+  
+  print(paste(flagfield,status,"2"))
+  
+  if (flagfield == "Gross"){
+    inputdataselect = inputdata[which(inputdata$FlagGross %in% statusupdate),]
+  }else if (flagfield == "Spike"){
+    inputdataselect = inputdata[which(inputdata$FlagSpike %in% statusupdate),]
+  }else if (flagfield == "RoC"){
+    inputdataselect = inputdata[which(inputdata$RoC %in% statusupdate),]
+  }else if (flagfield == "Flat"){
+    inputdataselect = inputdata[which(inputdata$FlagFlat %in% statusupdate),]
+  }else if (flagfield == "Vis"){
+    inputdataselect = inputdata[which(inputdata$FlagVis %in% statusupdate),]
+  }
+  
+  print(paste(flagfield,status,"3"))
+  
+  if (status == 'F'){
+    statusname = "Fail"
+    statuscolor = "red"
+    statusicon = icon("times-circle")
+  }else if (status == 'S'){
+    statusname = "Suspect"
+    statuscolor = "orange"
+    statusicon = icon("question-circle")
+  }else if (status == 'P'){
+    statusname = "Pass"
+    statuscolor = "blue"
+    statusicon = icon("thumbs-up")
+  }
+  
+  print(paste(flagfield,status,"4"))
+  
+  if (nrow(inputdataselect) > 0){
+    flagcount = nrow(inputdataselect)
+    
+    percflag = round((flagcount / nrow(inputdataselect)) * 100,digits = 2)
+    
+    print(paste(flagfield,status,"5.1"))
+  }else{
+    flagcount = 0
+    percflag = 0
+    
+    print(paste(flagfield,status,"5.2"))
+  }
+  
+  outputvb = valueBox2(
+    value = flagcount,
+    title = paste("Flag",flagfield,statusname),
+    subtitle = paste0(percflag,"% of the data"),
+    icon = statusicon,
+    color = statuscolor,
+    width = NULL,
+    href = NULL
+  )
+  print(paste(flagfield,status,"6"))
+    return(outputvb)
+}
+
+output$vbfail = renderUI({
+  tagList(
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Gross",
+      status = "F"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Spike",
+      status = "F"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "RoC",
+      status = "F"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Flat",
+      status = "F"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Vis",
+      status = "F"
+    )
+  )
+})
+
+output$vbsuspect = renderUI({
+  tagList(
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Gross",
+      status = "S"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Spike",
+      status = "S"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "RoC",
+      status = "S"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Flat",
+      status = "S"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Vis",
+      status = "S"
+    )
+  )
+})
+
+output$vbpass = renderUI({
+  tagList(
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Gross",
+      status = "P"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Spike",
+      status = "P"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "RoC",
+      status = "P"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Flat",
+      status = "P"
+    ),
+    valueBoxFlags(
+      inputdata = summaryselectdata(),
+      flagfield = "Vis",
+      status = "P"
+    )
+  )
+})

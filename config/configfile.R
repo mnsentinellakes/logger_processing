@@ -1,4 +1,4 @@
-print("Start Custom Config")# Waterbody ID:
+print("Start Custom Config")# Waterbody ID:b42738f95726b801
 
 #--------------------------------------------------------------------
 # Continuous data helper script
@@ -69,17 +69,17 @@ ContData.env$myName.DateTime <- "DateTime"
 
 #--------------------------------------------------------------------
 #QC Units
-ContData.env$myUnits.AirBP <- ""
-ContData.env$myUnits.AirTemp <- ""
-ContData.env$myUnits.Chlorophylla <- ""
-ContData.env$myUnits.Cond <- ""
-ContData.env$myUnits.Discharge <- ""
-ContData.env$myUnits.DO <- ""
-ContData.env$myUnits.GageHeight <- ""
-ContData.env$myUnits.pH <- ""
-ContData.env$myUnits.Turbidity <- ""
-ContData.env$myUnits.WaterP <- ""
-ContData.env$myUnits.WaterTemp <- ""
+ContData.env$myUnits.AirBP <- "psi"
+ContData.env$myUnits.AirTemp <- "C"
+ContData.env$myUnits.Chlorophylla <- "gcm3"
+ContData.env$myUnits.Cond <- "uScm"
+ContData.env$myUnits.Discharge <- "ft3s"
+ContData.env$myUnits.DO <- "mgL"
+ContData.env$myUnits.GageHeight <- "ft"
+ContData.env$myUnits.pH <- "SU"
+ContData.env$myUnits.Turbidity <- "NTU"
+ContData.env$myUnits.WaterP <- "psi"
+ContData.env$myUnits.WaterTemp <- "C"
 
 #--------------------------------------------------------------------
 # Logger Fields
@@ -90,34 +90,34 @@ ContData.env$myName.LoggerID.Air <- "RowID"
 
 #--------------------------------------------------------------------
 # Parameters as appear in logger files
-ContData.env$myName.AirBP <- "AirBP"
-ContData.env$myName.AirTemp <- "AirTemp"
-ContData.env$myName.Chlorophylla <- "Chlorophylla"
-ContData.env$myName.Cond <- "Cond"
-ContData.env$myName.Discharge <- "Discharge"
-ContData.env$myName.DO <- "DO"
-ContData.env$myName.GageHeight <- "GageHeight"
-ContData.env$myName.pH <- "pH"
-ContData.env$myName.Turbidity <- "Turbidity"
-ContData.env$myName.WaterP <- "WaterP"
-ContData.env$myName.WaterTemp <- "WaterTemp"
+ContData.env$myName.AirBP <- "AirBPpsi"
+ContData.env$myName.AirTemp <- "AirTempC"
+ContData.env$myName.Chlorophylla <- "Chlorophyllagcm3"
+ContData.env$myName.Cond <- "ConduScm"
+ContData.env$myName.Discharge <- "Dischargeft3s"
+ContData.env$myName.DO <- "DOmgL"
+ContData.env$myName.GageHeight <- "GageHeightft"
+ContData.env$myName.pH <- "pHSU"
+ContData.env$myName.Turbidity <- "TurbidityNTU"
+ContData.env$myName.WaterP <- "WaterPpsi"
+ContData.env$myName.WaterTemp <- "WaterTempC"
 
 #--------------------------------------------------------------------
 #Plot Labels
 ContData.env$myLab.Date <- "Date"
 ContData.env$myLab.DateTime <- "Date"
-ContData.env$myLab.AirBP <- "Barometric Pressure, Air ()"
-ContData.env$myLab.AirTemp <- "Temperature, Air (deg )"
-ContData.env$myLab.Chlorophylla <- "Chlorophyll a ()"
-ContData.env$myLab.Cond <- "Conductivity ()"
-ContData.env$myLab.Discharge <- "Discharge ()"
-ContData.env$myLab.DO <- "Dissolved Oxygen ()"
-ContData.env$myLab.GageHeight <- "Gage Height ()"
-ContData.env$myLab.pH <- "pH ()"
-ContData.env$myLab.Turbidity <- "Turbidity ()"
-ContData.env$myLab.WaterP <- "Pressure, Water ()"
-ContData.env$myLab.WaterTemp <- "Temperature, Water (deg )"
-ContData.env$myLab.Temp.BOTH <- "Temperature (deg )"
+ContData.env$myLab.AirBP <- "Barometric Pressure, Air (psi)"
+ContData.env$myLab.AirTemp <- "Temperature, Air (deg C)"
+ContData.env$myLab.Chlorophylla <- "Chlorophyll a (g/cm3)"
+ContData.env$myLab.Cond <- "Conductivity (uS/cm)"
+ContData.env$myLab.Discharge <- "Discharge (ft3/s)"
+ContData.env$myLab.DO <- "Dissolved Oxygen (mg/L)"
+ContData.env$myLab.GageHeight <- "Gage Height (ft)"
+ContData.env$myLab.pH <- "pH (SU)"
+ContData.env$myLab.Turbidity <- "Turbidity (NTU)"
+ContData.env$myLab.WaterP <- "Pressure, Water (psi)"
+ContData.env$myLab.WaterTemp <- "Temperature, Water (deg C)"
+ContData.env$myLab.Temp.BOTH <- "Temperature (deg C)"
 
 #--------------------------------------------------------------------
 #Discrete Measurements
@@ -279,157 +279,157 @@ ContData.env$myFlagVal.Order <- c(
 
 #--------------------------------------------------------------------
 #Gross Fail Hi
-ContData.env$myThresh.Gross.Fail.Hi.AirBP <- 
-ContData.env$myThresh.Gross.Fail.Hi.AirTemp <- 
-ContData.env$myThresh.Gross.Fail.Hi.Chlorophylla <- 
-ContData.env$myThresh.Gross.Fail.Hi.Cond <- 
-ContData.env$myThresh.Gross.Fail.Hi.Discharge <- 
-ContData.env$myThresh.Gross.Fail.Hi.DO <- 
-ContData.env$myThresh.Gross.Fail.Hi.GageHeight <- 
-ContData.env$myThresh.Gross.Fail.Hi.pH <- 
-ContData.env$myThresh.Gross.Fail.Hi.Turbidity <- 
-ContData.env$myThresh.Gross.Fail.Hi.WaterP <- 
-ContData.env$myThresh.Gross.Fail.Hi.WaterTemp <- 
+ContData.env$myThresh.Gross.Fail.Hi.AirBP <- 15
+ContData.env$myThresh.Gross.Fail.Hi.AirTemp <- 38
+ContData.env$myThresh.Gross.Fail.Hi.Chlorophylla <- 100000
+ContData.env$myThresh.Gross.Fail.Hi.Cond <- 1500
+ContData.env$myThresh.Gross.Fail.Hi.Discharge <- 100000
+ContData.env$myThresh.Gross.Fail.Hi.DO <- 20
+ContData.env$myThresh.Gross.Fail.Hi.GageHeight <- 100000
+ContData.env$myThresh.Gross.Fail.Hi.pH <- 12
+ContData.env$myThresh.Gross.Fail.Hi.Turbidity <- 100000
+ContData.env$myThresh.Gross.Fail.Hi.WaterP <- 17
+ContData.env$myThresh.Gross.Fail.Hi.WaterTemp <- 30
 
 #--------------------------------------------------------------------
 #Gross Fail Lo
-ContData.env$myThresh.Gross.Fail.Lo.AirBP <- 
-ContData.env$myThresh.Gross.Fail.Lo.AirTemp <- 
-ContData.env$myThresh.Gross.Fail.Lo.Chlorophylla <- 
-ContData.env$myThresh.Gross.Fail.Lo.Cond <- 
-ContData.env$myThresh.Gross.Fail.Lo.Discharge <- 
-ContData.env$myThresh.Gross.Fail.Lo.DO <- 
-ContData.env$myThresh.Gross.Fail.Lo.GageHeight <- 
-ContData.env$myThresh.Gross.Fail.Lo.pH <- 
-ContData.env$myThresh.Gross.Fail.Lo.Turbidity <- 
-ContData.env$myThresh.Gross.Fail.Lo.WaterP <- 
-ContData.env$myThresh.Gross.Fail.Lo.WaterTemp <- 
+ContData.env$myThresh.Gross.Fail.Lo.AirBP <- 13
+ContData.env$myThresh.Gross.Fail.Lo.AirTemp <- -25
+ContData.env$myThresh.Gross.Fail.Lo.Chlorophylla <- -1
+ContData.env$myThresh.Gross.Fail.Lo.Cond <- 10
+ContData.env$myThresh.Gross.Fail.Lo.Discharge <- -1
+ContData.env$myThresh.Gross.Fail.Lo.DO <- 1
+ContData.env$myThresh.Gross.Fail.Lo.GageHeight <- -1
+ContData.env$myThresh.Gross.Fail.Lo.pH <- 3
+ContData.env$myThresh.Gross.Fail.Lo.Turbidity <- -1
+ContData.env$myThresh.Gross.Fail.Lo.WaterP <- 13
+ContData.env$myThresh.Gross.Fail.Lo.WaterTemp <- -2
 
 #--------------------------------------------------------------------
 #Gross Suspect Hi
-ContData.env$myThresh.Gross.Suspect.Hi.AirBP <- 
-ContData.env$myThresh.Gross.Suspect.Hi.AirTemp <- 
-ContData.env$myThresh.Gross.Suspect.Hi.Chlorophylla <- 
-ContData.env$myThresh.Gross.Suspect.Hi.Cond <- 
-ContData.env$myThresh.Gross.Suspect.Hi.Discharge <- 
-ContData.env$myThresh.Gross.Suspect.Hi.DO <- 
-ContData.env$myThresh.Gross.Suspect.Hi.GageHeight <- 
-ContData.env$myThresh.Gross.Suspect.Hi.pH <- 
-ContData.env$myThresh.Gross.Suspect.Hi.Turbidity <- 
-ContData.env$myThresh.Gross.Suspect.Hi.WaterP <- 
-ContData.env$myThresh.Gross.Suspect.Hi.WaterTemp <- 
+ContData.env$myThresh.Gross.Suspect.Hi.AirBP <- 14.8
+ContData.env$myThresh.Gross.Suspect.Hi.AirTemp <- 35
+ContData.env$myThresh.Gross.Suspect.Hi.Chlorophylla <- 1000
+ContData.env$myThresh.Gross.Suspect.Hi.Cond <- 1200
+ContData.env$myThresh.Gross.Suspect.Hi.Discharge <- 1000
+ContData.env$myThresh.Gross.Suspect.Hi.DO <- 18
+ContData.env$myThresh.Gross.Suspect.Hi.GageHeight <- 1000
+ContData.env$myThresh.Gross.Suspect.Hi.pH <- 11
+ContData.env$myThresh.Gross.Suspect.Hi.Turbidity <- 1000
+ContData.env$myThresh.Gross.Suspect.Hi.WaterP <- 16.8
+ContData.env$myThresh.Gross.Suspect.Hi.WaterTemp <- 25
 
 #--------------------------------------------------------------------
 #Gross Suspect Lo
-ContData.env$myThresh.Gross.Suspect.Lo.AirBP <- 
-ContData.env$myThresh.Gross.Suspect.Lo.AirTemp <- 
-ContData.env$myThresh.Gross.Suspect.Lo.Chlorophylla <- 
-ContData.env$myThresh.Gross.Suspect.Lo.Cond <- 
-ContData.env$myThresh.Gross.Suspect.Lo.Discharge <- 
-ContData.env$myThresh.Gross.Suspect.Lo.DO <- 
-ContData.env$myThresh.Gross.Suspect.Lo.GageHeight <- 
-ContData.env$myThresh.Gross.Suspect.Lo.pH <- 
-ContData.env$myThresh.Gross.Suspect.Lo.Turbidity <- 
-ContData.env$myThresh.Gross.Suspect.Lo.WaterP <- 
-ContData.env$myThresh.Gross.Suspect.Lo.WaterTemp <- 
+ContData.env$myThresh.Gross.Suspect.Lo.AirBP <- 13
+ContData.env$myThresh.Gross.Suspect.Lo.AirTemp <- -23
+ContData.env$myThresh.Gross.Suspect.Lo.Chlorophylla <- -1
+ContData.env$myThresh.Gross.Suspect.Lo.Cond <- 20
+ContData.env$myThresh.Gross.Suspect.Lo.Discharge <- -1
+ContData.env$myThresh.Gross.Suspect.Lo.DO <- 2
+ContData.env$myThresh.Gross.Suspect.Lo.GageHeight <- -1
+ContData.env$myThresh.Gross.Suspect.Lo.pH <- 4
+ContData.env$myThresh.Gross.Suspect.Lo.Turbidity <- -1
+ContData.env$myThresh.Gross.Suspect.Lo.WaterP <- 13.5
+ContData.env$myThresh.Gross.Suspect.Lo.WaterTemp <- -0.1
 
 #--------------------------------------------------------------------
 #Spike Hi
-ContData.env$myThresh.Spike.Hi.AirBP <- 
-ContData.env$myThresh.Spike.Hi.AirTemp <- 
-ContData.env$myThresh.Spike.Hi.Chlorophylla <- 
-ContData.env$myThresh.Spike.Hi.Cond <- 
-ContData.env$myThresh.Spike.Hi.Discharge <- 
-ContData.env$myThresh.Spike.Hi.DO <- 
-ContData.env$myThresh.Spike.Hi.GageHeight <- 
-ContData.env$myThresh.Spike.Hi.pH <- 
-ContData.env$myThresh.Spike.Hi.Turbidity <- 
-ContData.env$myThresh.Spike.Hi.WaterP <- 
-ContData.env$myThresh.Spike.Hi.WaterTemp <- 
+ContData.env$myThresh.Spike.Hi.AirBP <- 0.25
+ContData.env$myThresh.Spike.Hi.AirTemp <- 10
+ContData.env$myThresh.Spike.Hi.Chlorophylla <- 10000
+ContData.env$myThresh.Spike.Hi.Cond <- 10
+ContData.env$myThresh.Spike.Hi.Discharge <- 10000
+ContData.env$myThresh.Spike.Hi.DO <- 10
+ContData.env$myThresh.Spike.Hi.GageHeight <- 10000
+ContData.env$myThresh.Spike.Hi.pH <- 10
+ContData.env$myThresh.Spike.Hi.Turbidity <- 10000
+ContData.env$myThresh.Spike.Hi.WaterP <- 0.7
+ContData.env$myThresh.Spike.Hi.WaterTemp <- 1.5
 
 #--------------------------------------------------------------------
 #Spike Lo
-ContData.env$myThresh.Spike.Lo.AirBP <- 
-ContData.env$myThresh.Spike.Lo.AirTemp <- 
-ContData.env$myThresh.Spike.Lo.Chlorophylla <- 
-ContData.env$myThresh.Spike.Lo.Cond <- 
-ContData.env$myThresh.Spike.Lo.Discharge <- 
-ContData.env$myThresh.Spike.Lo.DO <- 
-ContData.env$myThresh.Spike.Lo.GageHeight <- 
-ContData.env$myThresh.Spike.Lo.pH <- 
-ContData.env$myThresh.Spike.Lo.Turbidity <- 
-ContData.env$myThresh.Spike.Lo.WaterP <- 
-ContData.env$myThresh.Spike.Lo.WaterTemp <- 
+ContData.env$myThresh.Spike.Lo.AirBP <- 0.15
+ContData.env$myThresh.Spike.Lo.AirTemp <- 8
+ContData.env$myThresh.Spike.Lo.Chlorophylla <- 1000
+ContData.env$myThresh.Spike.Lo.Cond <- 5
+ContData.env$myThresh.Spike.Lo.Discharge <- 1000
+ContData.env$myThresh.Spike.Lo.DO <- 5
+ContData.env$myThresh.Spike.Lo.GageHeight <- 1000
+ContData.env$myThresh.Spike.Lo.pH <- 5
+ContData.env$myThresh.Spike.Lo.Turbidity <- 1000
+ContData.env$myThresh.Spike.Lo.WaterP <- 0.5
+ContData.env$myThresh.Spike.Lo.WaterTemp <- 1
 
 #--------------------------------------------------------------------
 #RoC SD number
-ContData.env$myThresh.RoC.SD.number.AirBP <- 
-ContData.env$myThresh.RoC.SD.number.AirTemp <- 
-ContData.env$myThresh.RoC.SD.number.Chlorophylla <- 
-ContData.env$myThresh.RoC.SD.number.Cond <- 
-ContData.env$myThresh.RoC.SD.number.Discharge <- 
-ContData.env$myThresh.RoC.SD.number.DO <- 
-ContData.env$myThresh.RoC.SD.number.GageHeight <- 
-ContData.env$myThresh.RoC.SD.number.pH <- 
-ContData.env$myThresh.RoC.SD.number.Turbidity <- 
-ContData.env$myThresh.RoC.SD.number.WaterP <- 
-ContData.env$myThresh.RoC.SD.number.WaterTemp <- 
+ContData.env$myThresh.RoC.SD.number.AirBP <- 3
+ContData.env$myThresh.RoC.SD.number.AirTemp <- 3
+ContData.env$myThresh.RoC.SD.number.Chlorophylla <- 3
+ContData.env$myThresh.RoC.SD.number.Cond <- 3
+ContData.env$myThresh.RoC.SD.number.Discharge <- 3
+ContData.env$myThresh.RoC.SD.number.DO <- 3
+ContData.env$myThresh.RoC.SD.number.GageHeight <- 3
+ContData.env$myThresh.RoC.SD.number.pH <- 3
+ContData.env$myThresh.RoC.SD.number.Turbidity <- 3
+ContData.env$myThresh.RoC.SD.number.WaterP <- 3
+ContData.env$myThresh.RoC.SD.number.WaterTemp <- 3
 
 #--------------------------------------------------------------------
 #RoC SD period
-ContData.env$myThresh.RoC.SD.period.AirBP <- 
-ContData.env$myThresh.RoC.SD.period.AirTemp <- 
-ContData.env$myThresh.RoC.SD.period.Chlorophylla <- 
-ContData.env$myThresh.RoC.SD.period.Cond <- 
-ContData.env$myThresh.RoC.SD.period.Discharge <- 
-ContData.env$myThresh.RoC.SD.period.DO <- 
-ContData.env$myThresh.RoC.SD.period.GageHeight <- 
-ContData.env$myThresh.RoC.SD.period.pH <- 
-ContData.env$myThresh.RoC.SD.period.Turbidity <- 
-ContData.env$myThresh.RoC.SD.period.WaterP <- 
-ContData.env$myThresh.RoC.SD.period.WaterTemp <- 
+ContData.env$myThresh.RoC.SD.period.AirBP <- 25
+ContData.env$myThresh.RoC.SD.period.AirTemp <- 25
+ContData.env$myThresh.RoC.SD.period.Chlorophylla <- 25
+ContData.env$myThresh.RoC.SD.period.Cond <- 25
+ContData.env$myThresh.RoC.SD.period.Discharge <- 25
+ContData.env$myThresh.RoC.SD.period.DO <- 25
+ContData.env$myThresh.RoC.SD.period.GageHeight <- 25
+ContData.env$myThresh.RoC.SD.period.pH <- 25
+ContData.env$myThresh.RoC.SD.period.Turbidity <- 25
+ContData.env$myThresh.RoC.SD.period.WaterP <- 25
+ContData.env$myThresh.RoC.SD.period.WaterTemp <- 25
 
 #--------------------------------------------------------------------
 #Flat Hi
-ContData.env$myThresh.Flat.Hi.AirBP <- 
-ContData.env$myThresh.Flat.Hi.AirTemp <- 
-ContData.env$myThresh.Flat.Hi.Chlorophylla <- 
-ContData.env$myThresh.Flat.Hi.Cond <- 
-ContData.env$myThresh.Flat.Hi.Discharge <- 
-ContData.env$myThresh.Flat.Hi.DO <- 
-ContData.env$myThresh.Flat.Hi.GageHeight <- 
-ContData.env$myThresh.Flat.Hi.pH <- 
-ContData.env$myThresh.Flat.Hi.Turbidity <- 
-ContData.env$myThresh.Flat.Hi.WaterP <- 
-ContData.env$myThresh.Flat.Hi.WaterTemp <- 
+ContData.env$myThresh.Flat.Hi.AirBP <- 15
+ContData.env$myThresh.Flat.Hi.AirTemp <- 20
+ContData.env$myThresh.Flat.Hi.Chlorophylla <- 60
+ContData.env$myThresh.Flat.Hi.Cond <- 60
+ContData.env$myThresh.Flat.Hi.Discharge <- 60
+ContData.env$myThresh.Flat.Hi.DO <- 60
+ContData.env$myThresh.Flat.Hi.GageHeight <- 30
+ContData.env$myThresh.Flat.Hi.pH <- 60
+ContData.env$myThresh.Flat.Hi.Turbidity <- 60
+ContData.env$myThresh.Flat.Hi.WaterP <- 15
+ContData.env$myThresh.Flat.Hi.WaterTemp <- 30
 
 #--------------------------------------------------------------------
 #Flat Lo
-ContData.env$myThresh.Flat.Lo.AirBP <- 
-ContData.env$myThresh.Flat.Lo.AirTemp <- 
-ContData.env$myThresh.Flat.Lo.Chlorophylla <- 
-ContData.env$myThresh.Flat.Lo.Cond <- 
-ContData.env$myThresh.Flat.Lo.Discharge <- 
-ContData.env$myThresh.Flat.Lo.DO <- 
-ContData.env$myThresh.Flat.Lo.GageHeight <- 
-ContData.env$myThresh.Flat.Lo.pH <- 
-ContData.env$myThresh.Flat.Lo.Turbidity <- 
-ContData.env$myThresh.Flat.Lo.WaterP <- 
-ContData.env$myThresh.Flat.Lo.WaterTemp <- 
+ContData.env$myThresh.Flat.Lo.AirBP <- 10
+ContData.env$myThresh.Flat.Lo.AirTemp <- 15
+ContData.env$myThresh.Flat.Lo.Chlorophylla <- 30
+ContData.env$myThresh.Flat.Lo.Cond <- 30
+ContData.env$myThresh.Flat.Lo.Discharge <- 30
+ContData.env$myThresh.Flat.Lo.DO <- 30
+ContData.env$myThresh.Flat.Lo.GageHeight <- 60
+ContData.env$myThresh.Flat.Lo.pH <- 30
+ContData.env$myThresh.Flat.Lo.Turbidity <- 30
+ContData.env$myThresh.Flat.Lo.WaterP <- 10
+ContData.env$myThresh.Flat.Lo.WaterTemp <- 20
 
 #--------------------------------------------------------------------
 #Flat Tolerance
-ContData.env$myThresh.Flat.Tolerance.AirBP <- 
-ContData.env$myThresh.Flat.Tolerance.AirTemp <- 
-ContData.env$myThresh.Flat.Tolerance.Chlorophylla <- 
-ContData.env$myThresh.Flat.Tolerance.Cond <- 
-ContData.env$myThresh.Flat.Tolerance.Discharge <- 
-ContData.env$myThresh.Flat.Tolerance.DO <- 
-ContData.env$myThresh.Flat.Tolerance.GageHeight <- 
-ContData.env$myThresh.Flat.Tolerance.pH <- 
-ContData.env$myThresh.Flat.Tolerance.Turbidity <- 
-ContData.env$myThresh.Flat.Tolerance.WaterP <- 
-ContData.env$myThresh.Flat.Tolerance.WaterTemp <- 
+ContData.env$myThresh.Flat.Tolerance.AirBP <- 0.001
+ContData.env$myThresh.Flat.Tolerance.AirTemp <- 0.01
+ContData.env$myThresh.Flat.Tolerance.Chlorophylla <- 0.01
+ContData.env$myThresh.Flat.Tolerance.Cond <- 0.01
+ContData.env$myThresh.Flat.Tolerance.Discharge <- 0.01
+ContData.env$myThresh.Flat.Tolerance.DO <- 0.01
+ContData.env$myThresh.Flat.Tolerance.GageHeight <- 0.01
+ContData.env$myThresh.Flat.Tolerance.pH <- 0.01
+ContData.env$myThresh.Flat.Tolerance.Turbidity <- 0.01
+ContData.env$myThresh.Flat.Tolerance.WaterP <- 0.001
+ContData.env$myThresh.Flat.Tolerance.WaterTemp <- 0.01
 
 ContData.env$myThresh.Flat.MaxComp    <- max(
       ContData.env$myThresh.Flat.Hi.WaterTemp, 

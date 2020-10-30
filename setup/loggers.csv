@@ -1,3 +1,3 @@
 Logger_Model,Date,Time,DateTime,Date_Format,Time_Format,TZ,AirBP,AirTemp,Chlorophylla,Cond,Discharge,DO,GageHeight,pH,Turbidity,WaterP,WaterTemp,FieldNamesRow,DataStartRow
-HOBO Pro v2 - U22-001,NA,NA,"Date Time, GMT+00:00",%m/%d/%Y, %H:%M,UTC,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"Temp, °C",1,2
+HOBO Pro v2 - U22-001,NA,NA,"Date Time, GMT+00:00",%m/%d/%y,%I:%M:%S %p,UTC,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"Temp, °C",1,2
 PME miniDOT,NA,NA,UTC_Date_._Time,%m/%d/%Y, %H:%M,UTC,NA,NA,NA,NA,NA,Dissolved.Oxygen,NA,NA,NA,NA,Temperature,1,3
