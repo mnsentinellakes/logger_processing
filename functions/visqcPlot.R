@@ -19,19 +19,20 @@ flagtype = reactive({
 })
 
 output$VisQCplot = renderPlotly({
+  #datatypedf() from visqcUI code file
   QCdata = datatypedf()
   
   QCdata = QCdata[which(QCdata$SiteId == input$siteidchoice),]
-
+  
   flagfield = sym(flagtype())
-    
+  
   flagcolors=c("P"="royalblue1",
-                "F"="red",
-                "S"="orange",
-                "X" = "slategray3")
-
-
-
+               "F"="red",
+               "S"="orange",
+               "X" = "slategray3")
+  
+  
+  
   Theme = theme(
     panel.border = element_rect(color = "black",fill = NA,size = 1),
     panel.grid.major.x = element_line(color = "lightgray",size = 0.5,linetype = 3),
@@ -46,27 +47,31 @@ output$VisQCplot = renderPlotly({
     legend.key.width = unit(12,"mm")
   )
   
-  ggplotly(
-    dynamicTicks = TRUE,
-    
-    source = "V",
-    ggplot(
-      data = QCdata
-    ) +
-      geom_point(
-        aes(
-          x = DateTime,
-          y = Data,
-          color = !!flagfield,
-          key = DateTime
-        ),
-        size = 2.5
+  suppressWarnings(
+    toWebGL(
+      ggplotly(
+        dynamicTicks = TRUE,
         
-      ) +
-      xlab("Date and Time") +
-      ylab(input$visqcloggerchoices) +
-      scale_color_manual(values = flagcolors) +
-      Theme
+        source = "V",
+        ggplot(
+          data = QCdata
+        ) +
+          geom_point(
+            aes(
+              x = DateTime,
+              y = Data,
+              color = !!flagfield,
+              key = DateTime
+            ),
+            size = 2.5
+            
+          ) +
+          xlab("Date and Time") +
+          ylab(input$visqcloggerchoices) +
+          scale_color_manual(values = flagcolors) +
+          Theme
+      )
+    )
   )
 })
 
@@ -78,19 +83,14 @@ VisQCdataupdate = function(updatedata){
 
 #Update the deployment table dates
 deploydatesupdate = function(){
-  
+  #datatypedf() from visqcUI code file
   deployqcdata = datatypedf()
   deployupdate = deploylogs()
   
-  minrecorddt = min(deployqcdata$DateTime)
-  maxrecorddt = max(deployqcdata$DateTime)
-  minvaliddt = min(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])
-  maxvaliddt = max(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])
-  
-  message(paste("StartDateTimeRecord = ",minrecorddt))
-  message(paste("EndDateTimeRecord = ",maxrecorddt))
-  message(paste("StartDateTimeValid = ",minvaliddt))
-  message(paste("EndDateTimeValid = ",maxvaliddt))
+  minrecorddt = unique(as.character(min(deployqcdata$DateTime)))
+  maxrecorddt = unique(as.character(max(deployqcdata$DateTime)))
+  minvaliddt = unique(as.character(min(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])))
+  maxvaliddt = unique(as.character(max(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])))
   
   deployupdate$StartDateTimeRecord[which(deployupdate$DeployID == deployid())] = minrecorddt
   deployupdate$EndDateTimeRecord[which(deployupdate$DeployID == deployid())] = maxrecorddt
@@ -109,6 +109,7 @@ observeEvent(
       event = "plotly_selected",
       source = "V"
     )
+    #datatypedf() from visqcUI code file
     VQCFail = datatypedf()
     VQCFail[which(VQCFail$SiteId == input$siteidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),flagtype()] = "F"
     VQCFail[which(VQCFail$SiteId == input$siteidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),paste0(flagtype(),"chng")] = "F"
@@ -123,6 +124,7 @@ observeEvent(
       event = "plotly_selected",
       source = "V"
     )
+    #datatypedf() from visqcUI code file
     VQCSusp = datatypedf()
     VQCSusp[which(VQCSusp$SiteId == input$siteidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),flagtype()] = "S"
     VQCSusp[which(VQCSusp$SiteId == input$siteidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),paste0(flagtype(),"chng")] = "S"
@@ -136,6 +138,7 @@ observeEvent(
     VQCfaildataP = event_data(
       event = "plotly_selected",
       source = "V")
+    #datatypedf() from visqcUI code file
     VQCPass = datatypedf()
     VQCPass[which(VQCPass$SiteId == input$siteidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),flagtype()] = "P"
     VQCPass[which(VQCPass$SiteId == input$siteidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),paste0(flagtype(),"chng")] = "P"

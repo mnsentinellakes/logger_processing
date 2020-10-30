@@ -185,8 +185,10 @@ compileQCdata = function(qcinfo,depthstable){
       if(length(qcfile)>0){
       readdata = read.csv(qcfile,stringsAsFactors = FALSE)
       
-      datacompile = data.frame("SiteId" = j,"DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
-                               "Data" = readdata[,ncol(readdata)],"Depth" = depthstable$Depth[which(depthstable$Serial_Number == j)],
+      datacompile = data.frame("SiteId" = j,
+                               "DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
+                               "Data" = readdata[,ncol(readdata)],
+                               "Depth" = depthstable$Depth[which(depthstable$Serial_Number == j)],
                                "FlagGrossorig" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
                                "FlagSpikeorig" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
                                "FlagRoCorig" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
@@ -241,7 +243,7 @@ observeEvent(
     
     #Disable processing button to prevent duplicate processing
     disable("processing")
-    
+    unlink("processing/*",recursive = TRUE,force = TRUE)
     #Ensures that data have been uploaded
     if(length(input$dataupload)>0){
       
@@ -328,79 +330,88 @@ observeEvent(
       )
       
       if(compiledata[[2]] == FALSE){
-      
+        
         compiledata = compiledata[[1]]
         
-      VisQCdata(compiledata)
-      
-      unlink("processing/*",recursive = TRUE,force = TRUE)
-      
-      updateProgressBar(
-        id = "processprogress",
-        session = session,
-        value = 90,
-        status = "success",
-        title = paste("Saving Metadata")
-      )
-      
-      ##Update tables
-      #Load tables
-      updatedates = processinglogs()
-      deployadd = deploylogs()
-      qcinfo = qc_config()
-      stationupdate = stations()
-      
-      #Update the depths table processed date
-      
-      if (turnoffprocessupdate == FALSE){
-        updatedates$Processed[which(updatedates$StationID == input$procstationname &
-                                      updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
-        processinglogs(updatedates)
-      }
-      #Update deploy table
-      deployidcreate = random_id(n = 1,bytes = 16)
-      deployid(deployidcreate)
-      
-      deployaddrows = NULL
-      for (i in names(compiledata)){
+        VisQCdata(compiledata)
         
-        selectunit = unique(qcinfo$Units[which(qcinfo$AppID == input$procwaterbody & qcinfo$Logger_Type == i)])
-        
-        deployaddrow = data.frame(
-          "DeployID" = deployidcreate,
-          "Lat" = input$lat,
-          "Lon" = input$lon,
-          "StartDateTimeRecord" = as.Date(as.character(NA)),
-          "EndDateTimeRecord" = as.Date(as.character(NA)),
-          "StartDateTimeValid" = as.Date(as.character(NA)),
-          "EndDateTimeValid" = as.Date(as.character(NA)),
-          "Units" = selectunit,
-          "Logger_Count" = length(datapaths),
-          "Deployment_Count" = input$deploynum,
-          "ProcessedDate" = Sys.Date(),
-          "Processedby" = as.character(NA),
-          stringsAsFactors = FALSE
+        updateProgressBar(
+          id = "processprogress",
+          session = session,
+          value = 90,
+          status = "success",
+          title = paste("Saving Metadata")
         )
-        deployaddrows = rbind(deployaddrows,deployaddrow)
-      }
-      deployadd = rbind(deployadd,deployaddrows)
-      deploylogs(deployadd)
-      
-      #Update stations table
-      stationupdate$Lat[which(stationupdate$StationID == input$procstationname)] = input$lat
-      stationupdate$Lon[which(stationupdate$StationID == input$procstationname)] = input$lon
-      
-      stations(stationupdate)
-      
-      updatebaseconfig()
-      
-      updateProgressBar(
-        id = "processprogress",
-        session = session,
-        value = 100,
-        status = "success",
-        title = paste("Processing and QC complete")
-      )
+        
+        ##Update tables
+        #Load tables
+        updatedates = processinglogs()
+        deployadd = deploylogs()
+        qctable = qc_config()
+        stationupdate = stations()
+        
+        #Update the depths table processed date
+        
+        if (turnoffprocessupdate == FALSE){
+          updatedates$Processed[which(updatedates$StationID == input$procstationname &
+                                        updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
+          processinglogs(updatedates)
+        }
+        #Update deploy table
+        deployidcreate = random_id(n = 1,bytes = 16)
+        deployid(deployidcreate)
+        
+        deployaddrows = NULL
+        for (k in names(compiledata)){
+          selectunit = unique(qctable$Units[which(qctable$AppID == input$procwaterbody & qctable$Logger_Type == k)])
+          selectunit = selectunit[!is.na(selectunit)]
+          
+          
+          deployaddrow = data.frame(
+            "DeployID" = deployidcreate,
+            "Logger_Type" = k,
+            "Lat" = input$lat,
+            "Lon" = input$lon,
+            "StartDateTimeRecord" = as.character(NA),
+            "EndDateTimeRecord" = as.character(NA),
+            "StartDateTimeValid" = as.character(NA),
+            "EndDateTimeValid" = as.character(NA),
+            "Units" = selectunit,
+            "Logger_Count" = length(datapaths),
+            "Deployment_Count" = input$deploynum,
+            "ProcessedDate" = as.character(Sys.Date()),
+            "Processedby" = as.character(NA),
+            stringsAsFactors = FALSE
+          )
+          print(k)
+          print(deployaddrow)
+          
+          deployaddrows = rbind(deployaddrows,deployaddrow)
+        }
+        
+        print(deployaddrows)
+        
+        deployadd = rbind(deployadd,deployaddrows)
+        
+       
+        
+        deploylogs(deployadd)
+        
+        #Update stations table
+        stationupdate$Lat[which(stationupdate$StationID == input$procstationname)] = input$lat
+        stationupdate$Lon[which(stationupdate$StationID == input$procstationname)] = input$lon
+        
+        stations(stationupdate)
+        
+        updatebaseconfig()
+        
+        updateProgressBar(
+          id = "processprogress",
+          session = session,
+          value = 100,
+          status = "success",
+          title = paste("Processing and QC complete")
+        )
       }else{
         updateProgressBar(
           id = "processprogress",
@@ -428,6 +439,13 @@ observeEvent(
   }
 )
 
+#Extract logger types
+qcloggertypes = reactive({
+  qcloggers=VisQCdata()
+  qcloggers = names(qcloggers)
+  return(qcloggers)
+})
+
 #Render Data Table for Review of Processed Data
 output$dataoutput=renderDT(
   options=list(
@@ -435,6 +453,9 @@ output$dataoutput=renderDT(
   ),
   extensions = 'Responsive',
   {
+
     qcdatadisplay=VisQCdata()
-    return(qcdatadisplay)
+    datatypeselect = head(qcdatadisplay[[input$prevloggerchoices]])
+    
+    return(datatypeselect[,c(1:4,15:18)])
   })

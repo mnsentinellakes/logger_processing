@@ -1,11 +1,5 @@
 #Vis QC Options----
 
-visqcloggertypes = reactive({
-  visqcloggers=VisQCdata()
-  visqcloggers = names(visqcloggers)
-  return(visqcloggers)
-})
-
 output$visqcoptions=renderUI({
   
   isolate(
@@ -77,10 +71,12 @@ output$visqcoptions=renderUI({
 
 #Picker input to select data logger type
 output$visqcdatatypesUI = renderUI({
+  isolate(
   pickerInput(
     inputId = "visqcloggerchoices",
-    choices = visqcloggertypes(),
+    choices = qcloggertypes(),
     label = "Data Type"
+  )
   )
 })
 
@@ -89,30 +85,45 @@ datatypedf = reactive({
   validate(
     need(input$visqcloggerchoices,"Loading...")
   )
-  
   VisQCdataoptions=VisQCdata()
   datatypeselect = VisQCdataoptions[[input$visqcloggerchoices]]
   return(datatypeselect)
-  
 })
+
+selectedsn = reactiveVal(NULL)
 
 #Picker input to select serial number/siteid
 output$siteidchoiceUI = renderUI({
-  validate(
+  
+    validate(
     need(datatypedf(),"Loading...")
   )
   
+  isolate({
+  
   siteidchoices = datatypedf()
   siteidchoices = unique(siteidchoices$SiteId)
+  if(is.null(selectedsn())){
+    selection = siteidchoices[1]
+  }else{
+    selection = selectedsn()
+  }
   
-  pickerInput(
-    inputId = "siteidchoice",
-    label = "Serial Number",
-    choices = siteidchoices,
-    options = list(
-      `actions-box` = TRUE, 
-      size = 10,
-      `selected-text-format` = "count > 3"))
+  
+    pickerInput(
+      inputId = "siteidchoice",
+      label = "Serial Number",
+      choices = siteidchoices,
+      selected = selection,
+      options = list(
+        `actions-box` = TRUE, 
+        size = 10,
+        `selected-text-format` = "count > 3"))
+  })
+})
+
+observe({
+  selectedsn(input$siteidchoice)
 })
 
 #Display Depth for selected SiteID----

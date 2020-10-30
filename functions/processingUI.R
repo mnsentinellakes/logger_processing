@@ -157,3 +157,19 @@ output$procmetadata=renderUI({
     )
   )
 })
+
+output$dataprevUI = renderUI({
+  tagList(
+    fluidRow(
+      column(
+        width = 3,
+        pickerInput(
+          inputId = "prevloggerchoices",
+          label = "Data Type",
+          choices = qcloggertypes(),
+        )
+      )
+    ),
+    DTOutput("dataoutput")
+  )
+})
