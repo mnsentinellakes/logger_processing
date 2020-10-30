@@ -59,9 +59,10 @@ logprocsidebar=function(id){
       menuItem(
         "Processing and QC", 
         icon = icon("laptop"),
-        menuSubItem("Setup/Processing (1)",tabName = "setup"),
-        menuSubItem("Visual QC (2)",tabName = "visqc"),
-        menuSubItem("Export (3)",tabName = "export")
+        menuSubItem("Setup/Processing",tabName = "setup"),
+        menuSubItem("Visual QC",tabName = "visqc"),
+        menuSubItem("Data Summary",tabName = "summary"),
+        menuSubItem("Export",tabName = "export")
       )
     )
   )

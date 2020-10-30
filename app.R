@@ -24,6 +24,7 @@ library(DT)
 library(mnsentinellakes)
 library(ids)
 library(lubridate)
+library(highcharter)
 source("functions/dashboard.R")
 options(scipen = 999)
 # function definitions are located in the dashboard.R file
@@ -85,7 +86,7 @@ server <- function(input,output,session) {
     source("functions/visqcPlot.R",local = TRUE)$value
     
     #Code for data export
-    source("functions/dataexport.R",local = TRUE)$value
+    source("functions/summary.R",local = TRUE)$value
 }
 
 # Run the application 

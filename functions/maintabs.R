@@ -261,30 +261,17 @@ tabItems(
             title = "Begin Processing"
           )
         )
-        # box(
-        #   title = "Progress",
-        #   solidHeader = TRUE,
-        #   status = "primary",
-        #   width = NULL,
-        #   #Processing progress bar
-        #   progressBar(
-        #     "processprogress",
-        #     value = 0,
-        #     display_pct = TRUE,
-        #     status = "success"
-        #   )
-        # )
       )
     ),
     box(
-      title = "Data Output",
+      title = "Data Preview",
       solidHeader = TRUE,
       status = "primary",
       width = 12,
       collapsible = TRUE,
       collapsed = TRUE,
       #Table output showing data processed up to this point
-      DTOutput("dataoutput")
+      uiOutput("dataprevUI")
     )
   ),
   
@@ -319,57 +306,7 @@ tabItems(
   
   #Export tab----
   tabItem(
-    tabName = "export",
-    fluidRow(
-      column(
-        width = 3,
-        box(
-          title = "Export Options",
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
-          #Picker input for selecting the final data format
-          pickerInput(
-            inputId = "exporttype",
-            label = "Data Export Type",
-            choices = c("All Data","Remove Failed Visual QC","Daily Summary")),
-          actionBttn(
-            inputId = "processexport",
-            label = "Process Data Export",
-            color = "success",
-            style = "fill"
-          ),
-          tags$br(),
-          tags$br(),
-          #Download Button
-          downloadButton("download")
-        )
-      ),
-      column(
-        width = 9,
-        box(
-          title = "Export Progress",
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
-          #Final processing progress bar
-          progressBar(
-            "exportprogress",
-            value = 0,
-            display_pct = TRUE
-          )
-        )
-      )
-    ),
-    box(
-      title = "Data Preview",
-      solidHeader = TRUE,
-      status = "primary",
-      width = 12,
-      collapsible = TRUE,
-      collapsed = TRUE,
-      #Table output showing data processed up to this point
-      DTOutput("exportpreview")
-    )
+    tabName = "summary",
+    uiOutput("summaryUI")
   )
 )
