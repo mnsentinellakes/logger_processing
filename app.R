@@ -24,7 +24,6 @@ library(DT)
 library(mnsentinellakes)
 library(ids)
 library(lubridate)
-library(highcharter)
 source("functions/dashboard.R")
 options(scipen = 999)
 # function definitions are located in the dashboard.R file
@@ -63,6 +62,9 @@ server <- function(input,output,session) {
     #Code for logger file definitions
     source("functions/logfiledefs.R",local = TRUE)$value
     
+    #Code of export options
+    source("functions/exportoptions.R",local = TRUE)$value
+    
     #Code for saving the configuration file
     source("functions/saveconfigfile.R",local = TRUE)$value
     
@@ -85,9 +87,18 @@ server <- function(input,output,session) {
     #Code for VisQC Plot
     source("functions/visqcPlot.R",local = TRUE)$value
     
-    #Code for data export
+    #Code for data summary
     source("functions/summary.R",local = TRUE)$value
+    
+    #Code for data export
+    source("functions/dataexport.R",local = TRUE)$value
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
+#Notes
+
+# -check for naming inconsistencies
+#   -make sure UI objects are named with "UI" at the end
+# -add many notes and documentation
