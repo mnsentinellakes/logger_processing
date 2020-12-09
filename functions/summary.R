@@ -272,6 +272,7 @@ output$summaryUI = renderUI({
       fluidRow(
         column(
           width = 1,
+          HTML("<CENTER>"),
           radioGroupButtons(
             inputId = "flagtype",
             label = NULL,
@@ -283,7 +284,8 @@ output$summaryUI = renderUI({
               no = icon("square")
             ),
             direction = "vertical"
-          )
+          ),
+          HTML("</CENTER>")
         ),
         column(
           width = 1
@@ -299,6 +301,15 @@ output$summaryUI = renderUI({
         column(
           width = 3,
           uiOutput("vbpass")
+        )
+      ),
+      fluidRow(
+        column(
+          width = 1
+        ),
+        column(
+          width = 11,
+          plotlyOutput("summaryplot")
         )
       )
     )
@@ -369,12 +380,8 @@ output$summaryloggerinfoUI = renderUI({
   
   
 summarydatatypes = reactive({
-
   summarydataselect = VisQCdata()
-  print(paste("VisQCdata names:",names(summarydataselect)))
-  print(paste("input$summaryloggerchoices:",input$summaryloggerchoices))
   summarydata = summarydataselect[[input$summaryloggerchoices]]
-  
   return(summarydata)
 })
 
@@ -427,4 +434,84 @@ output$vbpass = renderUI({
       status = "P"
     )
   )
+})
+
+output$summaryplot = renderPlotly({
+  
+  validate(
+    need(summaryselectdata(),"Loading...")
+  )
+  
+  summaryplotdata = summaryselectdata()
+  
+  if (input$flagtype == "Gross"){
+    
+    pointdata = summaryplotdata[which(summaryplotdata$FlagGross != 'P'),]
+  }else if (input$flagtype == "Spike"){
+    
+    pointdata = summaryplotdata[which(summaryplotdata$FlagSpike != 'P'),]
+  }else if (input$flagtype == "RoC"){
+    
+    pointdata = summaryplotdata[which(summaryplotdata$FlagRoC != 'P'),]
+  }else if (input$flagtype == "Flat"){
+    
+    pointdata = summaryplotdata[which(summaryplotdata$FlagFlat != 'P'),]
+  }else if (input$flagtype == "Vis"){
+    
+    pointdata = summaryplotdata[which(summaryplotdata$FlagVis != 'P'),]
+  }
+  
+  flagplot = sym(paste0("Flag",input$flagtype))
+  
+  summaryflagcolors=c(
+               "S"="orange",
+               "F"="red",
+               "X" = "red")
+  
+  Theme = theme(
+    panel.border = element_rect(color = "black",fill = NA,size = 1),
+    panel.grid.major.x = element_line(color = "lightgray",size = 0.5,linetype = 3),
+    panel.grid.major.y = element_line(color = "lightgray",size = 0.5,linetype = 3),
+    panel.grid.minor.x = element_blank(),
+    panel.background = element_blank(),
+    title = element_text(size = 16),
+    axis.text = element_text(size = 12),
+    legend.position = 'none'
+  )
+
+  if (nrow(summaryplotdata) > 0){
+    p = ggplot() + 
+      geom_line(
+        data = summaryplotdata,
+        aes(
+          x = DateTime,
+          y = Data
+        ),
+        color = "royalblue1",
+        size = 1.5
+      )
+    
+    if (nrow(pointdata) > 0){
+      q = geom_point(
+        data = pointdata,
+        aes(
+          x = DateTime,
+          y = Data,
+          color = !!flagplot
+        ),
+        size = 2.5
+      ) 
+      s = scale_color_manual(values = summaryflagcolors)
+    }else{
+      q = NULL
+      s = NULL
+    }
+    
+    toWebGL(
+      ggplotly(
+        dynamicTicks = TRUE,
+        p + q + s + xlab("Date and Time") + ylab(input$summaryloggerchoices) + Theme
+      )
+    )
+  }
 })
