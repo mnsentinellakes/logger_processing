@@ -150,10 +150,22 @@ output$procmetadata=renderUI({
         )
       )
     ),
-    textInput(
-      inputId = "deploynum",
-      label = "Deployment",
-      value = deploycounter()
+    fluidRow(
+      column(
+        width = 3,
+        textInput(
+          inputId = "deploynum",
+          label = "Deployment",
+          value = deploycounter()
+        )
+      ),
+      column(
+        width = 9,
+        textInput(
+          inputId = "username",
+          label = "User Name"
+        )
+      )
     )
   )
 })
