@@ -1,37 +1,37 @@
-#Dropdown Blocks----
-#Dropdown menus on the head for selecting the lake and logger type
-dropdownmenus=function(id){
-  tagList(
-    dropdownBlock(
-      id = paste0(id,"1"),
-      title = "Lake Name",
-      textInput(
-        inputId = "lakeinput",
-        label="",
-        placeholder = "Lake Name"
-      ),
-      #Submit Lake Name----------------------
-      actionBttn(
-        inputId = "lakeapply",
-        label="Submit",
-        color="success",
-        style = "fill",
-        size = 'sm'
-      )
-    ),
-    dropdownBlock(
-      id = paste0(id,"2"),
-      title = "Logger Type",
-      # icon = "temperature-high",
-      awesomeRadio(
-        inputId = "Type",
-        label = "",
-        choices = c("Temperature","Dissolved Oxygen"),
-        status = "success"
-      )
-    )
-  )
-}
+# #Dropdown Blocks----
+# #Dropdown menus on the head for selecting the lake and logger type
+# dropdownmenus=function(id){
+#   tagList(
+#     dropdownBlock(
+#       id = paste0(id,"1"),
+#       title = "Lake Name",
+#       textInput(
+#         inputId = "lakeinput",
+#         label="",
+#         placeholder = "Lake Name"
+#       ),
+#       #Submit Lake Name----------------------
+#       actionBttn(
+#         inputId = "lakeapply",
+#         label="Submit",
+#         color="success",
+#         style = "fill",
+#         size = 'sm'
+#       )
+#     ),
+#     dropdownBlock(
+#       id = paste0(id,"2"),
+#       title = "Logger Type",
+#       # icon = "temperature-high",
+#       awesomeRadio(
+#         inputId = "Type",
+#         label = "",
+#         choices = c("Temperature","Dissolved Oxygen"),
+#         status = "success"
+#       )
+#     )
+#   )
+# }
 
 #Sidebar----
 logprocsidebar=function(id){
@@ -54,6 +54,7 @@ logprocsidebar=function(id){
         menuSubItem("Programs and Waterbodies",tabName = "programsandwaterbodies"),
         menuSubItem("QC Settings",tabName = "configqc"),
         menuSubItem("Logger File Definitions",tabName = "logfiledefs"),
+        menuSubItem("Export Options",tabName = "exportoptions"),
         menuSubItem("Save Configuration File",tabName = "saveconfigfile")
       ),
       menuItem(
