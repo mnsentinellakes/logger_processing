@@ -242,7 +242,7 @@ observeEvent(
   input$processing,{
     
     #Disable processing button to prevent duplicate processing
-    disable("processing")
+    toggleState("processing")
     unlink("processing/*",recursive = TRUE,force = TRUE)
     #Ensures that data have been uploaded
     if(length(input$dataupload)>0){
@@ -380,21 +380,14 @@ observeEvent(
             "Logger_Count" = length(datapaths),
             "Deployment_Count" = input$deploynum,
             "ProcessedDate" = as.character(Sys.Date()),
-            "Processedby" = as.character(NA),
+            "Processedby" = input$username,
             stringsAsFactors = FALSE
           )
-          print(k)
-          print(deployaddrow)
-          
+
           deployaddrows = rbind(deployaddrows,deployaddrow)
         }
-        
-        print(deployaddrows)
-        
         deployadd = rbind(deployadd,deployaddrows)
-        
-       
-        
+
         deploylogs(deployadd)
         
         #Update stations table
@@ -435,7 +428,7 @@ observeEvent(
 #Re-enable disabled Processing button upon uploading new data
 observeEvent(
   input$dataupload,{
-    enable("processing")
+    toggleState("processing")
   }
 )
 
