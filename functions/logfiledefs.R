@@ -193,7 +193,6 @@ output$lfaddmodeltimeconfigUI = renderUI({
             )
           ),
           fluidRow(
-            
             column(
               width = 12,
               uiOutput("lfaddtimesettingsUI")
