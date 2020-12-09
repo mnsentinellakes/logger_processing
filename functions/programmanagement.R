@@ -320,16 +320,6 @@ output$aedwaterbodiesselectchoiceUI = renderUI({
       fluidRow(
         column(
           width = 7,
-          pickerInput(
-            inputId = "addwaterbodiestype",
-            choices = wbtypes,
-            label = NULL
-          )
-        )
-      ),
-      fluidRow(
-        column(
-          width = 7,
           textInput(
             inputId = "addwaterbodiesid",
             label = NULL,
@@ -344,6 +334,16 @@ output$aedwaterbodiesselectchoiceUI = renderUI({
             style = "fill",
             color = "primary",
             size = "sm"
+          )
+        )
+      ),
+      fluidRow(
+        column(
+          width = 7,
+          pickerInput(
+            inputId = "addwaterbodiestype",
+            choices = wbtypes,
+            label = NULL
           )
         )
       )
@@ -411,18 +411,20 @@ output$editwaterbodiesnameUI = renderUI({
     textInput(
       inputId = "editwaterbodyname",
       label = NULL,
-      value = names(programwbnamesselect()[programwbnamesselect() == input$editwaterbodiesnamechoices])
+      value = names(programwbnamesselect()[programwbnamesselect() == input$editwaterbodiesnamechoices]),
+      placeholder = "Add Waterbody Name"
+    ),
+    textInput(
+      inputId = "editwaterbodyid",
+      label = NULL,
+      value = waterbodyids,
+      placeholder = "Add Waterbody ID"
     ),
     pickerInput(
       inputId = "editwaterbodiestype",
       choices = wbtypes,
       selected = waterbodytypes,
       label = NULL
-    ),
-    textInput(
-      inputId = "editwaterbodyid",
-      label = NULL,
-      value = waterbodyids
     )
   )
 })
@@ -431,7 +433,7 @@ output$editwaterbodiesnameUI = renderUI({
 observeEvent(
   input$addwaterbodies,
   {
-    if (nchar(input$addwaterbodiesname) > 0 & nchar(input$addwaterbodiesid) > 0){
+    if (nchar(input$addwaterbodiesname) > 0){
       programwbsrv=programwbs()
       wbnamesrv=wbnames()
       newwbqcconfig=qc_config()
@@ -468,18 +470,11 @@ observeEvent(
         value = ""
       )
       
-    }else if (nchar(input$addwaterbodiesname) <= 0 & nchar(input$addwaterbodiesid) <= 0){
+    }else if (nchar(input$addwaterbodiesname) <= 0){
       sendSweetAlert(
         session = session,
-        title = "Missing Waterbody Name and ID",
-        text = "Please add a waterbody name and ID. If the lake does not already have a defined ID, click the Generate Waterbody ID button to create one.",
-        type = "danger"
-      )
-    }else if (nchar(input$addwaterbodiesname) > 0 & nchar(input$addwaterbodiesid) <= 0){
-      sendSweetAlert(
-        session = session,
-        title = "Missing Waterbody ID",
-        text = "Please add a waterbody ID. If the lake does not already have a defined ID, click the Generate Waterbody ID button to create one.",
+        title = "Missing Waterbody Name",
+        text = "Please add a waterbody name.",
         type = "danger"
       )
     }
@@ -492,9 +487,9 @@ observeEvent(
   {
     editprogramwbsrv = programwbs()
     editwbnamesrv = wbnames()
+    editwbnamesrv$Waterbody_Name[which(editwbnamesrv$AppID == input$editwaterbodiesnamechoices)] = input$editwaterbodyname
     editprogramwbsrv$ProgramWaterbodyID[which(editprogramwbsrv$AppID == input$editwaterbodiesnamechoices)] = input$editwaterbodyid
     editprogramwbsrv$WB_Type[which(editprogramwbsrv$AppID == input$editwaterbodiesnamechoices)] = input$editwaterbodiestype
-    editwbnamesrv$Waterbody_Name[which(editwbnamesrv$AppID == input$editwaterbodiesnamechoices)] = input$editwaterbodyname
     programwbs(editprogramwbsrv)
     wbnames(editwbnamesrv)
     
@@ -600,6 +595,11 @@ output$aedstationsselectchoiceUI = renderUI({
             label = NULL,
             placeholder = "New Station Name"
           ),
+          textInput(
+            inputId = "addprogramstationid",
+            label = NULL,
+            placeholder = "New Station ID"
+          ),
           fluidRow(
             column(
               width = 6,
@@ -693,7 +693,14 @@ output$editstationnameUI = renderUI({
     textInput(
       inputId = "editstationname",
       label = NULL,
-      value = names(wbstationnameselect()[wbstationnameselect() == input$editstationnamechoices])
+      value = stationcoor$Station_Name,
+      placeholder = "Add Station Name"
+    ),
+    textInput(
+      inputId = "editprogramstationid",
+      label = NULL,
+      value = stationcoor$ProgramStationID,
+      placeholder = "Add Station ID"
     ),
     fluidRow(
       column(
@@ -701,7 +708,8 @@ output$editstationnameUI = renderUI({
       textInput(
         inputId = "stationlatedit",
         label = "Latitude",
-        value = stationcoor$Lat
+        value = stationcoor$Lat,
+        placeholder = "Add Station Latitude"
         )
       ),
       column(
@@ -709,7 +717,8 @@ output$editstationnameUI = renderUI({
         textInput(
           inputId = "stationlonedit",
           label = "Longitude",
-          value = stationcoor$Lon
+          value = stationcoor$Lon,
+          placeholder = "Add Station Longitude"
         )
       )
     )
@@ -729,6 +738,7 @@ observeEvent(
         "AppID" = input$stationwaterbodiesselect,
         "StationID" = random_id(n = 1,bytes = 12),
         "Station_Name" = input$addstationname,
+        "ProgramStationID" = input$addprogramstationid,
         "Lat"=input$stationlatadd,
         "Lon"=input$stationlonadd,
         stringsAsFactors = FALSE
@@ -741,6 +751,12 @@ observeEvent(
       updateTextInput(
         session = session,
         inputId = "addstationname",
+        value = ""
+      )
+      
+      updateTextInput(
+        session = session,
+        inputId = "addprogramstationid",
         value = ""
       )
       
@@ -772,6 +788,7 @@ observeEvent(
   {
     editstations = stations()
     editstations$Station_Name[which(editstations$StationID == input$editstationnamechoices)] = input$editstationname
+    editstationnameUI$ProgramStationID[which(editstations$StationID == input$editstationnamechoices)] = input$editprogramstationid
     editstations$Lat[which(editstations$StationID == input$editstationnamechoices)] = input$stationlatedit
     editstations$Lon[which(editstations$StationID == input$editstationnamechoices)] = input$stationlonedit
     
