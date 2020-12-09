@@ -121,7 +121,7 @@ tabItems(
           solidHeader = TRUE,
           status = "primary",
           width = NULL,
-          title = "Logger",
+          title = "Parameter",
           uiOutput("loggerconfigselectUI")
         )
       ),
@@ -183,6 +183,11 @@ tabItems(
         )
       )
     )
+  ),
+  #Export Options Tab----
+  tabItem(
+    tabName = "exportoptions",
+    uiOutput("exportoptionsUI")
   ),
   #Save Config File Tab----
   tabItem(
@@ -308,5 +313,9 @@ tabItems(
   tabItem(
     tabName = "summary",
     uiOutput("summaryUI")
+  ),
+  tabItem(
+    tabName = "export",
+    uiOutput("exportUI")
   )
 )
