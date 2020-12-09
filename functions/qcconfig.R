@@ -1,3 +1,6 @@
+#Update object names to reflect qcconfig usage
+
+
 savestatus=reactiveVal("")
 
 # output$test=renderText({
