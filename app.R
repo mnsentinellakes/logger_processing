@@ -68,7 +68,6 @@ server <- function(input,output,session) {
     #Code for saving the configuration file
     source("functions/saveconfigfile.R",local = TRUE)$value
     
-    
     #code for QC processing and data formatting UI
     source("functions/processingUI.R", local = TRUE)$value
     
@@ -97,8 +96,17 @@ server <- function(input,output,session) {
 # Run the application 
 shinyApp(ui = ui, server = server)
 
+#Future update ideas
+# -change qc thresholds according to depth
+# -indicate whether a logger model will be processed with multiple units, ie depths
+# -allow the user to rearrange the export fields
+
+
 #Notes
 
 # -check for naming inconsistencies
 #   -make sure UI objects are named with "UI" at the end
+# -add saved notifications where needed
+# -update Depths table to reflect settings in the export options
 # -add many notes and documentation
+
