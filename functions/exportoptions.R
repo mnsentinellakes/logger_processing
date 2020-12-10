@@ -1,41 +1,41 @@
 #Main Export UI
 output$exportoptionsUI = renderUI({
-  
-  fluidRow(
-    column(
-      width = 3,
-      box(
-        solidHeader = TRUE,
-        status = "primary",
-        width = NULL,
-        title = "Program",
-        uiOutput("selectprogramsexportUI"),
+  tagList(
+    fluidRow(
+      column(
+        width = 3,
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Program",
+          uiOutput("selectprogramsexportUI"),
+        ),
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Logger Model",
+          uiOutput("selectloggerexportUI")
+        )
       ),
-      box(
-        solidHeader = TRUE,
-        status = "primary",
-        width = NULL,
-        title = "Logger Model",
-        uiOutput("selectloggerexportUI")
+      column(
+        width = 6,
+        box(
+          solidHeader = TRUE,
+          status = "primary",
+          width = NULL,
+          title = "Export Settings",
+          uiOutput("exportsettingsUI")
+        )
+      ),
+      column(
+        width = 3
       )
-    ),
-    column(
-      width = 6,
-      box(
-        solidHeader = TRUE,
-        status = "primary",
-        width = NULL,
-        title = "Export Settings",
-        uiOutput("exportsettingsUI")
-      )
-    ),
-    column(
-      width = 3
     )
-    
   )
 })
-  
+
 #Render the UI for selecting the program
 output$selectprogramsexportUI = renderUI({
   pickerInput(
@@ -64,8 +64,32 @@ output$selectloggerexportUI = renderUI({
   )
 })
 
+#Select appropriate row from the export table
+exportselect = reactive({
+  namesdeploy = export()
+  namesdeploy = namesdeploy[which(namesdeploy$ProgramID == input$selectedprogramexport & namesdeploy$ModelID == input$selectloggerexport),]
+  return(namesdeploy)
+})
+
 #Export Settings UI
 output$exportsettingsUI = renderUI({
+  supportfilesexport = exportselect()
+  
+  if (nrow(supportfilesexport) > 0){
+    sepfilevalue = supportfilesexport$FileSep
+    metavalue = supportfilesexport$IncMeta
+    reportvalue = supportfilesexport$IncRep
+    configvalue = supportfilesexport$IncConfig
+    summaryvalue = supportfilesexport$IncSum
+  }else{
+    sepfilevalue = "Single"
+    metavalue = TRUE
+    reportvalue = TRUE
+    configvalue = TRUE
+    summaryvalue = TRUE
+  }
+  
+  
   tagList(
     fluidRow(
       column(
@@ -77,7 +101,7 @@ output$exportsettingsUI = renderUI({
             inputId = "sepfile",
             label = NULL,
             choices = c("Single","Multiple"),
-            selected = "Single",
+            selected = sepfilevalue,
             status = "success"
           )
         )
@@ -89,29 +113,38 @@ output$exportsettingsUI = renderUI({
           tags$h4("Include Support Files"),
           fluidRow(
             column(
-              width = 4,
+              width = 3,
               prettyCheckbox(
                 inputId = "incmeta",
                 label = "Metadata",
-                value = TRUE,
+                value = metavalue,
                 status = "success"
               )
             ),
             column(
-              width = 4,
+              width = 3,
               prettyCheckbox(
                 inputId = "increp",
                 label = "Report",
-                value = TRUE,
+                value = reportvalue,
                 status = "success"
               )
             ),
             column(
-              width = 4,
+              width = 3,
               prettyCheckbox(
                 inputId = "incconfig",
                 label = "Config",
-                value = TRUE,
+                value = configvalue,
+                status = "success"
+              )
+            ),
+            column(
+              width = 3,
+              prettyCheckbox(
+                inputId = "incsummary",
+                label = "Summary",
+                value = summaryvalue,
                 status = "success"
               )
             )
@@ -130,6 +163,20 @@ output$exportsettingsUI = renderUI({
         column(
           width = 9,
       uiOutput("namesdeployexportUI")
+        )
+      )
+    ),
+    tags$br(),
+    tags$div(
+      style="vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
+      fluidRow(
+        column(
+          width = 3,
+          tags$h4("Location Field Names")
+        ),
+        column(
+          width = 9,
+          uiOutput("locationexportUI")
         )
       )
     ),
@@ -178,34 +225,40 @@ output$exportsettingsUI = renderUI({
           uiOutput("exportdatafieldsUI")
         )
       )
-    )
-  )
-})
-
-namesdeployexportselect = reactive({
-  fluidRow(
-    column(
-      width = 2,
-      
     ),
-    column(
-      width = 10
+    tags$br(),
+    actionBttn(
+      inputId = "saveexportoptions",
+      label = "Save Export Settings",
+      style = "fill",
+      color = "success",
+      size = "md"
     )
   )
-  
 })
-
-
-namesdeployfields = reactive({
-  namesdeploy = export()
-  namesdeploy = namesdeploy[which(namesdeploy$ProgramID == input$selectedprogramexport & namesdeploy$ModelID == input$selectloggerexport),]
-  return(namesdeploy)
-})
-
 
 #Waterbody Names and Deployment Information UI
 output$namesdeployexportUI = renderUI({
-  namesdeployfieldvalues = namesdeployfields()
+  namesdeployfieldvalues = exportselect()
+  
+  if (nrow(namesdeployfieldvalues) > 0){
+    incwbidvalue = namesdeployfieldvalues$IncProgramWBID
+    incwbnamevalue = namesdeployfieldvalues$IncWBName
+    incstationidvalue = namesdeployfieldvalues$IncProgramStationID
+    incstationnamevalue = namesdeployfieldvalues$IncStationName
+    incunitidvalue = namesdeployfieldvalues$IncUnitID
+    incdeploymentvalue = namesdeployfieldvalues$IncDeploy
+    incusernamevalue = namesdeployfieldvalues$IncUser
+  }else{
+    incwbidvalue = TRUE
+    incwbnamevalue = TRUE
+    incstationidvalue = TRUE
+    incstationnamevalue = TRUE
+    incunitidvalue = TRUE
+    incdeploymentvalue = TRUE
+    incusernamevalue = TRUE
+  }
+  
   tagList(
     fluidRow(
       column(
@@ -215,7 +268,7 @@ output$namesdeployexportUI = renderUI({
         prettyCheckbox(
           inputId = "incwbidexport",
           label = "Waterbody ID",
-          value = namesdeployfieldvalues$IncProgramWBID,
+          value = incwbidvalue,
           status = "success"
         )
       ),
@@ -232,7 +285,7 @@ output$namesdeployexportUI = renderUI({
         prettyCheckbox(
           inputId = "incwbnameexport",
           label = "Waterbody Name",
-          value = namesdeployfieldvalues$IncWBName,
+          value = incwbnamevalue,
           status = "success"
         )
       ),
@@ -240,13 +293,94 @@ output$namesdeployexportUI = renderUI({
         width = 8,
         uiOutput("wbnameexportUI")
       )
+    ),
+    fluidRow(
+      column(
+        width = 4,
+        tags$br(),
+        prettyCheckbox(
+          inputId = "incstationidexport",
+          label = "Station ID",
+          value = incstationidvalue,
+          status = "success"
+        )
+      ),
+      column(
+        width = 8,
+        uiOutput("stationidexportUI")
+      )
+    ),
+    fluidRow(
+      column(
+        width = 4,
+        tags$br(),
+        prettyCheckbox(
+          inputId = "incstationnameexport",
+          label = "Station Name",
+          value = incstationnamevalue,
+          status = "success"
+        )
+      ),
+      column(
+        width = 8,
+        uiOutput("stationnameexportUI")
+      )
+    ),
+    fluidRow(
+      column(
+        width = 4,
+        tags$br(),
+        prettyCheckbox(
+          inputId = "incunitidexport",
+          label = "Unit ID",
+          value = incunitidvalue,
+          status = "success"
+        )
+      ),
+      column(
+        width = 8,
+        uiOutput("unitidexportUI")
+      )
+    ),
+    fluidRow(
+      column(
+        width = 4,
+        tags$br(),
+        prettyCheckbox(
+          inputId = "incdeploymentexport",
+          label = "Deployment",
+          value = incdeploymentvalue,
+          status = "success"
+        )
+      ),
+      column(
+        width = 8,
+        uiOutput("deploymentexportUI")
+      )
+    ),
+    fluidRow(
+      column(
+        width = 4,
+        tags$br(),
+        prettyCheckbox(
+          inputId = "incusernameexport",
+          label = "User Name",
+          value = incusernamevalue,
+          status = "success"
+        )
+      ),
+      column(
+        width = 8,
+        uiOutput("usernameexportUI")
+      )
     )
   )
 })
 
 #WBID Field Name UI
 output$wbidexportUI = renderUI({
-  incwbidexportvalue = namesdeployfields()
+  incwbidexportvalue = exportselect()
+  
   if (input$incwbidexport == TRUE){
     textInput(
       inputId = "wbidexport",
@@ -258,7 +392,7 @@ output$wbidexportUI = renderUI({
 
 #WB Name Field Name UI
 output$wbnameexportUI = renderUI({
-  incwbnameexportvalue = namesdeployfields()
+  incwbnameexportvalue = exportselect()
   if (input$incwbnameexport == TRUE){
     textInput(
       inputId = "wbnameexport",
@@ -268,12 +402,162 @@ output$wbnameexportUI = renderUI({
   }else{}
 })
 
+#Station ID Field UI
+output$stationidexportUI = renderUI({
+  incstationidexportvalue = exportselect()
+  if (input$incstationidexport == TRUE){
+    textInput(
+      inputId = "stationidexport",
+      label = "Station ID Field Name",
+      value = incstationidexportvalue$ProgramStationID
+    )
+  }else{}
+})
+
+#Station Name Field UI
+output$stationnameexportUI = renderUI({
+  incstationnameexportvalue = exportselect()
+  if (input$incstationnameexport == TRUE){
+    textInput(
+      inputId = "stationnameexport",
+      label = "Station Name Field Name",
+      value = incstationnameexportvalue$StationName
+    )
+  }else{}
+})
+
+#Unit ID Field UI
+output$unitidexportUI = renderUI({
+  incunitidexportvalue = exportselect()
+  if (input$incunitidexport == TRUE){
+    textInput(
+      inputId = "unitidexport",
+      label = "Unit ID Field Name",
+      value = incunitidexportvalue$UnitID
+    )
+  }else{}
+})
+
+#Deployment Field UI
+output$deploymentexportUI = renderUI({
+  incdeploymentexportvalue = exportselect()
+  if (input$incdeploymentexport == TRUE){
+    textInput(
+      inputId = "deploymentexport",
+      label = "Deployment Field Name",
+      value = incdeploymentexportvalue$Deployment
+    )
+  }else{}
+})
+
+#User Name Field UI
+output$usernameexportUI = renderUI({
+  incusernameexportvalue = exportselect()
+  if (input$incusernameexport == TRUE){
+    textInput(
+      inputId = "usernameexport",
+      label = "User Name Field Name",
+      value = incusernameexportvalue$User
+    )
+  }else{}
+})
+
+#Location Field Names UI
+output$locationexportUI = renderUI({
+  locationfieldvalues = exportselect()
+  
+  if (nrow(locationfieldvalues) > 0){
+    inczvalue = locationfieldvalues$IncZ
+    inclocvalue = locationfieldvalues$IncLoc
+  }else{
+    inczvalue = TRUE
+    inclocvalue = TRUE
+  }
+  
+  tagList(
+    fluidRow(
+      column(
+        width = 4,
+        tags$br(),
+        prettyCheckbox(
+          inputId = "inczexport",
+          label = "Z data",
+          value = inczvalue,
+          status = "success"
+        )
+      ),
+      column(
+        width = 8,
+        uiOutput("zexportUI")
+      )
+    ),
+    fluidRow(
+      column(
+        width = 4,
+        tags$br(),
+        prettyCheckbox(
+          inputId = "inclocexport",
+          label = "Coordinates",
+          value = inclocvalue,
+          status = "success"
+        )
+      ),
+      column(
+        width = 8,
+        uiOutput("locexportUI")
+      )
+    )
+  )
+  
+})
+
+#Z Field UI
+output$zexportUI = renderUI({
+  inczexportvalue = exportselect()
+  if (input$inczexport == TRUE){
+    textInput(
+      inputId = "zexport",
+      label = "Z Data Name Field Name",
+      value = inczexportvalue$Z
+    )
+  }else{}
+})
+
+#X and Y Fields
+output$locexportUI = renderUI({
+  inclocexportvalue = exportselect()
+  if (input$inclocexport == TRUE){
+    tagList(
+      textInput(
+        inputId = "latexport",
+        label = "Latitude Field Name",
+        value = inclocexportvalue$Lat
+      ),
+      textInput(
+        inputId = "lonexport",
+        label = "Longitude Field Name",
+        value = inclocexportvalue$Lon
+      )
+    )
+  }else{}
+  
+})
+
 #Add Logger Date Fields
 output$datefieldexportUI = renderUI({
+  datetypeexportvalue = exportselect()
+  
+  if (nrow(datetypeexportvalue) > 0){
+    datetypevalue = datetypeexportvalue$DateTimeSep
+  }else{
+    datetypevalue = "Combined"
+  }
+  
   radioGroupButtons(
     inputId ="datetypeexport",
     label = "Field Organization",
     choices = c("Combined","Separate"),
+    selected = datetypevalue,
     status = "primary"
   )
 })
@@ -283,13 +567,16 @@ output$datetimeexportUI = renderUI({
   validate(
     need(input$datetypeexport,"Loading...")
   )
+  datetimecolexportvalue = exportselect()
+  
   if (input$datetypeexport == "Combined"){
     fluidRow(
       column(
         width = 10,
         textInput(
           inputId = "datetimecombinecolexport",
-          label = "Date Time Field Name"
+          label = "Date Time Field Name",
+          value = datetimecolexportvalue$Date_Time
         )
       )
     )
@@ -299,14 +586,16 @@ output$datetimeexportUI = renderUI({
         width = 6,
         textInput(
           inputId = "datecolexport",
-          label = "Date Field Name"
+          label = "Date Field Name",
+          value = datetimecolexportvalue$Date
         )
       ),
       column(
         width = 6,
         textInput(
           inputId = "timecolexport",
-          label = "Time Field Name"
+          label = "Time Field Name",
+          datetimecolexportvalue$Time
         )
       )
     )
@@ -315,6 +604,7 @@ output$datetimeexportUI = renderUI({
 
 #Date Time UI
 output$timesettingsexportUI = renderUI({
+  tzexportvalue = exportselect()
   
   fluidRow(
     column(
@@ -326,7 +616,8 @@ output$timesettingsexportUI = renderUI({
       pickerInput(
         inputId = "tzexport",
         label = "Time Zone",
-        choices = OlsonNames()
+        choices = OlsonNames(),
+        selected = tzexportvalue$TZ
       )
     )
   )
@@ -334,6 +625,7 @@ output$timesettingsexportUI = renderUI({
 
 #Date Time Format UI
 output$datetimeformatexportUI = renderUI({
+  datetimeformatexportvalue = exportselect()
   
   fluidRow(
     column(
@@ -342,7 +634,8 @@ output$datetimeformatexportUI = renderUI({
         inputId = "dateformatexport",
         label = "Date Format",
         #dateformats located in the logfiledefs.R file
-        choices = dateformats
+        choices = dateformats,
+        selected = datetimeformatexportvalue$Date_Format
       )
     ),
     column(
@@ -351,7 +644,8 @@ output$datetimeformatexportUI = renderUI({
         inputId = "timeformatexport",
         label = "Time Format",
         #timeformats located in the logfiledefs.R file
-        choices = timeformats
+        choices = timeformats,
+        selected = datetimeformatexportvalue$Time_Format
       )
     )
   )
@@ -553,4 +847,332 @@ output$exportdatafieldsUI = renderUI({
     }
   )
   
+})
+
+observeEvent(
+  input$saveexportoptions,
+  {
+    exportfinal = export()
+    loggerexportfinal = loggerfiledefs()
+    loggerexportfinal = loggerexportfinal[which(loggerexportfinal$ModelID == input$selectloggerexport),]
+    
+    
+    #If settings already exist for the program and model combination
+    if (nrow(exportselect()) > 0){
+      #File Setup
+      exportfinal$FileSep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$sepfile
+      exportfinal$IncMeta[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incmeta
+      exportfinal$IncRep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$increp
+      exportfinal$IncConfig[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incconfig
+      exportfinal$IncSum[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incsummary
+      
+      
+      #Identification Field Names
+      exportfinal$IncProgramWBID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incwbidexport
+      if (input$incwbidexport == TRUE){
+        exportfinal$ProgramWBID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$wbidexport
+      }else{
+        exportfinal$ProgramWBID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      exportfinal$IncWBName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incwbnameexport
+      if (input$incwbnameexport == TRUE){
+        exportfinal$WBName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$wbnameexport
+      }else{
+        exportfinal$WBName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      exportfinal$IncProgramStationID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incstationidexport
+      if (input$incstationidexport == TRUE){
+        exportfinal$ProgramStationID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$stationidexport  
+      }else{
+        exportfinal$ProgramStationID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      exportfinal$IncStationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incstationnameexport
+      if (input$incstationnameexport == TRUE){
+        exportfinal$StationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$stationnameexport
+      }else{
+        exportfinal$StationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      exportfinal$IncUnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incunitidexport
+      if (input$incunitidexport == TRUE){
+        exportfinal$UnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$unitidexport
+      }else{
+        exportfinal$UnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      exportfinal$IncDeploy[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incdeploymentexport
+      if (input$incdeploymentexport == TRUE){
+        exportfinal$Deployment[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$deploymentexport
+      }else{
+        exportfinal$Deployment[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      exportfinal$IncUser[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incusernameexport
+      if (input$incusernameexport == TRUE){
+        exportfinal$User[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$usernameexport
+      }else{
+        exportfinal$User[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      #Location Field Names
+      exportfinal$IncZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$inczexport
+      if (input$inczexport == TRUE){
+        exportfinal$Z[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$zexport
+      }else{
+        exportfinal$Z[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      exportfinal$IncLoc[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$inclocexport
+      if (input$inclocexport == TRUE){
+        exportfinal$Lat[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$latexport
+        exportfinal$Lon[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$lonexport
+      }else{
+        exportfinal$Lat[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        exportfinal$Lon[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      #Date and Time Field Names
+      exportfinal$DateTimeSep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datetypeexport
+      if (input$datetypeexport == "Combined"){
+        exportfinal$Date_Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datetimecombinecolexport
+        exportfinal$Date[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }else if (input$datetypeexport == "Separate"){
+        exportfinal$Date_Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        exportfinal$Date[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datecolexport
+        exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timecolexport
+      }
+      
+      exportfinal$Date_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dateformatexport
+      exportfinal$Time_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timeformatexport
+      exportfinal$TZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$tzexport
+    
+    
+    #Data Field Names
+    if (!is.na(loggerexportfinal$AirBP)){
+      exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airbpexport
+    }else{
+      exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$AirTemp)){
+      exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airtempexport
+    }else{
+      exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$Chlorophylla)){
+      exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$chlorophyllaexport
+    }else{
+      exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$Cond)){
+      exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$condexport
+    }else{
+      exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$Discharge)){
+      exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dischargeexport
+    }else{
+      exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$DO)){
+      exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$doexport
+    }else{
+      exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$GageHeight)){
+      exportfinal$GageHeight[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$gageheightexport
+    }else{
+      exportfinal$GageHeight[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$pH)){
+      exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$phexport
+    }else{
+      exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$Turbidity)){
+      exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$turbidityexport
+    }else{
+      exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$WaterP)){
+      exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterpexport
+    }else{
+      exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+    
+    if (!is.na(loggerexportfinal$WaterTemp)){
+      exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$watertempexport
+    }else{
+      exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+    }
+  #If settings do not exist for Program and Logger Model combination
+  }else{
+    
+    if (input$incwbidexport == TRUE){
+      wbidfinal = input$wbidexport
+    }else{
+      wbidfinal = NA
+    }
+    
+    if (input$incwbnameexport == TRUE){
+      wbnamefinal = input$wbnameexport
+    }else{
+      wbnamefinal = NA
+    }
+    
+    if (input$incstationidexport == TRUE){
+      stationidfinal = input$stationidexport
+    }else{
+      stationidfinal = NA
+    }
+    
+    if (input$incstationnameexport == TRUE){
+      stationnamefinal = input$stationnameexport
+    }else{
+      stationnamefinal = NA
+    }
+    
+    if (input$incunitidexport == TRUE){
+      unitidfinal = input$unitidexport
+    }else{
+      unitidfinal = NA
+    }
+    
+    if (input$incdeploymentexport == TRUE){
+      deploymentfinal = input$deploymentexport
+    }else{
+      deploymentfinal = NA
+    }
+    
+    if (input$incusernameexport == TRUE){
+      usernamefinal = input$usernameexport
+    }else{
+      usernamefinal = NA
+    }
+    
+    #Location Fields
+    if (input$inczexport == TRUE){
+      zfinal = input$zexport
+    }else{
+      zfinal = NA
+    }
+    
+    if (input$inclocexport == TRUE){
+      latfinal = input$latexport
+      lonfinal = input$lonexport
+    }else{
+      latfinal = NA
+      lonfinal = NA
+    }
+    
+    if (input$datetypeexport == "Combined"){
+      datetimecombined = input$datetimecombinecolexport
+      dateonly = NA
+      timeonly = NA
+    }else if (input$datetypeexport == "Separate"){
+      datetimecombined = NA
+      dateonly = input$datecolexport
+      timeonly = input$timecolexport
+    }
+    
+    if (!is.na(loggerexportfinal$AirBP)){
+      airbpfinal = input$airbpexport
+    }else{
+      airbpfinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$AirTemp)){
+      airtempfinal = input$airtempexport
+    }else{
+      airtempfinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$Chlorophylla)){
+      chlorophyllafinal = input$chlorophyllaexport
+    }else{
+      chlorophyllafinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$Cond)){
+      condfinal = input$condexport
+    }else{
+      condfinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$Discharge)){
+      dischargefinal = input$dischargeexport
+    }else{
+      dischargefinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$DO)){
+      dofinal = input$doexport
+    }else{
+      dofinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$GageHeight)){
+      gageheightfinal = input$gageheightexport
+    }else{
+      gageheightfinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$pH)){
+      phfinal = input$phexport
+    }else{
+      phfinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$Turbidity)){
+      turbidityfinal = input$turbidityexport
+    }else{
+      turbidityfinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$WaterP)){
+      waterpfinal = input$waterpexport
+    }else{
+      waterpfinal = NA
+    }
+    
+    if (!is.na(loggerexportfinal$WaterTemp)){
+      watertempfinal = input$watertempexport
+    }else{
+      watertempfinal = NA
+    }
+    
+    
+    exportfinalrow = data.frame("ProgramID" = input$selectedprogramexport,"ModelID" = input$selectloggerexport,"FileSep" = input$sepfile,
+                                "IncMeta" = input$incmeta,"IncRep" = input$increp,"IncConfig" = input$incconfig,"IncSum" = input$incsummary,
+                                "IncProgramWBID" = input$incwbidexport,"ProgramWBID" = wbidfinal,"IncWBName" = input$incwbnameexport,
+                                "WBName" = wbnamefinal,"IncProgramStationID" = input$incstationidexport,"ProgramStationID" = stationidfinal,
+                                "IncStationName" = input$incstationnameexport,"StationName" = stationnamefinal,"IncUnitID" = input$incunitidexport,
+                                "UnitID" = unitidfinal,
+                                "IncDeploy" = input$incdeploymentexport,"Deployment" = deploymentfinal,"DateTimeSep" = input$datetypeexport,
+                                "Date_Time" = datetimecombined,"Date" = dateonly,"Time" = timeonly,"Date_Format" = input$dateformatexport,
+                                "Time_Format" = input$timeformatexport,"TZ" = input$tzexport,"IncZ" = input$inczexport,"Z" = zfinal,"IncLoc" = input$inclocexport,
+                                "Lat" = latfinal,"Lon" = lonfinal,"IncUser" = input$incusernameexport,"User" = usernamefinal,"AirBP" = airbpfinal,
+                                "AirTemp" = airtempfinal,
+                                "Chlorophylla" = chlorophyllafinal,"Cond" = condfinal,"Discharge" = dischargefinal,
+                                "DO" = dofinal,"GageHeight" = gageheightfinal,"pH" = phfinal,"Turbidity" = turbidityfinal,
+                                "WaterP" = waterpfinal,"WaterTemp" = watertempfinal,stringsAsFactors = FALSE)
+    print(exportfinalrow)
+    
+    exportfinal = rbind(exportfinal,exportfinalrow)
+  }
+  
+  export(exportfinal)
+  updatebaseconfig()
 })
