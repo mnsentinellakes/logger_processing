@@ -33,6 +33,7 @@ wbnames=data.frame(
 stations = data.frame(
   "AppID" = "b42738f95726b801",
   "StationID" = random_id(n = 1,bytes = 12),
+  "ProgramStationID" = as.character(NA),
   "Station_Name" = "Primary",
   "Lat"=NA,
   "Lon"=NA,
@@ -60,8 +61,9 @@ for (i in 2:18){
   
   
 }
+generatemodelid = random_id(n = 2, bytes = 6)
 
-loggerfiledefs$ModelID = random_id(n = 2, bytes = 6)
+loggerfiledefs$ModelID = generatemodelid
 # loggerfiledefs=loggerfiledefs[,c(1:2,17,3:16)]
 # loggerfiledefs$TZ = "UTC"
 
@@ -112,10 +114,21 @@ for (i in wbloggertypes$AppID){
 }
 qc_config=rbind(qc_config,qc_config_addappid)
 
+#Define Export table
+export = data.frame("ProgramID" = as.character("cd4cba49cd35"),"ModelID" = as.character(generatemodelid)[1],"FileSep" = as.character("Single"),
+                    "IncMeta" = TRUE,"IncRep" = TRUE,"IncConfig" = TRUE,"IncSum" = TRUE,"IncProgramWBID" = TRUE,"ProgramWBID" = "BasinID","IncWBName" = TRUE,
+                    "WBName" = "Lake_Name","IncProgramStationID" = FALSE,"ProgramStationID" = as.character(NA),"IncStationName" = TRUE,
+                    "StationName" = "Station","IncUnitID" = TRUE,"UnitID" = "Serial_Number","IncDeploy" = TRUE,
+                    "Deployment" = "Deployment","DateTimeSep" = as.character("Combined"),"Date_Time" = "Date_Time","Date" = as.character(NA),
+                    "Time" = as.character(NA),"Date_Format" = "%Y-%m-%d","Time_Format" = "%H:%M:%S","TZ" = "UTC","IncZ" = TRUE,"Z" = "Depth_m",
+                    "IncLoc" = TRUE,"Lat" = "Lat","Lon" = "Lon","IncUser" = FALSE,"User" = as.character(NA),"AirBP" = as.character(NA),
+                    "AirTemp" = as.character(NA),"Chlorophylla" = as.character(NA),"Cond" = as.character(NA),"Discharge" = as.character(NA),
+                    "DO" = as.character(NA),"GageHeight" = as.character(NA),"pH" = as.character(NA),"Turbidity" = as.character(NA),
+                    "WaterP" = as.character(NA),"WaterTemp" = as.character("Temp"),stringsAsFactors = FALSE)
 
 #Create list of all tables
-baseconfig=list("programs"=programs,"programwbs"=programwbs,"wbnames"=wbnames,"stations"=stations,"processinglogs"=processinglogs,
-                "qc_config"=qc_config,"loggerfiledefs"=loggerfiledefs,"deploylogs"=deploylogs)
+baseconfig=list("programs" = programs,"programwbs" = programwbs,"wbnames" = wbnames,"stations" = stations,"processinglogs" = processinglogs,
+                "qc_config" = qc_config,"loggerfiledefs" = loggerfiledefs,"deploylogs" = deploylogs,"export" = export)
 
 #Save all tables
 save(baseconfig,file = "C:/Projects/Shiny_App_Development/Logger_Processing/config/baseconfig.RData")
