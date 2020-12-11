@@ -7,32 +7,8 @@ output$visqcoptions=renderUI({
       uiOutput("visqcdatatypesUI"),
       
       #Place in own UI
-      uiOutput("siteidchoiceUI"),
-      HTML("<CENTER>"),
-      HTML("</CENTER>"),
-      HTML("<H5><B>Depth</B></H5>"),
-      HTML("<CENTER>"),
-      fluidRow(
-        column(
-          width = 5
-        ),
-        column(
-          width = 2,
-          tags$table(
-            tags$tr(
-              tags$td(
-                style="border: 1px solid black; padding: 5px; padding-top: 2px; padding-bottom: 2px;",
-                HTML("<font size=5>"),
-                textOutput("depthout"),
-                HTML("</font>")
-              )
-            )
-          )
-        ),
-        column(
-          width = 5
-        )
-      ),
+      uiOutput("unitidchoiceUI"),
+      uiOutput("depthout"),
       HTML("</CENTER><br><h5><b>QC Flag Type</b></h5><CENTER>"),
       pickerInput(
         inputId = "flagselect",
@@ -87,33 +63,44 @@ datatypedf = reactive({
   )
   VisQCdataoptions=VisQCdata()
   datatypeselect = VisQCdataoptions[[input$visqcloggerchoices]]
+  
   return(datatypeselect)
 })
 
 selectedsn = reactiveVal(NULL)
 
-#Picker input to select serial number/siteid
-output$siteidchoiceUI = renderUI({
+#Picker input to select serial number/unitid
+output$unitidchoiceUI = renderUI({
   
     validate(
-    need(datatypedf(),"Loading...")
+    need(datatypedf(),"Loading..."),
+    need(nrow(fieldnames()) > 0,"Loading...")
   )
+  
+  unitidname = fieldnames()
+  
+  if (!is.na(unitidname$UnitID)){
+    unitidnamechoice = unitidname$UnitID
+  }else{
+    unitidnamechoice = "Unit ID"
+  }
+  
   
   isolate({
   
-  siteidchoices = datatypedf()
-  siteidchoices = unique(siteidchoices$SiteId)
+  unitidchoices = datatypedf()
+  unitidchoices = unique(unitidchoices$UnitID)
   if(is.null(selectedsn())){
-    selection = siteidchoices[1]
+    selection = unitidchoices[1]
   }else{
     selection = selectedsn()
   }
   
   
     pickerInput(
-      inputId = "siteidchoice",
-      label = "Serial Number",
-      choices = siteidchoices,
+      inputId = "unitidchoice",
+      label = unitidnamechoice,
+      choices = unitidchoices,
       selected = selection,
       options = list(
         `actions-box` = TRUE, 
@@ -123,16 +110,44 @@ output$siteidchoiceUI = renderUI({
 })
 
 observe({
-  selectedsn(input$siteidchoice)
+  selectedsn(input$unitidchoice)
 })
 
-#Display Depth for selected SiteID----
-output$depthout = renderText({
+#Display Depth for selected unitID----
+output$depthout = renderUI({
   validate(
     need(datatypedf(),"Loading..."),
-    need(input$siteidchoice,"Loading...")
+    need(input$unitidchoice,"Loading..."),
+    need(nrow(fieldnames()) > 0,"Loading...")
   )
-  siteiddepthdf = datatypedf()
-  siteiddepth = unique(siteiddepthdf$Depth[which(siteiddepthdf$SiteId == input$siteidchoice)])
-  return(siteiddepth)
+  unitidzdf = datatypedf()
+  unitidz = unique(unitidzdf$Z[which(unitidzdf$UnitID == input$unitidchoice)])
+  zname = fieldnames()
+  
+  
+  tagList(
+  HTML(paste0("<H5><B>",zname$Z,"</B></H5>")),
+  HTML("<CENTER>"),
+  fluidRow(
+    column(
+      width = 5
+    ),
+    column(
+      width = 2,
+      tags$table(
+        tags$tr(
+          tags$td(
+            style="border: 1px solid black; padding: 5px; padding-top: 2px; padding-bottom: 2px;",
+            HTML("<font size=5>",unitidz,"</font>"),
+          )
+        )
+      )
+    ),
+    column(
+      width = 5
+    )
+  )
+  
+  )
+  
 })
