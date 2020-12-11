@@ -107,7 +107,6 @@ shinyApp(ui = ui, server = server)
 # -check for naming inconsistencies
 #   -make sure UI objects are named with "UI" at the end
 # -add saved notifications where needed
-# -update Depths table to reflect settings in the export options
 # -add many notes and documentation
-# -rename Depth to Z in processed data
+
 
