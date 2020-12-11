@@ -22,7 +22,7 @@ output$VisQCplot = renderPlotly({
   #datatypedf() from visqcUI code file
   QCdata = datatypedf()
   
-  QCdata = QCdata[which(QCdata$SiteId == input$siteidchoice),]
+  QCdata = QCdata[which(QCdata$UnitID == input$unitidchoice),]
   
   flagfield = sym(flagtype())
   
@@ -111,8 +111,8 @@ observeEvent(
     )
     #datatypedf() from visqcUI code file
     VQCFail = datatypedf()
-    VQCFail[which(VQCFail$SiteId == input$siteidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),flagtype()] = "F"
-    VQCFail[which(VQCFail$SiteId == input$siteidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),paste0(flagtype(),"chng")] = "F"
+    VQCFail[which(VQCFail$UnitID == input$unitidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),flagtype()] = "F"
+    VQCFail[which(VQCFail$UnitID == input$unitidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),paste0(flagtype(),"chng")] = "F"
     VisQCdataupdate(VQCFail)
     deploydatesupdate()
   })
@@ -126,8 +126,8 @@ observeEvent(
     )
     #datatypedf() from visqcUI code file
     VQCSusp = datatypedf()
-    VQCSusp[which(VQCSusp$SiteId == input$siteidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),flagtype()] = "S"
-    VQCSusp[which(VQCSusp$SiteId == input$siteidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),paste0(flagtype(),"chng")] = "S"
+    VQCSusp[which(VQCSusp$UnitID == input$unitidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),flagtype()] = "S"
+    VQCSusp[which(VQCSusp$UnitID == input$unitidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),paste0(flagtype(),"chng")] = "S"
     VisQCdataupdate(VQCSusp)
     deploydatesupdate()
   })
@@ -140,8 +140,8 @@ observeEvent(
       source = "V")
     #datatypedf() from visqcUI code file
     VQCPass = datatypedf()
-    VQCPass[which(VQCPass$SiteId == input$siteidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),flagtype()] = "P"
-    VQCPass[which(VQCPass$SiteId == input$siteidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),paste0(flagtype(),"chng")] = "P"
+    VQCPass[which(VQCPass$UnitID == input$unitidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),flagtype()] = "P"
+    VQCPass[which(VQCPass$UnitID == input$unitidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),paste0(flagtype(),"chng")] = "P"
     VisQCdataupdate(VQCPass)
     deploydatesupdate()
   })
