@@ -197,20 +197,21 @@ output$exportsettingsUI = renderUI({
             ),
             column(
               width = 7,
-              uiOutput("datetimeexportUI")
+              uiOutput("datetimeexportUI"),
+              uiOutput("timesettingsexportUI")
             )
           )
         )
-      ),
-      fluidRow(
-        column(
-          width = 3
-        ),
-        column(
-          width = 9,
-          uiOutput("timesettingsexportUI")
-        )
       )
+      # fluidRow(
+      #   column(
+      #     width = 5
+      #   ),
+      #   column(
+      #     width = 7,
+      #     
+      #   )
+      # )
     ),
     tags$br(),
     tags$div(
@@ -261,6 +262,22 @@ output$namesdeployexportUI = renderUI({
   
   tagList(
     fluidRow(
+      fluidRow(
+        column(
+          width = 4,
+          # tags$br(),
+          # prettyCheckbox(
+          #   inputId = "incunitidexport",
+          #   label = "Unit ID",
+          #   value = incunitidvalue,
+          #   status = "success"
+          # )
+        ),
+        column(
+          width = 8,
+          uiOutput("unitidexportUI")
+        )
+      ),
       column(
         width = 4,
         tags$br(),
@@ -326,22 +343,7 @@ output$namesdeployexportUI = renderUI({
         uiOutput("stationnameexportUI")
       )
     ),
-    fluidRow(
-      column(
-        width = 4,
-        tags$br(),
-        prettyCheckbox(
-          inputId = "incunitidexport",
-          label = "Unit ID",
-          value = incunitidvalue,
-          status = "success"
-        )
-      ),
-      column(
-        width = 8,
-        uiOutput("unitidexportUI")
-      )
-    ),
+
     fluidRow(
       column(
         width = 4,
@@ -429,13 +431,13 @@ output$stationnameexportUI = renderUI({
 #Unit ID Field UI
 output$unitidexportUI = renderUI({
   incunitidexportvalue = exportselect()
-  if (input$incunitidexport == TRUE){
+  # if (input$incunitidexport == TRUE){
     textInput(
       inputId = "unitidexport",
       label = "Unit ID Field Name",
       value = incunitidexportvalue$UnitID
     )
-  }else{}
+  # }else{}
 })
 
 #Deployment Field UI
@@ -517,7 +519,7 @@ output$zexportUI = renderUI({
   if (input$inczexport == TRUE){
     textInput(
       inputId = "zexport",
-      label = "Z Data Name Field Name",
+      label = "Z Data Field Name",
       value = inczexportvalue$Z
     )
   }else{}
@@ -583,7 +585,7 @@ output$datetimeexportUI = renderUI({
   }else{
     fluidRow(
       column(
-        width = 6,
+        width = 3,
         textInput(
           inputId = "datecolexport",
           label = "Date Field Name",
@@ -607,12 +609,12 @@ output$timesettingsexportUI = renderUI({
   tzexportvalue = exportselect()
   
   fluidRow(
+    # column(
+    #   width = 6,
+    #   uiOutput("datetimeformatexportUI")
+    # ),
     column(
-      width = 8,
-      uiOutput("datetimeformatexportUI")
-    ),
-    column(
-      width = 4,
+      width = 10,
       pickerInput(
         inputId = "tzexport",
         label = "Time Zone",
@@ -623,33 +625,33 @@ output$timesettingsexportUI = renderUI({
   )
 })
 
-#Date Time Format UI
-output$datetimeformatexportUI = renderUI({
-  datetimeformatexportvalue = exportselect()
-  
-  fluidRow(
-    column(
-      width = 6,
-      pickerInput(
-        inputId = "dateformatexport",
-        label = "Date Format",
-        #dateformats located in the logfiledefs.R file
-        choices = dateformats,
-        selected = datetimeformatexportvalue$Date_Format
-      )
-    ),
-    column(
-      width = 6,
-      pickerInput(
-        inputId = "timeformatexport",
-        label = "Time Format",
-        #timeformats located in the logfiledefs.R file
-        choices = timeformats,
-        selected = datetimeformatexportvalue$Time_Format
-      )
-    )
-  )
-})
+# #Date Time Format UI
+# output$datetimeformatexportUI = renderUI({
+#   datetimeformatexportvalue = exportselect()
+#   
+#   fluidRow(
+#     column(
+#       width = 6,
+#       pickerInput(
+#         inputId = "dateformatexport",
+#         label = "Date Format",
+#         #dateformats located in the logfiledefs.R file
+#         choices = dateformats,
+#         selected = datetimeformatexportvalue$Date_Format
+#       )
+#     ),
+#     column(
+#       width = 6,
+#       pickerInput(
+#         inputId = "timeformatexport",
+#         label = "Time Format",
+#         #timeformats located in the logfiledefs.R file
+#         choices = timeformats,
+#         selected = datetimeformatexportvalue$Time_Format
+#       )
+#     )
+#   )
+# })
 
 #Select Logger Types in model
 modelnamesselectexport = reactive({
@@ -896,12 +898,12 @@ observeEvent(
         exportfinal$StationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      exportfinal$IncUnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incunitidexport
-      if (input$incunitidexport == TRUE){
+      # exportfinal$IncUnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incunitidexport
+      # if (input$incunitidexport == TRUE){
         exportfinal$UnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$unitidexport
-      }else{
-        exportfinal$UnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
+      # }else{
+        # exportfinal$UnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      # }
       
       exportfinal$IncDeploy[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incdeploymentexport
       if (input$incdeploymentexport == TRUE){
@@ -946,8 +948,8 @@ observeEvent(
         exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timecolexport
       }
       
-      exportfinal$Date_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dateformatexport
-      exportfinal$Time_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timeformatexport
+      # exportfinal$Date_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dateformatexport
+      # exportfinal$Time_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timeformatexport
       exportfinal$TZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$tzexport
     
     
@@ -1044,11 +1046,11 @@ observeEvent(
       stationnamefinal = NA
     }
     
-    if (input$incunitidexport == TRUE){
+    # if (input$incunitidexport == TRUE){
       unitidfinal = input$unitidexport
-    }else{
-      unitidfinal = NA
-    }
+    # }else{
+      # unitidfinal = NA
+    # }
     
     if (input$incdeploymentexport == TRUE){
       deploymentfinal = input$deploymentexport
@@ -1158,11 +1160,10 @@ observeEvent(
                                 "IncMeta" = input$incmeta,"IncRep" = input$increp,"IncConfig" = input$incconfig,"IncSum" = input$incsummary,
                                 "IncProgramWBID" = input$incwbidexport,"ProgramWBID" = wbidfinal,"IncWBName" = input$incwbnameexport,
                                 "WBName" = wbnamefinal,"IncProgramStationID" = input$incstationidexport,"ProgramStationID" = stationidfinal,
-                                "IncStationName" = input$incstationnameexport,"StationName" = stationnamefinal,"IncUnitID" = input$incunitidexport,
+                                "IncStationName" = input$incstationnameexport,"StationName" = stationnamefinal,
                                 "UnitID" = unitidfinal,
                                 "IncDeploy" = input$incdeploymentexport,"Deployment" = deploymentfinal,"DateTimeSep" = input$datetypeexport,
-                                "Date_Time" = datetimecombined,"Date" = dateonly,"Time" = timeonly,"Date_Format" = input$dateformatexport,
-                                "Time_Format" = input$timeformatexport,"TZ" = input$tzexport,"IncZ" = input$inczexport,"Z" = zfinal,"IncLoc" = input$inclocexport,
+                                "Date_Time" = datetimecombined,"Date" = dateonly,"Time" = timeonly,"TZ" = input$tzexport,"IncZ" = input$inczexport,"Z" = zfinal,"IncLoc" = input$inclocexport,
                                 "Lat" = latfinal,"Lon" = lonfinal,"IncUser" = input$incusernameexport,"User" = usernamefinal,"AirBP" = airbpfinal,
                                 "AirTemp" = airtempfinal,
                                 "Chlorophylla" = chlorophyllafinal,"Cond" = condfinal,"Discharge" = dischargefinal,
