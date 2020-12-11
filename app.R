@@ -90,7 +90,7 @@ server <- function(input,output,session) {
     source("functions/summary.R",local = TRUE)$value
     
     #Code for data export
-    source("functions/dataexport.R",local = TRUE)$value
+    source("functions/exportprocessing.R",local = TRUE)$value
 }
 
 # Run the application 
@@ -109,4 +109,5 @@ shinyApp(ui = ui, server = server)
 # -add saved notifications where needed
 # -update Depths table to reflect settings in the export options
 # -add many notes and documentation
+# -rename Depth to Z in processed data
 
