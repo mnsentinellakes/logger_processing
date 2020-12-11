@@ -169,7 +169,7 @@ QCProcess = function(qcinfo,siteid){
 compileQCdata = function(qcinfo,depthstable){
   loggertypes = qcinfo$qcnames
   
-  siteids = depthstable$Serial_Number
+  siteids = depthstable$UnitID
   
   stopprocess = FALSE
   datalist = list()
@@ -185,10 +185,10 @@ compileQCdata = function(qcinfo,depthstable){
       if(length(qcfile)>0){
       readdata = read.csv(qcfile,stringsAsFactors = FALSE)
       
-      datacompile = data.frame("SiteId" = j,
+      datacompile = data.frame("UnitID" = j,
                                "DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
                                "Data" = readdata[,ncol(readdata)],
-                               "Depth" = depthstable$Depth[which(depthstable$Serial_Number == j)],
+                               "Z" = depthstable$Z[which(depthstable$UnitID == j)],
                                "FlagGrossorig" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
                                "FlagSpikeorig" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
                                "FlagRoCorig" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
@@ -211,8 +211,8 @@ compileQCdata = function(qcinfo,depthstable){
         
         sendSweetAlert(
           session = session,
-          title = paste("No file with Serial Number:",j),
-          text = "Ensure the Serial Numbers in the Depths Table match the file names",
+          title = paste("No file with ID:",j),
+          text = "Ensure the IDs in the Depths Table match the file names",
           type = "error"
         )
         stopprocess = TRUE
@@ -411,7 +411,7 @@ observeEvent(
           session = session,
           value = 90,
           status = "danger",
-          title = paste("Delete and Re-enter Serial Numbers")
+          title = paste("Delete and Re-enter Unit IDs")
         )
       }
     }else{
@@ -436,6 +436,7 @@ observeEvent(
 qcloggertypes = reactive({
   qcloggers=VisQCdata()
   qcloggers = names(qcloggers)
+  
   return(qcloggers)
 })
 
