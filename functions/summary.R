@@ -328,13 +328,21 @@ output$summaryloggerinfoUI = renderUI({
   summaryfileenddate = unique(max(summaryinfo$DateTime))
   summarydatastartdate = unique(min(summaryinfo$DateTime[which(summaryinfo$FlagVis == 'P')]))
   summarydataenddate = unique(max(summaryinfo$DateTime[which(summaryinfo$FlagVis == 'P')]))
-  summarydepth = unique(summaryinfo$Depth)
+  summaryz = unique(summaryinfo$Z)
+  
+  summaryznamedata = fieldnames()
+  if (nrow(summaryznamedata) > 0){
+    summaryzname = summaryznamedata$Z
+  }else{
+    summaryzname = "Z"
+  }
+  
   
   tags$table(
     tags$tr(
       tags$td(
         style = tablestyletop,
-        HTML("<font size = 3>Depth</font>")
+        HTML(paste0("<font size = 3>",summaryzname,"</font>"))
       ),
       tags$td(
         style = tablestyletop,
@@ -356,7 +364,7 @@ output$summaryloggerinfoUI = renderUI({
     tags$tr(
       tags$td(
         style = tablestylebottom,
-        HTML(paste("<font size = 4><CENTER>",summarydepth,"</CENTER></font>"))
+        HTML(paste("<font size = 4><CENTER>",summaryz,"</CENTER></font>"))
       ),
       tags$td(
         style = tablestylebottom,
@@ -388,12 +396,19 @@ summarydatatypes = reactive({
 output$summarysnchoicesUI = renderUI({
 
   summarysn = summarydatatypes()
-  summarysn = unique(summarysn$SiteId)
+  summarysn = unique(summarysn$UnitID)
+  summaryunitidname = fieldnames()
+  
+  if (nrow(summaryunitidname) > 0){
+    summaryunitid = summaryunitidname$UnitID
+  }else{
+    summaryunitid = "Unit ID"
+  }
   
   pickerInput(
     inputId = "summarysnchoices",
     choices = summarysn,
-    label = "Serial Number",
+    label = summaryunitid,
     options = list(
       style = "btn-primary")
   )
@@ -401,7 +416,7 @@ output$summarysnchoicesUI = renderUI({
 
 summaryselectdata = reactive({
   summaryselect = summarydatatypes()
-  summaryselect = summaryselect[which(summaryselect$SiteId == input$summarysnchoices),]
+  summaryselect = summaryselect[which(summaryselect$UnitID == input$summarysnchoices),]
   
   return(summaryselect)
 })
