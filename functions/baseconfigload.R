@@ -7,7 +7,6 @@ programs=reactiveVal(baseconfig$programs)
 programwbs=reactiveVal(baseconfig$programwbs)
 #Assign waterbody names data frame to a reactive value
 wbnames=reactiveVal(baseconfig$wbnames)
-
 #Assign stations data frame to a reactive value
 stations=reactiveVal(baseconfig$stations)
 
