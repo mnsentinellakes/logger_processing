@@ -69,7 +69,7 @@ loggerfiledefs$ModelID = generatemodelid
 
 #Define Individual Logger Processing Logs
 
-processinglogs = data.frame("Serial_Number" = as.character(NA),"Depth" = as.numeric(NA),"Processed" = as.Date(as.character(NA)),
+processinglogs = data.frame("UnitID" = as.character(NA),"Z" = as.numeric(NA),"Processed" = as.Date(as.character(NA)),
                             "ModelID" = as.character(NA),"StationID" = as.character(NA),"DeployID" = as.character(NA),
                             "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
 
@@ -116,11 +116,13 @@ qc_config=rbind(qc_config,qc_config_addappid)
 
 #Define Export table
 export = data.frame("ProgramID" = as.character("cd4cba49cd35"),"ModelID" = as.character(generatemodelid)[1],"FileSep" = as.character("Single"),
-                    "IncMeta" = TRUE,"IncRep" = TRUE,"IncConfig" = TRUE,"IncSum" = TRUE,"IncProgramWBID" = TRUE,"ProgramWBID" = "BasinID","IncWBName" = TRUE,
+                    "IncMeta" = TRUE,"IncRep" = TRUE,"IncConfig" = TRUE,"IncSum" = TRUE,"UnitID" = "Serial_Number","IncProgramName" = FALSE,
+                    "ProgramName" = NA,"IncProgramWBID" = TRUE,
+                    "ProgramWBID" = "BasinID","IncWBName" = TRUE,
                     "WBName" = "Lake_Name","IncProgramStationID" = FALSE,"ProgramStationID" = as.character(NA),"IncStationName" = TRUE,
-                    "StationName" = "Station","IncUnitID" = TRUE,"UnitID" = "Serial_Number","IncDeploy" = TRUE,
+                    "StationName" = "Station","IncDeploy" = TRUE,
                     "Deployment" = "Deployment","DateTimeSep" = as.character("Combined"),"Date_Time" = "Date_Time","Date" = as.character(NA),
-                    "Time" = as.character(NA),"Date_Format" = "%Y-%m-%d","Time_Format" = "%H:%M:%S","TZ" = "UTC","IncZ" = TRUE,"Z" = "Depth_m",
+                    "Time" = as.character(NA),"TZ" = "UTC","IncZ" = TRUE,"Z" = "Depth_m",
                     "IncLoc" = TRUE,"Lat" = "Lat","Lon" = "Lon","IncUser" = FALSE,"User" = as.character(NA),"AirBP" = as.character(NA),
                     "AirTemp" = as.character(NA),"Chlorophylla" = as.character(NA),"Cond" = as.character(NA),"Discharge" = as.character(NA),
                     "DO" = as.character(NA),"GageHeight" = as.character(NA),"pH" = as.character(NA),"Turbidity" = as.character(NA),
