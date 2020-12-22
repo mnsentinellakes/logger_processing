@@ -1,11 +1,9 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+#Metadata-----------------------------------------------------------------------
+#Name: Logger Processing and QC App
+#Version: 0.5b
+#Purpose: Process and QC Aquatic Loggers
+#Developed by: Tim Martin
+#Contact: tim.martin@state.mn.us
 
 library(shiny)
 library(shinydashboard)
@@ -117,7 +115,6 @@ shinyApp(ui = ui, server = server)
 
 #Questions
 # -are there instances where a logger model collects multiple metrics, but at different times?
-# -would there be instances where data from individual units will need to be in individual files?
 # -do we need customized file names?
 # -do we need to have individual logger units exported in separate files?
 
