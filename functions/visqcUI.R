@@ -63,7 +63,7 @@ datatypedf = reactive({
   )
   VisQCdataoptions=VisQCdata()
   datatypeselect = VisQCdataoptions[[input$visqcloggerchoices]]
-  
+
   return(datatypeselect)
 })
 
