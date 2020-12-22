@@ -70,6 +70,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   datafieldnames$Units = NA
   for (i in 1:nrow(datafieldnames)){
     datafieldnames[i,3] = qcunits$Units[which(qcunits$Logger_Type == datafieldnames[i,1] & qcunits$QC_Metric == "Gross.Fail.Hi")]
+    print(1)
   }
   datafieldnames$type = datafieldnames$qcfield
   datafieldnames$qcfield = paste0(datafieldnames$qcfield,datafieldnames$Units)
@@ -88,15 +89,12 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   datetimefieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$datafield),perl = TRUE))
   datafieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$qcfield),perl = TRUE))
   datafieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$datafield),perl = TRUE))
-  
-  # testfile = read.csv("C:/Projects/Datasets/Water_Temperature/Demo/For_Tetratech/2250237.csv",stringsAsFactors = FALSE)
-  
+  print(2)
   names(datafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(datafile)),perl = TRUE))
-  
+  print(names(datafile))
   #Rebuild dataset
   
   for (i in 1:nrow(datafieldnames)){
-    # i=1
     
     builddata=data.frame("RowID" = seq(1:nrow(datafile)))
     
@@ -148,8 +146,11 @@ QCProcess = function(qcinfo,siteid){
   
   loggertypes = qcinfo$qcnames
   
+  if (!is.na(qcinfo$startdate) & !is.na(qcinfo$enddate)){
   for (i in loggertypes){
     dir.create(paste0("processing/",i,"/QC"),showWarnings = FALSE)
+    
+    print(qcinfo$startdate)
     
     ContDataQC::ContDataQC(
       fun.myData.Operation = "QCRaw",
@@ -162,6 +163,16 @@ QCProcess = function(qcinfo,siteid){
       fun.CreateReport = FALSE,
       fun.myConfig = "config/configfile.R"
     )
+  }
+  }else{
+    #Incorrect Date Format Error
+    sendSweetAlert(
+      session = session,
+      title = "Incorrect Date Format",
+      text = "Please ensure the date format in the Logger File Definitions match the input logger data",
+      type = "error"
+    )
+    
   }
 }
 
@@ -280,42 +291,60 @@ observeEvent(
         inputname=as.character(gsub(".TXT","",inputname))
         inputname=as.character(gsub(".txt","",inputname))
         
-        file.create("processing",showWarnings = FALSE)
-        
-        progval = progval + progvaltotal
-        
-        updateProgressBar(
-          id = "processprogress",
-          session = session,
-          value = progval,
-          status = "success",
-          title = paste("Formatting",inputname,"for QC")
-        )
-        qcinfo = formatforQC(
-          datafilepath = datapaths[j],
-          siteid = inputname,
-          waterbody = input$procwaterbody,
-          loggermodel = input$procmodel,
-          loggerfields = loggerfiledefs(),
-          qcunits = qc_config()
-        )
-        
-        progval = progval + progvaltotal
-        
-        updateProgressBar(
-          id = "processprogress",
-          session = session,
-          value = progval,
-          status = "success",
-          title = paste("Running automatic QC checks for",inputname)
-        )
-        
-        QCProcess(
-          qcinfo = qcinfo,
-          siteid = inputname
-        )
+        if (inputname %in% depthstableselect$UnitID){
+          
+          file.create("processing",showWarnings = FALSE)
+          
+          progval = progval + progvaltotal
+          
+          updateProgressBar(
+            id = "processprogress",
+            session = session,
+            value = progval,
+            status = "success",
+            title = paste("Formatting",inputname,"for QC")
+          )
+          
+          
+          qcinfo = formatforQC(
+            datafilepath = datapaths[j],
+            siteid = inputname,
+            waterbody = input$procwaterbody,
+            loggermodel = input$procmodel,
+            loggerfields = loggerfiledefs(),
+            qcunits = qc_config()
+          )
+          
+          progval = progval + progvaltotal
+          
+          updateProgressBar(
+            id = "processprogress",
+            session = session,
+            value = progval,
+            status = "success",
+            title = paste("Running automatic QC checks for",inputname)
+          )
+          
+          
+          
+          QCProcess(
+            qcinfo = qcinfo,
+            siteid = inputname
+          )
+          stopqc = FALSE
+        }else{
+          sendSweetAlert(
+            session = session,
+            title = "Missing Logger UnitID",
+            text = paste("Logger",inputname,"has not been included in the Logger Units Table. Ensure that the correct Logger Model has been
+                       selected or enter the UnitID in to the Logger Units Table"),
+            type = "error"
+          )
+          stopqc = TRUE
+        }
       }
       
+      if (stopqc == FALSE){
       updateProgressBar(
         id = "processprogress",
         session = session,
@@ -414,6 +443,7 @@ observeEvent(
           title = paste("Delete and Re-enter Unit IDs")
         )
       }
+    }
     }else{
       sendSweetAlert(
         session,
@@ -422,6 +452,8 @@ observeEvent(
         type = "error"
       )
     }
+    
+    unlink("processing/*",recursive = TRUE,force = TRUE)
     
   })
 
