@@ -24,6 +24,7 @@ library(DT)
 library(mnsentinellakes)
 library(ids)
 library(lubridate)
+library(zip)
 source("functions/dashboard.R")
 options(scipen = 999)
 # function definitions are located in the dashboard.R file
@@ -89,7 +90,10 @@ server <- function(input,output,session) {
     #Code for data summary
     source("functions/summary.R",local = TRUE)$value
     
-    #Code for data export
+    #Code for export UI
+    source("functions/exportUI.R",local = TRUE)$value
+    
+    #Code for export processing
     source("functions/exportprocessing.R",local = TRUE)$value
 }
 
@@ -104,9 +108,16 @@ shinyApp(ui = ui, server = server)
 
 #Notes
 
+# -need to figure out how to properly configure ContDataQC, re: Air vs. Water
 # -check for naming inconsistencies
 #   -make sure UI objects are named with "UI" at the end
 # -add saved notifications where needed
 # -add many notes and documentation
+# -add Model Name and waterbody type to export options
 
+#Questions
+# -are there instances where a logger model collects multiple metrics, but at different times?
+# -would there be instances where data from individual units will need to be in individual files?
+# -do we need customized file names?
+# -do we need to have individual logger units exported in separate files?
 
