@@ -29,7 +29,7 @@ output$exportUI = renderUI({
         box(
           title = "Data Preview",
           collapsible = TRUE,
-          collapsed = TRUE,
+          collapsed = FALSE,
           width = NULL,
           status = "success",
           DTOutput("finaltable")
@@ -69,9 +69,13 @@ output$exportviewUI = renderUI({
 output$finaltable = renderDT(
   options = list(
     lengthChange = FALSE,
-    searching = FALSE
+    searching = FALSE,
+    pageLength = 5
+    # scrollY = "250px",
+    # paging = FALSE
   ),
   rownames = FALSE,
+  
   extensions = 'Responsive',
   {
     if (!is.null(finaldata())){
