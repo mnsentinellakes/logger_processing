@@ -1,5 +1,35 @@
 selectexportdata = reactiveVal()
 
+#Update the deployment table dates
+deploydatesupdate = function(){
+  #datatypedf() from visqcUI code file
+  deployqcdata = datatypedf()
+  print(deployqcdata)
+  deployupdate = deploylogs()
+  print(deployupdate)
+  
+  minrecorddt = unique(as.character(min(deployqcdata$DateTime)))
+  
+  print(paste(1,minrecorddt))
+  maxrecorddt = unique(as.character(max(deployqcdata$DateTime)))
+  print(paste(2,maxrecorddt))
+  minvaliddt = unique(as.character(min(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])))
+  print(paste(3,minvaliddt))
+  maxvaliddt = unique(as.character(max(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])))
+  print(paste(4,maxvaliddt))
+  
+  
+  deployupdate$StartDateTimeRecord[which(deployupdate$DeployID == deployid())] = minrecorddt
+  deployupdate$EndDateTimeRecord[which(deployupdate$DeployID == deployid())] = maxrecorddt
+  deployupdate$StartDateTimeValid[which(deployupdate$DeployID == deployid())] = minvaliddt
+  deployupdate$EndDateTimeValid[which(deployupdate$DeployID == deployid())] = maxvaliddt
+  
+  deploylogs(deployupdate)
+  
+  updatebaseconfig()
+}
+
+
 #Select the relevant row from the export table
 observeEvent(
   input$exportprocessbttn,
@@ -22,6 +52,7 @@ observeEvent(
       need(selectexportdata(),"Loading...")
     )
     
+    deploydatesupdate()
     #Export Data Settings
     exportsettings = selectexportdata()
     #Program Names
@@ -297,6 +328,8 @@ observeEvent(
     }
 })
 
+
+
 #Configure Download File
 output$dlddata = downloadHandler(
   filename = function() {
@@ -309,10 +342,10 @@ output$dlddata = downloadHandler(
   content = function(fname){
     exportdldsettings = selectexportdata()
     #Delete Temp folder
-    unlink(paste0(getwd(),"/Temp"),recursive = FALSE)
+    unlink(paste0(getwd(),"/temp"),recursive = FALSE)
     
     #Create Temp folder
-    dir.create(paste0(getwd(),"/Temp"))
+    dir.create(paste0(getwd(),"/temp"))
     
     #Get Waterbody Name
     wbnamedld = wbnames()
@@ -324,7 +357,7 @@ output$dlddata = downloadHandler(
       dldname = paste0(dldname,"_",qcloggertypes(),collapse = "_")
       dldname = gsub("\\s+","_",gsub("[[:punct:]]","",dldname))
       dldname = paste0(dldname,".csv")
-      dldpath = paste0("Temp/",dldname)
+      dldpath = paste0("temp/",dldname)
       
       #Create the csv and zip it
       write.csv(finaldata(),dldpath,row.names = FALSE)
@@ -335,7 +368,6 @@ output$dlddata = downloadHandler(
         recurse = FALSE,
         mode = "cherry-pick"
       )
-      
     }else{
       
       finaldataout = finaldata()
@@ -349,7 +381,7 @@ output$dlddata = downloadHandler(
         dldname = paste0(dldname,collapse = "_")
         dldname = gsub("\\s+","_",gsub("[[:punct:]]","",dldname))
         dldname1 = paste0(dldname,"_",i,".csv")
-        dldpath = paste0("Temp/",dldname1)
+        dldpath = paste0("temp/",dldname1)
         
         #Write csv
         write.csv(selectfinaldata,dldpath,row.names = FALSE)
@@ -364,6 +396,44 @@ output$dlddata = downloadHandler(
         mode = "cherry-pick"
       )
     }
+    #Add Config File
+    if (exportdldsettings$IncConfig == TRUE){
+      zip_append(
+        zipfile = fname,
+        files = "config/baseconfig.RData",
+        include_directories = FALSE,
+        recurse = FALSE,
+        mode = "cherry-pick"
+      )
+    }
+    
+    if (exportdldsettings$IncMeta == TRUE){
+      buildmeta(
+        programid = input$procprogram,
+        appid = input$procwaterbody,
+        stationid = input$procstationname,
+        deployid = deployid(),
+        modelid = input$procmodel,
+        programs = programs(),
+        programwbs = programwbs(),
+        wbnames = wbnames(),
+        stations = stations(),
+        logfiledefs = loggerfiledefs(),
+        deploylogs = deploylogs(),
+        qcconfig = qcconfig(),
+        export = export()
+      )
+      
+      zip_append(
+        zipfile = fname,
+        files = "temp/metadata.csv",
+        include_directories = FALSE,
+        recurse = FALSE,
+        mode = "cherry-pick"
+      )
+      
+    }
+    
   },
   contentType = "application/zip"
 )
