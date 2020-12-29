@@ -280,23 +280,26 @@ observeEvent(
         title = "Start Processing"
       )
       
-      
+      #Progress bar calculation for updating while looping through input csvs
       progvaltotal = 75 / (2 * length(datapaths))
       progval = 5
       #Iterates through the uploaded files, reformats them and runs QC
       for (j in 1:length(datapaths)){
         
+        #Format input csv name
         inputname=as.character(filetable$name[j])
         inputname=as.character(gsub(".csv","",inputname))
         inputname=as.character(gsub(".TXT","",inputname))
         inputname=as.character(gsub(".txt","",inputname))
         
+        #Continue if input name is in the depthstable
         if (inputname %in% depthstableselect$UnitID){
           
+          #Create processing folder
           file.create("processing",showWarnings = FALSE)
           
+          #Update Progress Bar
           progval = progval + progvaltotal
-          
           updateProgressBar(
             id = "processprogress",
             session = session,
@@ -305,7 +308,7 @@ observeEvent(
             title = paste("Formatting",inputname,"for QC")
           )
           
-          
+          #Run formatforQC
           qcinfo = formatforQC(
             datafilepath = datapaths[j],
             siteid = inputname,
@@ -315,8 +318,8 @@ observeEvent(
             qcunits = qc_config()
           )
           
+          #Update Progress Bar
           progval = progval + progvaltotal
-          
           updateProgressBar(
             id = "processprogress",
             session = session,
@@ -325,13 +328,14 @@ observeEvent(
             title = paste("Running automatic QC checks for",inputname)
           )
           
-          
-          
+          #Run QCProcess
           QCProcess(
             qcinfo = qcinfo,
             siteid = inputname
           )
           stopqc = FALSE
+          
+        #If the input csv name is not in the depthstable, send an alert and stop the process
         }else{
           sendSweetAlert(
             session = session,
@@ -344,106 +348,114 @@ observeEvent(
         }
       }
       
+      #If stopqc is not triggered, continue with process
       if (stopqc == FALSE){
-      updateProgressBar(
-        id = "processprogress",
-        session = session,
-        value = 85,
-        status = "success",
-        title = paste("Compiling and formatting QCed data for",inputname)
-      )
-      
-      compiledata = compileQCdata(
-        qcinfo = qcinfo,
-        depthstable = depthstableselect
-      )
-      
-      if(compiledata[[2]] == FALSE){
-        
-        compiledata = compiledata[[1]]
-        
-        VisQCdata(compiledata)
-        
         updateProgressBar(
           id = "processprogress",
           session = session,
-          value = 90,
+          value = 85,
           status = "success",
-          title = paste("Saving Metadata")
+          title = paste("Compiling and formatting QCed data for",inputname)
         )
         
-        ##Update tables
-        #Load tables
-        updatedates = processinglogs()
-        deployadd = deploylogs()
-        qctable = qc_config()
-        stationupdate = stations()
+        #Run compileQCdata
+        compiledata = compileQCdata(
+          qcinfo = qcinfo,
+          depthstable = depthstableselect
+        )
         
-        #Update the depths table processed date
         
-        if (turnoffprocessupdate == FALSE){
-          updatedates$Processed[which(updatedates$StationID == input$procstationname &
-                                        updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
-          processinglogs(updatedates)
-        }
-        #Update deploy table
-        deployidcreate = random_id(n = 1,bytes = 16)
-        deployid(deployidcreate)
-        
-        deployaddrows = NULL
-        for (k in names(compiledata)){
-          selectunit = unique(qctable$Units[which(qctable$AppID == input$procwaterbody & qctable$Logger_Type == k)])
-          selectunit = selectunit[!is.na(selectunit)]
+        if(compiledata[[2]] == FALSE){
           
+          compiledata = compiledata[[1]]
           
-          deployaddrow = data.frame(
-            "DeployID" = deployidcreate,
-            "Logger_Type" = k,
-            "Lat" = input$lat,
-            "Lon" = input$lon,
-            "StartDateTimeRecord" = as.character(NA),
-            "EndDateTimeRecord" = as.character(NA),
-            "StartDateTimeValid" = as.character(NA),
-            "EndDateTimeValid" = as.character(NA),
-            "Units" = selectunit,
-            "Logger_Count" = length(datapaths),
-            "Deployment_Count" = input$deploynum,
-            "ProcessedDate" = as.character(Sys.Date()),
-            "Processedby" = input$username,
-            stringsAsFactors = FALSE
+          VisQCdata(compiledata)
+          
+          depthsdata = compiledata[[1]]
+          
+          updateProgressBar(
+            id = "processprogress",
+            session = session,
+            value = 90,
+            status = "success",
+            title = paste("Saving Metadata")
           )
-
-          deployaddrows = rbind(deployaddrows,deployaddrow)
+          
+          ##Update tables
+          #Load tables
+          updatedates = processinglogs()
+          deployadd = deploylogs()
+          qctable = qc_config()
+          stationupdate = stations()
+          
+          #Update the depths table processed date
+          
+          if (turnoffprocessupdate == FALSE){
+            updatedates$Processed[which(updatedates$StationID == input$procstationname &
+                                          updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
+            processinglogs(updatedates)
+          }
+          #Update deploy table
+          deployidcreate = random_id(n = 1,bytes = 16)
+          deployid(deployidcreate)
+          
+          deployaddrows = NULL
+          for (k in names(compiledata)){
+            selectunit = unique(qctable$Units[which(qctable$AppID == input$procwaterbody & qctable$Logger_Type == k)])
+            selectunit = selectunit[!is.na(selectunit)]
+            
+            
+            # print(paste(sort(unique(compiledata$Z)),collapse = ","))
+            
+            deployaddrow = data.frame(
+              "DeployID" = deployidcreate,
+              "Logger_Type" = k,
+              "Lat" = input$lat,
+              "Lon" = input$lon,
+              "StartDateTimeRecord" = as.character(NA),
+              "EndDateTimeRecord" = as.character(NA),
+              "StartDateTimeValid" = as.character(NA),
+              "EndDateTimeValid" = as.character(NA),
+              "Units" = selectunit,
+              "Z" = paste(sort(unique(depthsdata$Z)),collapse = ","),
+              "Logger_Count" = length(datapaths),
+              "Deployment_Count" = input$deploynum,
+              "ProcessedDate" = as.character(Sys.Date()),
+              "Processedby" = input$username,
+              stringsAsFactors = FALSE
+            )
+            
+            deployaddrows = rbind(deployaddrows,deployaddrow)
+          }
+          deployadd = rbind(deployadd,deployaddrows)
+          
+          deploylogs(deployadd)
+          
+          #Update stations table
+          stationupdate$Lat[which(stationupdate$StationID == input$procstationname)] = input$lat
+          stationupdate$Lon[which(stationupdate$StationID == input$procstationname)] = input$lon
+          
+          stations(stationupdate)
+          
+          updatebaseconfig()
+          
+          updateProgressBar(
+            id = "processprogress",
+            session = session,
+            value = 100,
+            status = "success",
+            title = paste("Processing and QC complete")
+          )
+        }else{
+          updateProgressBar(
+            id = "processprogress",
+            session = session,
+            value = 90,
+            status = "danger",
+            title = paste("Delete and Re-enter Unit IDs")
+          )
         }
-        deployadd = rbind(deployadd,deployaddrows)
-
-        deploylogs(deployadd)
-        
-        #Update stations table
-        stationupdate$Lat[which(stationupdate$StationID == input$procstationname)] = input$lat
-        stationupdate$Lon[which(stationupdate$StationID == input$procstationname)] = input$lon
-        
-        stations(stationupdate)
-        
-        updatebaseconfig()
-        
-        updateProgressBar(
-          id = "processprogress",
-          session = session,
-          value = 100,
-          status = "success",
-          title = paste("Processing and QC complete")
-        )
-      }else{
-        updateProgressBar(
-          id = "processprogress",
-          session = session,
-          value = 90,
-          status = "danger",
-          title = paste("Delete and Re-enter Unit IDs")
-        )
       }
-    }
     }else{
       sendSweetAlert(
         session,
