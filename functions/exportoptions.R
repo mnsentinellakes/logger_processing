@@ -689,7 +689,12 @@ modelnamesselectexport = reactive({
   modelexport = modelexport[,8:18]
   
   modelexportnona = modelexport %>% select_if(function(x){all(!is.na(x))})
+  
+  print(modelexport[,1])
+  
   loggermodeltypes = colnames(modelexportnona)
+  
+  # print(loggermodeltypes)
   return(loggermodeltypes)
 })
 
@@ -740,7 +745,7 @@ storedexportnames = reactive({
   }
   
   if ("DO" %in% modelnamesselectexport()){
-    print("DO")
+    
     if (nrow(exportnames) > 0){
       exportnameslist = c(exportnameslist,"DO" = exportnames$DO)
     }else{
@@ -788,7 +793,7 @@ storedexportnames = reactive({
     }
   }
   
-  print(exportnameslist)
+  
   return(exportnameslist)
 })
 
@@ -1202,7 +1207,6 @@ observeEvent(
                                 "Chlorophylla" = chlorophyllafinal,"Cond" = condfinal,"Discharge" = dischargefinal,
                                 "DO" = dofinal,"GageHeight" = gageheightfinal,"pH" = phfinal,"Turbidity" = turbidityfinal,
                                 "WaterP" = waterpfinal,"WaterTemp" = watertempfinal,stringsAsFactors = FALSE)
-    print(exportfinalrow)
     
     exportfinal = rbind(exportfinal,exportfinalrow)
   }
