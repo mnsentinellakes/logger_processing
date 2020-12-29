@@ -81,26 +81,6 @@ VisQCdataupdate = function(updatedata){
   VisQCdata(VisQCdataselect)
 }
 
-#Update the deployment table dates
-deploydatesupdate = function(){
-  #datatypedf() from visqcUI code file
-  deployqcdata = datatypedf()
-  deployupdate = deploylogs()
-  
-  minrecorddt = unique(as.character(min(deployqcdata$DateTime)))
-  maxrecorddt = unique(as.character(max(deployqcdata$DateTime)))
-  minvaliddt = unique(as.character(min(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])))
-  maxvaliddt = unique(as.character(max(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])))
-  
-  deployupdate$StartDateTimeRecord[which(deployupdate$DeployID == deployid())] = minrecorddt
-  deployupdate$EndDateTimeRecord[which(deployupdate$DeployID == deployid())] = maxrecorddt
-  deployupdate$StartDateTimeValid[which(deployupdate$DeployID == deployid())] = minvaliddt
-  deployupdate$EndDateTimeValid[which(deployupdate$DeployID == deployid())] = maxvaliddt
-  
-  deploylogs(deployupdate)
-  
-  updatebaseconfig()
-}
 
 #FlagV=Fail for selected data-----
 observeEvent(
@@ -114,7 +94,7 @@ observeEvent(
     VQCFail[which(VQCFail$UnitID == input$unitidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),flagtype()] = "F"
     VQCFail[which(VQCFail$UnitID == input$unitidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),paste0(flagtype(),"chng")] = "F"
     VisQCdataupdate(VQCFail)
-    deploydatesupdate()
+    
   })
 
 #FlagV=Suspect for selected data------
@@ -129,7 +109,7 @@ observeEvent(
     VQCSusp[which(VQCSusp$UnitID == input$unitidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),flagtype()] = "S"
     VQCSusp[which(VQCSusp$UnitID == input$unitidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),paste0(flagtype(),"chng")] = "S"
     VisQCdataupdate(VQCSusp)
-    deploydatesupdate()
+    
   })
 
 #FlagV=Pass for selected data-----
@@ -143,5 +123,5 @@ observeEvent(
     VQCPass[which(VQCPass$UnitID == input$unitidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),flagtype()] = "P"
     VQCPass[which(VQCPass$UnitID == input$unitidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),paste0(flagtype(),"chng")] = "P"
     VisQCdataupdate(VQCPass)
-    deploydatesupdate()
+    
   })
