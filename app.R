@@ -93,6 +93,9 @@ server <- function(input,output,session) {
     
     #Code for export processing
     source("functions/exportprocessing.R",local = TRUE)$value
+    
+    #Code for compiling metadata
+    source("functions/metadata.R",local = TRUE)$value
 }
 
 # Run the application 
@@ -109,7 +112,8 @@ shinyApp(ui = ui, server = server)
 # -need to figure out how to properly configure ContDataQC, re: Air vs. Water
 # -check for naming inconsistencies
 #   -make sure UI objects are named with "UI" at the end
-# -add saved notifications where needed
+# -add saved notifications where needed to indicate something worked
+# -clean up formatting
 # -add many notes and documentation
 # -add Model Name and waterbody type to export options
 
