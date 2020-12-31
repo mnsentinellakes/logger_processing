@@ -455,13 +455,26 @@ output$dlddata = downloadHandler(
         export = export()
       )
       
+      getqcsettings(
+        appid = input$procwaterbody,
+        deployid = deployid(),
+        deploylogs = deploylogs(),
+        qcconfig = qc_config(),
+        programwbs = programwbs(),
+        wbnames = wbnames()
+      )
+  
       zip_append(
         zipfile = fname,
-        files = "temp/metadata.csv",
+        files = c("temp/metadata.csv","temp/qcsettings.csv"),
         include_directories = FALSE,
         recurse = FALSE,
         mode = "cherry-pick"
       )
+      
+
+      
+      
       
     }
     
