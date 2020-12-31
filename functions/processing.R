@@ -130,8 +130,16 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     
     foldername = paste0("processing/",datafieldnames$type[i])
     
+    #Determine if file should be named with Air or Water
+    if (datafieldnames$type[i] %in% c("AirTemp","AirBP")){
+      qctypename = "Air"
+    }else{
+      qctypename = "Water"
+    }
+    
     dir.create(foldername,showWarnings = FALSE)
-    write.csv(builddata,paste0(foldername,"/",siteid,"_Water_",startdate,"_",enddate,".csv"),row.names = FALSE,fileEncoding = "ISO-8859-1")
+    write.csv(builddata,paste0(foldername,"/",siteid,"_",qctypename,"_",startdate,"_",enddate,".csv"),row.names = FALSE,
+              fileEncoding = "ISO-8859-1")
   }
   
   #Compile QC metadata
@@ -147,23 +155,28 @@ QCProcess = function(qcinfo,siteid){
   loggertypes = qcinfo$qcnames
   
   if (!is.na(qcinfo$startdate) & !is.na(qcinfo$enddate)){
-  for (i in loggertypes){
-    dir.create(paste0("processing/",i,"/QC"),showWarnings = FALSE)
-    
-    print(qcinfo$startdate)
-    
-    ContDataQC::ContDataQC(
-      fun.myData.Operation = "QCRaw",
-      fun.myDir.import = paste0("processing/",i),
-      fun.myDir.export = paste0("processing/",i,"/QC"),
-      fun.myData.Type = "Water",
-      fun.myData.DateRange.Start = qcinfo$startdate,
-      fun.myData.DateRange.End = qcinfo$enddate,
-      fun.myData.SiteID = siteid,
-      fun.CreateReport = FALSE,
-      fun.myConfig = "config/configfile.R"
-    )
-  }
+    for (i in loggertypes){
+      dir.create(paste0("processing/",i,"/QC"),showWarnings = FALSE)
+      
+      #Determine if ContDataQC should look for Air or Water in file name
+      if (i %in% c("AirTemp","AirBP")){
+        contdataqctype = "Air"
+      }else{
+        contdataqctype = "Water"
+      }
+      
+      ContDataQC::ContDataQC(
+        fun.myData.Operation = "QCRaw",
+        fun.myDir.import = paste0("processing/",i),
+        fun.myDir.export = paste0("processing/",i,"/QC"),
+        fun.myData.Type = contdataqctype,
+        fun.myData.DateRange.Start = qcinfo$startdate,
+        fun.myData.DateRange.End = qcinfo$enddate,
+        fun.myData.SiteID = siteid,
+        fun.CreateReport = FALSE,
+        fun.myConfig = "config/configfile.R"
+      )
+    }
   }else{
     #Incorrect Date Format Error
     sendSweetAlert(
@@ -189,12 +202,12 @@ compileQCdata = function(qcinfo,depthstable){
     for (j in siteids){
       
       if (stopprocess == FALSE){
-      qcpath = paste0("processing/",i,"/QC/")
-      qcfiles = list.files(qcpath,full.names = TRUE)
-      qcfile = qcfiles[which(grepl(j,qcfiles))]
-      
-      if(length(qcfile)>0){
-      readdata = read.csv(qcfile,stringsAsFactors = FALSE)
+        qcpath = paste0("processing/",i,"/QC/")
+        qcfiles = list.files(qcpath,full.names = TRUE)
+        qcfile = qcfiles[which(grepl(j,qcfiles))]
+        
+        if(length(qcfile)>0){
+          readdata = read.csv(qcfile,stringsAsFactors = FALSE)
       
       datacompile = data.frame("UnitID" = j,
                                "DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
