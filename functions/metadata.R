@@ -98,8 +98,4 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
   )
   
   write.csv(metadataframe,"temp/metadata.csv",row.names = FALSE)
-  
-  
 }
-
-
