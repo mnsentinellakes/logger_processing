@@ -62,6 +62,8 @@ observeEvent(
     wbnamessettings = wbnames()
     #Stations
     stationssettings = stations()
+    #LoggerFiles
+    loggerfilesettings = loggerfiledefs()
     #Export Data
     processdata = VisQCdata()
     
@@ -93,11 +95,17 @@ observeEvent(
       startfields[,2] = NULL
     }
     
-    #Add Program Name
+    #Add Model Name
+    if (exportsettings$IncModelName == TRUE){
+      #input$procmodel sourced from processingUI.R
+      modname = loggerfilesettings$Logger_Model[which(loggerfilesettings$ModelID == input$procmodel)]
+      startfields$modname = modname
+      names(startfields)[ncol(startfields)] = exportsettings$ModelName
+    }
     
+    #Add Program Name
     if (exportsettings$IncProgramName == TRUE){
       #input$procprogram sourced from processingUI.R
-      
       progname = programsettings$Program_Name[which(programsettings$ProgramID == input$procprogram)]
       startfields$progname = progname
       names(startfields)[ncol(startfields)] = exportsettings$ProgramName
@@ -115,6 +123,12 @@ observeEvent(
       #input$procwaterbody sourced from processingUI.R
       startfields$wbname = wbnamessettings$Waterbody_Name[which(wbnamessettings$AppID == input$procwaterbody)]
       names(startfields)[ncol(startfields)] = exportsettings$WBName
+    }
+    
+    if (exportsettings$IncWBType == TRUE){
+      #input$procwaterbody sourced from processingUI.R
+      startfields$wbtype = wbnamessettings$programwbssettings$WB_Type[which(programwbssettings$AppID == input$procwaterbody)]
+      names(startfields)[ncol(startfields)] = exportsettings$WBType
     }
     
     #Add Station ID
@@ -145,7 +159,6 @@ observeEvent(
       startfields$user = input$username
       names(startfields)[ncol(startfields)] = exportsettings$User
     }
-    
     
     if (exportsettings$FileSep == "Single"){
       
@@ -188,6 +201,11 @@ observeEvent(
       #Create vector for sorting fields in the table
       #Start with UnitID (required)
       fieldorder = c(exportsettings$UnitID)
+      #Model Name
+      if (exportsettings$IncModelName == TRUE){
+        fieldorder = c(fieldorder,exportsettings$ModelName)
+      }
+      
       #Program Name
       if (exportsettings$IncProgramName == TRUE){
         fieldorder = c(fieldorder,exportsettings$ProgramName)
@@ -199,6 +217,10 @@ observeEvent(
       #Waterbody Name
       if (exportsettings$IncWBName == TRUE){
         fieldorder = c(fieldorder,exportsettings$WBName)
+      }
+      #Waterbody Type
+      if (exportsettings$IncWBType == TRUE){
+        fieldorder = c(fieldorder,exportsettings$WBType)
       }
       #Station ID
       if (exportsettings$IncProgramStationID == TRUE){
@@ -276,6 +298,11 @@ observeEvent(
         combinedata = cbind(paradata,qcdata)
         
         fieldorder = c(exportsettings$UnitID)
+        
+        #Model Name
+        if (exportsettings$IncModelName == TRUE){
+          fieldorder = c(fieldorder,exportsettings$ModelName)
+        }
         #Program Name
         if (exportsettings$IncProgramName == TRUE){
           fieldorder = c(fieldorder,exportsettings$ProgramName)
@@ -287,6 +314,10 @@ observeEvent(
         #Waterbody Name
         if (exportsettings$IncWBName == TRUE){
           fieldorder = c(fieldorder,exportsettings$WBName)
+        }
+        #Waterbody Type
+        if (exportsettings$IncWBType == TRUE){
+          fieldorder = c(fieldorder,exportsettings$WBType)
         }
         #Station ID
         if (exportsettings$IncProgramStationID == TRUE){
