@@ -115,7 +115,6 @@ shinyApp(ui = ui, server = server)
 # -add saved notifications where needed to indicate something worked
 # -clean up formatting
 # -add many notes and documentation
-# -add Model Name and waterbody type to export options
 
 #Questions
 # -are there instances where a logger model collects multiple metrics, but at different times?
