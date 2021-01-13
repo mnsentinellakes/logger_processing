@@ -1,4 +1,4 @@
-turnoffprocessupdate = TRUE
+turnoffprocessupdate = FALSE
 
 # procwbs = reactive({
 #   wbs = programwbs()
