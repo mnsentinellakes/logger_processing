@@ -1,14 +1,13 @@
 #Vis QC Options----
 
-output$visqcoptions=renderUI({
-  
+output$visqcoptionsUI=renderUI({
   isolate(
     tagList(
       uiOutput("visqcdatatypesUI"),
       
       #Place in own UI
       uiOutput("unitidchoiceUI"),
-      uiOutput("depthout"),
+      uiOutput("depthoutUI"),
       HTML("</CENTER><br><h5><b>QC Flag Type</b></h5><CENTER>"),
       pickerInput(
         inputId = "flagselect",
@@ -18,7 +17,7 @@ output$visqcoptions=renderUI({
       tags$br(),
       HTML("</CENTER><h5><b>Manual Visual QC Flags</b></h5><CENTER>"),
       actionBttn(
-        inputId = "fail",
+        inputId = "failbttn",
         label = "Fail",
         color = "danger",
         style="fill",
@@ -26,7 +25,7 @@ output$visqcoptions=renderUI({
       ),
       tags$br(),
       actionBttn(
-        inputId = "susp",
+        inputId = "suspbttn",
         label = "Suspect",
         color = "warning",
         style = "fill",
@@ -34,7 +33,7 @@ output$visqcoptions=renderUI({
       ),
       tags$br(),
       actionBttn(
-        inputId = "pass",
+        inputId = "passbttn",
         label = "Pass",
         color = "primary",
         style = "fill",
@@ -48,11 +47,11 @@ output$visqcoptions=renderUI({
 #Picker input to select data logger type
 output$visqcdatatypesUI = renderUI({
   isolate(
-  pickerInput(
-    inputId = "visqcloggerchoices",
-    choices = qcloggertypes(),
-    label = "Data Type"
-  )
+    pickerInput(
+      inputId = "visqcloggerchoices",
+      choices = qcloggertypes(),
+      label = "Data Type"
+    )
   )
 })
 
@@ -61,9 +60,9 @@ datatypedf = reactive({
   validate(
     need(input$visqcloggerchoices,"Loading...")
   )
-  VisQCdataoptions=VisQCdata()
+  VisQCdataoptions = VisQCdata()
   datatypeselect = VisQCdataoptions[[input$visqcloggerchoices]]
-
+  
   return(datatypeselect)
 })
 
@@ -71,32 +70,27 @@ selectedsn = reactiveVal(NULL)
 
 #Picker input to select serial number/unitid
 output$unitidchoiceUI = renderUI({
-  
-    validate(
+  validate(
     need(datatypedf(),"Loading..."),
     need(nrow(fieldnames()) > 0,"Loading...")
   )
   
   unitidname = fieldnames()
-  
   if (!is.na(unitidname$UnitID)){
     unitidnamechoice = unitidname$UnitID
   }else{
     unitidnamechoice = "Unit ID"
   }
   
-  
   isolate({
-  
-  unitidchoices = datatypedf()
-  unitidchoices = unique(unitidchoices$UnitID)
-  if(is.null(selectedsn())){
-    selection = unitidchoices[1]
-  }else{
-    selection = selectedsn()
-  }
-  
-  
+    unitidchoices = datatypedf()
+    unitidchoices = unique(unitidchoices$UnitID)
+    if(is.null(selectedsn())){
+      selection = unitidchoices[1]
+    }else{
+      selection = selectedsn()
+    }
+    
     pickerInput(
       inputId = "unitidchoice",
       label = unitidnamechoice,
@@ -109,12 +103,13 @@ output$unitidchoiceUI = renderUI({
   })
 })
 
+#Update selectedsn
 observe({
   selectedsn(input$unitidchoice)
 })
 
 #Display Depth for selected unitID----
-output$depthout = renderUI({
+output$depthoutUI = renderUI({
   validate(
     need(datatypedf(),"Loading..."),
     need(input$unitidchoice,"Loading..."),
@@ -124,30 +119,27 @@ output$depthout = renderUI({
   unitidz = unique(unitidzdf$Z[which(unitidzdf$UnitID == input$unitidchoice)])
   zname = fieldnames()
   
-  
   tagList(
-  HTML(paste0("<H5><B>",zname$Z,"</B></H5>")),
-  HTML("<CENTER>"),
-  fluidRow(
-    column(
-      width = 5
-    ),
-    column(
-      width = 2,
-      tags$table(
-        tags$tr(
-          tags$td(
-            style="border: 1px solid black; padding: 5px; padding-top: 2px; padding-bottom: 2px;",
-            HTML("<font size=5>",unitidz,"</font>"),
+    HTML(paste0("<H5><B>",zname$Z,"</B></H5>")),
+    HTML("<CENTER>"),
+    fluidRow(
+      column(
+        width = 5
+      ),
+      column(
+        width = 2,
+        tags$table(
+          tags$tr(
+            tags$td(
+              style = "border: 1px solid black; padding: 5px; padding-top: 2px; padding-bottom: 2px;",
+              HTML("<font size=5>",unitidz,"</font>")
+            )
           )
         )
+      ),
+      column(
+        width = 5
       )
-    ),
-    column(
-      width = 5
     )
   )
-  
-  )
-  
 })

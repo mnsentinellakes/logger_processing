@@ -16,7 +16,7 @@ output$aedoptionsUI = renderUI({
         ),
         column(
           width = 9,
-          uiOutput("aedmodelnames")
+          uiOutput("aedmodelnamesUI")
         )
       )
     ),
@@ -26,7 +26,7 @@ output$aedoptionsUI = renderUI({
 })
 
 #Add Edit Delete Model Names
-output$aedmodelnames = renderUI({
+output$aedmodelnamesUI = renderUI({
   if (input$aedmodels == "Add"){
     fluidRow(
       column(
@@ -46,7 +46,6 @@ output$aedmodelnames = renderUI({
           inputId = "lfeditloggermodelchoices",
           label = NULL,
           choices = loggermodelsedit()
-          
         )
       ),
       column(
@@ -79,7 +78,7 @@ output$lfeditloggermodelnameUI = renderUI({
 #Add Edit Delete 
 output$aedoptionschoiceUI = renderUI({
   
-  loggerpresets = loggerfiledefs()
+  # loggerpresets = loggerfiledefs()
   
   if (input$aedmodels == "Add"){
     tagList(
@@ -98,18 +97,18 @@ output$aedoptionschoiceUI = renderUI({
     )
   }else if (input$aedmodels == "Edit"){
     tagList(
-    uiOutput("lfeditmodeltableconfigUI"),
-    tags$br(),
-    uiOutput("lfeditmodeltimeconfigUI"),
-    tags$br(),
-    uiOutput("lfeditmodeldataconfigUI"),
-    tags$br(),
-    actionBttn(
-      inputId = "editloggerfieldsbttn",
-      label = "Edit Logger Model Settings",
-      style = "fill",
-      color = "warning"
-    )
+      uiOutput("lfeditmodeltableconfigUI"),
+      tags$br(),
+      uiOutput("lfeditmodeltimeconfigUI"),
+      tags$br(),
+      uiOutput("lfeditmodeldataconfigUI"),
+      tags$br(),
+      actionBttn(
+        inputId = "editloggerfieldsbttn",
+        label = "Edit Logger Model Settings",
+        style = "fill",
+        color = "warning"
+      )
     )
   }else if (input$aedmodels == "Delete"){
     fluidRow(
@@ -246,32 +245,12 @@ output$lfadddatetimeUI = renderUI({
         )
       )
     )
-    
   }
-})
-
-#Date Time UI
-output$lfaddtimesettingsUI = renderUI({
- 
-  fluidRow(
-    column(
-      width = 6,
-      uiOutput("lfadddatetimeformatUI")
-    ),
-    column(
-      width = 3,
-      pickerInput(
-        inputId = "tzadd",
-        label = "Time Zone",
-        choices = OlsonNames()
-      )
-    )
-  )
 })
 
 #Date Time Format UI
 output$lfadddatetimeformatUI = renderUI({
-
+  
   fluidRow(
     column(
       width = 6,
@@ -287,6 +266,25 @@ output$lfadddatetimeformatUI = renderUI({
         inputId = "timeformatadd",
         label = "Time Format",
         choices = timeformats
+      )
+    )
+  )
+})
+
+#Date Time UI
+output$lfaddtimesettingsUI = renderUI({
+  
+  fluidRow(
+    column(
+      width = 6,
+      uiOutput("lfadddatetimeformatUI")
+    ),
+    column(
+      width = 3,
+      pickerInput(
+        inputId = "tzadd",
+        label = "Time Zone",
+        choices = OlsonNames()
       )
     )
   )
@@ -371,68 +369,61 @@ output$lfaddmodeldataconfigUI = renderUI({
 #Add Logger Buttons----
 #Add New Logger Model
 observeEvent(
-  input$saveloggerfieldsbttn,
-  {
+  input$saveloggerfieldsbttn,{
     if (nchar(input$addloggermodelnametxt) > 0){
-      
-
-        newloggerdefs=loggerfiledefs()
+      newloggerdefs = loggerfiledefs()
+      if (!is.null(input$datetimecombinecoladd)){
+        datetimeentry = input$datetimecombinecoladd
+        dateentry = NA
+        timeentry = NA
         
-        if (!is.null(input$datetimecombinecoladd)){
-          
-          datetimeentry = input$datetimecombinecoladd
-          dateentry = NA
-          timeentry = NA
-          
-          updateTextInput(
-            session = session,
-            inputId = "datetimecombinecoladd",
-            value = NA
-          )
-        }else if (!is.null(input$datecoladd) & !is.null(input$timecoladd)){
-          datetimeentry = NA
-          dateentry = input$datecoladd
-          timeentry = input$timecoladd
-          
-          updateTextInput(
-            session = session,
-            inputId = "datecoladd",
-            value = NA
-          )
-          
-          updateTextInput(
-            session = session,
-            inputId = "timecoladd",
-            value = NA
-          )
-          
-        }else{
-          sendSweetAlert(
-            session = session,
-            title = "Missing Date and Time Fields",
-            text = "Please enter in the names of the combined or separate date and time fields",
-            type = "warning"
-          )
-        }
-          
-          newloggerdf=data.frame("Logger_Model" = input$addloggermodelnametxt,"ModelID" = random_id(1,6),"Date" = dateentry,"Time" = timeentry,
-                                 "DateTime" = datetimeentry,"Date_Format" = input$dateformatadd,"Time_Format" = input$timeformatadd,
-                                 "AirBP" = input$airbpfieldadd,"AirTemp" = input$airtempfieldadd,"Chlorophylla" = input$chlorophyllafieldadd,
-                                 "Cond" = input$condfieldadd,"Discharge" = input$dischargefieldadd,"DO" = input$dofieldadd,
-                                 "GageHeight" = input$gageheightfieldadd,"pH" = input$phfieldadd,"Turbidity" = input$turbidityfieldadd,
-                                 "WaterP" = input$waterpfieldadd,"WaterTemp" = input$watertempfieldadd,"TZ" = input$tzadd,
-                                 "FieldNamesRow" = input$fieldnamerownumadd,"DataStartRow" = input$datarownumadd)
-          
-          newloggerdefs=rbind(newloggerdefs,newloggerdf)
-          
-          loggerfiledefs(newloggerdefs)
-          updatebaseconfig()
-          updateTextInput(
-            session = session,
-            inputId = "addloggermodelnametxt",
-            value = NA
-          )
-
+        updateTextInput(
+          session = session,
+          inputId = "datetimecombinecoladd",
+          value = NA
+        )
+      }else if (!is.null(input$datecoladd) & !is.null(input$timecoladd)){
+        datetimeentry = NA
+        dateentry = input$datecoladd
+        timeentry = input$timecoladd
+        
+        updateTextInput(
+          session = session,
+          inputId = "datecoladd",
+          value = NA
+        )
+        
+        updateTextInput(
+          session = session,
+          inputId = "timecoladd",
+          value = NA
+        )
+      }else{
+        sendSweetAlert(
+          session = session,
+          title = "Missing Date and Time Fields",
+          text = "Please enter in the names of the combined or separate date and time fields",
+          type = "warning"
+        )
+      }
+      
+      newloggerdf=data.frame("Logger_Model" = input$addloggermodelnametxt,"ModelID" = random_id(1,6),"Date" = dateentry,"Time" = timeentry,
+                             "DateTime" = datetimeentry,"Date_Format" = input$dateformatadd,"Time_Format" = input$timeformatadd,
+                             "AirBP" = input$airbpfieldadd,"AirTemp" = input$airtempfieldadd,"Chlorophylla" = input$chlorophyllafieldadd,
+                             "Cond" = input$condfieldadd,"Discharge" = input$dischargefieldadd,"DO" = input$dofieldadd,
+                             "GageHeight" = input$gageheightfieldadd,"pH" = input$phfieldadd,"Turbidity" = input$turbidityfieldadd,
+                             "WaterP" = input$waterpfieldadd,"WaterTemp" = input$watertempfieldadd,"TZ" = input$tzadd,
+                             "FieldNamesRow" = input$fieldnamerownumadd,"DataStartRow" = input$datarownumadd)
+      
+      newloggerdefs=rbind(newloggerdefs,newloggerdf)
+      
+      loggerfiledefs(newloggerdefs)
+      updatebaseconfig()
+      updateTextInput(
+        session = session,
+        inputId = "addloggermodelnametxt",
+        value = NA
+      )
     }else{
       sendSweetAlert(
         session = session,
@@ -524,7 +515,6 @@ output$lfeditmodeltimeconfigUI = renderUI({
             )
           ),
           fluidRow(
-            
             column(
               width = 12,
               uiOutput("lfedittimesettingsUI")
@@ -579,7 +569,6 @@ output$lfeditdatetimeUI = renderUI({
       )
     )
   }else{
-    
     fluidRow(
       column(
         width = 6,
@@ -732,12 +721,10 @@ output$lfeditmodeldataconfigUI = renderUI({
 #Edit Button----
 #Edit Model Name
 observeEvent(
-  input$editloggerfieldsbttn,
-  {
+  input$editloggerfieldsbttn,{
     editloggerdefs = loggerfiledefs()
     
     #configure input data
-    
     #Date column
     if (!is.null(input$datecoledit)){
       datecol = input$datecoledit
@@ -856,7 +843,7 @@ observeEvent(
     editloggerdefs$WaterTemp[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = watertempfield
     editloggerdefs$FieldNamesRow[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = input$fieldnamerownumedit
     editloggerdefs$DataStartRow[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = input$datarownumedit
-
+    
     loggerfiledefs(editloggerdefs)
     updatebaseconfig()
     
@@ -873,7 +860,6 @@ observeEvent(
     
     loggerfiledefs(deleteloggerdefs)
     updatebaseconfig()
-    
   }
 )
 
@@ -888,9 +874,9 @@ output$aedoptionsdescUI = renderUI({
 
 output$lfloggerconfigdescUI = renderUI({
   tags$p(
-    HTML("<font size = 4><i>This section allows the user to define the data table organization for unique logger models. <br><br>In the <b>Row 
-    Selection</b> box, select which rows contain the field names and the first row that contains the actual logger data. <br><br>Define the Date and 
-    Time field organization, formats and fields in the <b>Date and Time Fields</b> box. <br><br>Copy the field names of the relevant logger data 
-    types within the logger data table. Only the data fields with data need to be entered.</i></font>")
+    HTML("<font size = 4><i>This section allows the user to define the data table organization for unique logger models. <br><br>In the 
+    <b>Row Selection</b> box, select which rows contain the field names and the first row that contains the actual logger data. 
+    <br><br>Define the Date and Time field organization, formats and fields in the <b>Date and Time Fields</b> box. <br><br>Copy the field 
+    names of the relevant logger data types within the logger data table. Only the data fields with data need to be entered.</i></font>")
   )
 })

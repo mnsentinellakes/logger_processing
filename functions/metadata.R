@@ -1,3 +1,4 @@
+#Collect and build metadata for export
 buildmeta = function(programid,appid,stationid,deployid,modelid,programs,programwbs,wbnames,stations,logfiledefs,deploylogs,qcconfig,export){
   
   #Program Name
@@ -100,32 +101,23 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
   write.csv(metadataframe,"temp/metadata.csv",row.names = FALSE)
 }
 
-
+#Compile QC Settings for export
 getqcsettings = function(appid,deployid,deploylogs,qcconfig,programwbs,wbnames){
   
   selectdeploy = deploylogs
-  print(1)
+  
   #deployid() sourced from processing.R
   selectdeploy = selectdeploy$Logger_Type[which(selectdeploy$DeployID == deployid)]
-  print(2)
+  
   selectqcdata = qcconfig
-  print(3)
   #input$procwaterbody sourced from processingUI.R
   selectqcdata = selectqcdata[which(selectqcdata$AppID == input$procwaterbody & selectqcdata$Logger_Type %in% selectdeploy),]
-  print(4)
   qcwbid = programwbs$ProgramWaterbodyID[which(programwbs$AppID == appid)]
-  print(5)
   qcwbname = wbnames$Waterbody_Name[which(wbnames$AppID == appid)]
-  print(6)
   selectqcdata$AppID = NULL
-  print(7)
   selectqcdata$WaterbodyID = qcwbid
-  print(8)
   selectqcdata$WaterbodyName = qcwbname
-  print(9)
   selectqcdata = selectqcdata[,c(5,6,1:4)]
-  print(10)
+  
   write.csv(selectqcdata,"temp/qcsettings.csv",row.names = FALSE)
-  
-  
 }

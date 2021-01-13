@@ -4,20 +4,13 @@ selectexportdata = reactiveVal()
 deploydatesupdate = function(){
   #datatypedf() from visqcUI code file
   deployqcdata = datatypedf()
-  print(deployqcdata)
   deployupdate = deploylogs()
-  print(deployupdate)
   
   minrecorddt = unique(as.character(min(deployqcdata$DateTime)))
   
-  print(paste(1,minrecorddt))
   maxrecorddt = unique(as.character(max(deployqcdata$DateTime)))
-  print(paste(2,maxrecorddt))
   minvaliddt = unique(as.character(min(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])))
-  print(paste(3,minvaliddt))
   maxvaliddt = unique(as.character(max(deployqcdata$DateTime[which(deployqcdata$FlagVis == 'P')])))
-  print(paste(4,maxvaliddt))
-  
   
   deployupdate$StartDateTimeRecord[which(deployupdate$DeployID == deployid())] = minrecorddt
   deployupdate$EndDateTimeRecord[which(deployupdate$DeployID == deployid())] = maxrecorddt
@@ -29,25 +22,23 @@ deploydatesupdate = function(){
   updatebaseconfig()
 }
 
-
 #Select the relevant row from the export table
 observeEvent(
-  input$exportprocessbttn,
-  {
+  input$exportprocessbttn,{
     
     exportdata = export()
     #input$procprogram and input$procmodel are sourced from the processingUI.R file
     exportdata = exportdata[which(exportdata$ProgramID == input$procprogram & exportdata$ModelID == input$procmodel),]
     selectexportdata(exportdata)
-  })
+  }
+)
 
 finaldata = reactiveVal()
 
 #Process data for export
 observeEvent(
   input$exportprocessbttn,
-  ignoreNULL = FALSE,
-  {
+  ignoreNULL = FALSE,{
     validate(
       need(selectexportdata(),"Loading...")
     )
@@ -161,13 +152,10 @@ observeEvent(
     }
     
     if (exportsettings$FileSep == "Single"){
-      
       combinefields = startfields
       #qcloggertypes() sourced from processing.R
       for (i in qcloggertypes()){
-        
         #Select parameter Data and Depth Fields and rename them
-        
         paradata = processdata[[i]]
         paradata = paradata[,c(3,4)]
         
@@ -175,14 +163,12 @@ observeEvent(
         
         names(paradata)[1] = unitidname
         if (exportsettings$IncZ == TRUE){
-          
           names(paradata)[2] = exportsettings$Z
         }else if (exportsettings$IncZ == FALSE){
           paradata[,2] = NULL
         }
         
         #Select Flag fields and rename them
-        
         qcdata = processdata[[i]]
         qcdata = qcdata[,c(15:19)]
         
@@ -248,7 +234,6 @@ observeEvent(
       }else{
         fieldorder = c(fieldorder,exportsettings$Date,exportsettings$Time)
       }
-      
       #Add Parameters
       for (i in qcloggertypes()){
         parametertype = as.character(dplyr::select(exportsettings,matches(i)))
@@ -269,17 +254,11 @@ observeEvent(
       combinefields = combinefields[,fieldorder]
       
       finaldata(combinefields)
-      
     }else if (exportsettings$FileSep == "Multiple"){
-      
-      
       combinelist = list()
       for (i in qcloggertypes()){
-        # i = "WaterTemp"
-        
         #Select data by logger type
         paradata = processdata[[i]]
-        
         
         #Remove extra QC Flag Fields
         paradata = paradata[,c(3,4)]
@@ -337,29 +316,23 @@ observeEvent(
         }
         #Z
         if (exportsettings$IncZ == TRUE){
-          
           fieldorder = c(fieldorder,exportsettings$Z)
         }
         #Add Parameters
         datafieldname = as.character(dplyr::select(exportsettings,matches(i)))
         fieldorder = c(fieldorder,datafieldname)
         
-        
         #Add QC
         fieldorder = c(fieldorder,"FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")
         
-        print(names(combinedata))
-        print(fieldorder)
         combinedata = combinedata[,fieldorder]
         
         combinelist[[i]] = combinedata
-        
       }
       finaldata(combinelist)
     }
-})
-
-
+  }
+)
 
 #Configure Download File
 output$dlddata = downloadHandler(
@@ -384,7 +357,6 @@ output$dlddata = downloadHandler(
     
     #Process Data for Single File
     if (exportdldsettings$FileSep == "Single"){
-      
       dldname = paste0(dldname,"_",qcloggertypes(),collapse = "_")
       dldname = gsub("\\s+","_",gsub("[[:punct:]]","",dldname))
       dldname = paste0(dldname,".csv")
@@ -400,11 +372,10 @@ output$dlddata = downloadHandler(
         mode = "cherry-pick"
       )
     }else{
-      
       finaldataout = finaldata()
       #Get a list of logger types from the final data
       listnames = names(finaldataout)
-    
+      
       #List containing file paths
       listoutput = NULL
       for (i in listnames){
@@ -463,7 +434,7 @@ output$dlddata = downloadHandler(
         programwbs = programwbs(),
         wbnames = wbnames()
       )
-  
+      
       zip_append(
         zipfile = fname,
         files = c("temp/metadata.csv","temp/qcsettings.csv"),
@@ -471,13 +442,7 @@ output$dlddata = downloadHandler(
         recurse = FALSE,
         mode = "cherry-pick"
       )
-      
-
-      
-      
-      
     }
-    
   },
   contentType = "application/zip"
 )

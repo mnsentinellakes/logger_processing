@@ -3,12 +3,12 @@
 tabItems(
   #Home Tab----
   tabItem(
-    tabName = "home",
+    tabName = "abouttab",
     useSweetAlert()
   ),
   #Programs and Waterbodies Tab----
   tabItem(
-    tabName = "programsandwaterbodies",
+    tabName = "programsandwaterbodiestab",
     fluidRow(
       column(
         width = 7,
@@ -99,7 +99,7 @@ tabItems(
   ),
   #QC Configuration Tab----
   tabItem(
-    tabName = "configqc",
+    tabName = "configqctab",
     fluidRow(
       column(
         width = 3,
@@ -133,9 +133,7 @@ tabItems(
           width = NULL,
           title = "QC Configuration",
           uiOutput("configUI")
-          # tableOutput("test")
         )
-        
       ),
       column(
         width = 3,
@@ -151,7 +149,7 @@ tabItems(
   ),
   #Logger File Definitions Tab----
   tabItem(
-    tabName = "logfiledefs",
+    tabName = "logfiledefstab",
     fluidRow(
       column(
         width = 9,
@@ -186,12 +184,12 @@ tabItems(
   ),
   #Export Options Tab----
   tabItem(
-    tabName = "exportoptions",
+    tabName = "exportoptionstab",
     uiOutput("exportoptionsUI")
   ),
   #Save Config File Tab----
   tabItem(
-    tabName = "saveconfigfile",
+    tabName = "saveconfigfiletab",
     fluidRow(
       column(
         width = 6,
@@ -217,7 +215,7 @@ tabItems(
   ),
   #Setup and Processing Tab----
   tabItem(
-    tabName = "setup",
+    tabName = "setuptab",
     uiOutput("pwlmUI"),
     fluidRow(
       column(
@@ -246,15 +244,7 @@ tabItems(
             )
           ),
           #UI output for ui section rendered in the server side of the app
-          uiOutput("procmetadata"),
-          actionBttn(
-            inputId = "processing",
-            label = "Process Data",
-            color = "success",
-            style = "fill",
-            size = "lg",
-            icon = icon("desktop")
-          ),
+          uiOutput("procmetadataUI"),
           tags$br(),
           tags$hr(),
           tags$br(),
@@ -282,7 +272,7 @@ tabItems(
   
   #Visual QC tab----
   tabItem(
-    tabName = "visqc",
+    tabName = "visqctab",
     fluidRow(
       column(
         width = 2,
@@ -292,7 +282,7 @@ tabItems(
           status = "primary",
           width = NULL,
           #UI output of qc options rendered in the server side of the app
-          uiOutput("visqcoptions")
+          uiOutput("visqcoptionsUI")
         )
       ),
       column(
@@ -308,14 +298,14 @@ tabItems(
       )
     )
   ),
-  
-  #Export tab----
+  #Summary tab----
   tabItem(
-    tabName = "summary",
+    tabName = "summarytab",
     uiOutput("summaryUI")
   ),
+  #Export tab----
   tabItem(
-    tabName = "export",
+    tabName = "exporttab",
     uiOutput("exportUI")
   )
 )

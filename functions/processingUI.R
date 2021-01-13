@@ -115,20 +115,18 @@ deploycounter = reactive({
   deployidselect = processinglogs()
   deploycountdata = deploylogs()
   
-  deployidselect = unique(deployidselect$DeployID[which(deployidselect$AppID == input$procwaterbody & deployidselect$Logger_Type == input$proclogger)])
+  deployidselect = unique(deployidselect$DeployID[which(deployidselect$AppID == input$procwaterbody & 
+                                                          deployidselect$ModelID == input$procmodel)])
   
-
   if (length(deployidselect)>0){
-  
-  deploycountdata = max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)])
+    deploycountdata = max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)]) + 1
   }else{
     deploycountdata = 1
   }
   return(deploycountdata)
 })
 
-
-output$procmetadata=renderUI({
+output$procmetadataUI = renderUI({
   coords = coordselect()
   
   tagList(
@@ -166,10 +164,19 @@ output$procmetadata=renderUI({
           label = "User Name"
         )
       )
+    ),
+    actionBttn(
+      inputId = "processingbttn",
+      label = "Process Data",
+      color = "success",
+      style = "fill",
+      size = "lg",
+      icon = icon("desktop")
     )
   )
 })
 
+#Data Preview Table UI
 output$dataprevUI = renderUI({
   tagList(
     fluidRow(

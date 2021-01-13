@@ -33,7 +33,6 @@ ui <- dashboardPagePlus(
         titleWidth = 275,
         enable_rightsidebar = FALSE
     ),
-    rightsidebar = uiOutput("rtsidebar"),
     sidebar = dashboardSidebar(
         logprocsidebar("leftsidebarmenu")
     ),

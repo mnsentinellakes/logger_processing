@@ -21,24 +21,18 @@ output$loadconfigfileUI = renderUI({
     ),
     column(
       width = 4,
-    HTML(paste0("<font size=5 color=gray> <p align = left>",loadstatus(),"</p></font>"))
+      HTML(paste0("<font size=5 color=gray> <p align = left>",loadstatus(),"</p></font>"))
     )
   )
 })
 
 #Observe Config Load Button
 observeEvent(
-  input$baseconfigloadbttn,
-  {
+  input$baseconfigloadbttn,{
     baseconfiginput=input$baseconfigload
     
-    
     load(baseconfiginput$datapath)
-    
-    
     save(baseconfig,file = "config/baseconfig.RData")
-    
-    # load("config/baseconfig.RData")
     
     #Assign programs data frame to a reactive value
     programs(baseconfig$programs)
@@ -56,12 +50,12 @@ observeEvent(
   }
 )
 
-
 #Load Configuration File Description UI
 output$loadconfigfiledescUI = renderUI({
   tags$p(
     HTML("<font size = 4><i>"),
-    "Upload previously created configuration files containing customized programs, waterbodies, qc settings, file settings, and tracking information.",
+    "Upload previously created configuration files containing customized programs, waterbodies, qc settings, file settings, and tracking 
+    information.",
     HTML("</i></font>")
   )
 })
@@ -89,7 +83,8 @@ output$aedprogramsUI = renderUI({
 output$aedprogramsdescUI = renderUI({
   tags$p(
     HTML("<font size = 4><i>"),
-    "Add new programs, edit the name of existing programs, or delete programs. Please note that if a program is deleted, all associated waterbodies will be deleted as well.",
+    "Add new programs, edit the name of existing programs, or delete programs. Please note that if a program is deleted, all associated 
+    waterbodies will be deleted as well.",
     HTML("</i></font>")
   )
 })
@@ -108,11 +103,10 @@ output$aedprogramselectchoiceUI = renderUI({
             placeholder = "New Program Name"
           )
         ),
-
         column(
           width = 4,
           actionBttn(
-            inputId = "addprogram",
+            inputId = "addprogrambttn",
             label = "Add",
             style = "fill",
             color = "success"
@@ -138,7 +132,7 @@ output$aedprogramselectchoiceUI = renderUI({
         column(
           width = 1,
           actionBttn(
-            inputId = "editprogram",
+            inputId = "editprogrambttn",
             label = "Edit",
             style = "fill",
             color = "warning"
@@ -160,7 +154,7 @@ output$aedprogramselectchoiceUI = renderUI({
         column(
           width = 4,
           actionBttn(
-            inputId = "deleteprogram",
+            inputId = "deleteprogrambttn",
             label = "Delete",
             style = "fill",
             color = "danger"
@@ -182,42 +176,42 @@ output$editprogramnameUI = renderUI({
 
 #Add Progam Event
 observeEvent(
-  input$addprogram,
-  {
-   addprogramsrv = programs()
-   
-   programsaddrow = data.frame("ProgramID"=random_id(1,bytes = 6),"Program_Name"=input$addprogramname)
-   addprogramsrvsave = rbind(addprogramsrv,programsaddrow)
-   
-   programs(addprogramsrvsave)
-   updatebaseconfig()
-
-   updateTextInput(
-     session = session,
-     inputId = "addprogramname",
-     value = ""
-   )
-  })
+  input$addprogrambttn,{
+    addprogramsrv = programs()
+    
+    programsaddrow = data.frame("ProgramID"=random_id(1,bytes = 6),"Program_Name"=input$addprogramname)
+    addprogramsrvsave = rbind(addprogramsrv,programsaddrow)
+    
+    programs(addprogramsrvsave)
+    updatebaseconfig()
+    
+    updateTextInput(
+      session = session,
+      inputId = "addprogramname",
+      value = ""
+    )
+  }
+)
 
 #Edit Program Event
 observeEvent(
-  input$editprogram,
-  {
-   editprogramsrv = programs() 
-   editprogramsrv$Program_Name[which(editprogramsrv$ProgramID == input$editprogramnamechoices)] = input$editprogramname
-
-   programs(editprogramsrv)
-   updatebaseconfig()
-
-  })
+  input$editprogrambttn,{
+    editprogramsrv = programs() 
+    editprogramsrv$Program_Name[which(editprogramsrv$ProgramID == input$editprogramnamechoices)] = input$editprogramname
+    
+    programs(editprogramsrv)
+    updatebaseconfig()
+    
+  }
+)
 
 #Delete Program Event
 observeEvent(
-  input$deleteprogram,
-  {
+  input$deleteprogrambttn,{
     deleteprogramsrv = programs()
     deleteprogramwbsrv = programwbs()
     deleteprogramwbnamesrv = wbnames()
+    deletestationsrv = stations()
     deleteprogramqcconfig = qc_config()
     
     appids = deleteprogramwbsrv$AppID[which(deleteprogramwbsrv$ProgramID == input$deleteprogramnamechoices)]
@@ -225,16 +219,19 @@ observeEvent(
     deleteprogramsrv = deleteprogramsrv[which(deleteprogramsrv$ProgramID != input$deleteprogramnamechoices),]
     deleteprogramwbsrv = deleteprogramwbsrv[which(deleteprogramwbsrv$AppID %not in% appids),]
     deleteprogramwbnamesrv = deleteprogramwbnamesrv[which(deleteprogramwbnamesrv$AppID %not in% appids),]
+    deletestationsrv = deletestationsrv[which(deletestationsrv$AppID %not in% appids),]
     deleteprogramqcconfig = deleteprogramqcconfig[which(deleteprogramqcconfig$AppID %not in% appids),]
     
     programs(deleteprogramsrv)
     programwbs(deleteprogramwbsrv)
     wbnames(deleteprogramwbnamesrv)
+    stations(deletestationsrv)
     qc_config(deleteprogramqcconfig)
     
     updatebaseconfig()
     load("config/baseconfig.RData")
-  })
+  }
+)
 
 #Add Edit Delete Waterbodies
 output$aedwaterbodiesUI = renderUI({
@@ -269,8 +266,9 @@ output$aedwaterbodiesUI = renderUI({
 output$aedwaterbodiesdescUI = renderUI({
   tags$p(
     HTML("<font size = 4><i>"),
-    "For the selected program, add new waterbodies, edit the name and/or id of existing waterbodies, or delete waterbodies. If a waterbody does not already have a unique id provided by the 
-    program or organization it is associated with, an id will need to be created by clicking the Generate Waterbody ID button before adding the waterbody to the configuration file",
+    "For the selected program, add new waterbodies, edit the name and/or id of existing waterbodies, or delete waterbodies. If a waterbody 
+    does not already have a unique id provided by the program or organization it is associated with, an id will need to be created by 
+    clicking the Generate Waterbody ID button before adding the waterbody to the configuration file",
     HTML("</i></font>")
   )
 })
@@ -310,7 +308,7 @@ output$aedwaterbodiesselectchoiceUI = renderUI({
         column(
           width = 4,
           actionBttn(
-            inputId = "addwaterbodies",
+            inputId = "addwaterbodiesbttn",
             label = "Add",
             style = "fill",
             color = "success"
@@ -329,7 +327,7 @@ output$aedwaterbodiesselectchoiceUI = renderUI({
         column(
           width = 4,
           actionBttn(
-            inputId = "generatewbid",
+            inputId = "generatewbidbttn",
             label = "Generate Waterbody ID",
             style = "fill",
             color = "primary",
@@ -367,9 +365,10 @@ output$aedwaterbodiesselectchoiceUI = renderUI({
         ),
         column(
           width = 1,
-          tags$br(),tags$br(),
+          tags$br(),
+          tags$br(),
           actionBttn(
-            inputId = "editwaterbodies",
+            inputId = "editwaterbodiesbttn",
             label = "Edit",
             style = "fill",
             color = "warning"
@@ -391,7 +390,7 @@ output$aedwaterbodiesselectchoiceUI = renderUI({
         column(
           width = 4,
           actionBttn(
-            inputId = "deletewaterbodies",
+            inputId = "deletewaterbodiesbttn",
             label = "Delete",
             style = "fill",
             color = "danger"
@@ -429,10 +428,20 @@ output$editwaterbodiesnameUI = renderUI({
   )
 })
 
+#Generate waterbody id Event
+observeEvent(
+  input$generatewbid,{
+    updateTextInput(
+      session = session,
+      inputId = "addwaterbodiesid",
+      value = random_id(1,4)
+    )
+  }
+)
+
 #Create a new waterbody in the program Event
 observeEvent(
-  input$addwaterbodies,
-  {
+  input$addwaterbodiesbttn,{
     if (nchar(input$addwaterbodiesname) > 0){
       programwbsrv=programwbs()
       wbnamesrv=wbnames()
@@ -460,7 +469,6 @@ observeEvent(
       updateTextInput(
         session = session,
         inputId = "addwaterbodiesname",
-        
         value = ""
       )
       
@@ -483,8 +491,7 @@ observeEvent(
 
 #Edit existing waterbody name and id Event
 observeEvent(
-  input$editwaterbodies,
-  {
+  input$editwaterbodiesbttn,{
     editprogramwbsrv = programwbs()
     editwbnamesrv = wbnames()
     editwbnamesrv$Waterbody_Name[which(editwbnamesrv$AppID == input$editwaterbodiesnamechoices)] = input$editwaterbodyname
@@ -494,22 +501,25 @@ observeEvent(
     wbnames(editwbnamesrv)
     
     updatebaseconfig()
-  })
+  }
+)
 
 #Delete waterbodies
 observeEvent(
-  input$deletewaterbodies,
-  {
+  input$deletewaterbodiesbttn,{
     deleteprogramwbsrv=programwbs()
     deletewbnamesrv=wbnames()
+    deletestationsrv = stations()
     deleteqcconfig=qc_config()
     
     deleteprogramwbsrv=deleteprogramwbsrv[which(deleteprogramwbsrv$AppID != input$deletewaterbodiesnamechoices),]
     deletewbnamesrv=deletewbnamesrv[which(deletewbnamesrv$AppID != input$deletewaterbodiesnamechoices),]
+    deletestationsrv = deletestationsrv[which(deletestationsrv$AppID != input$deletewaterbodiesnamechoices),]
     deleteqcconfig=deleteqcconfig[which(deleteqcconfig$AppID != input$deletewaterbodiesnamechoices),]
     
     programwbs(deleteprogramwbsrv)
     wbnames(deletewbnamesrv)
+    stations(deletestationsrv)
     qc_config(deleteqcconfig)
     
     updatebaseconfig()
@@ -531,16 +541,16 @@ output$aedstationsUI = renderUI({
         fluidRow(
           column(
             width = 6,
-        pickerInput(
-          inputId = "stationprogramselect",
-          label = NULL,
-          choices = programid()
-        )
+            pickerInput(
+              inputId = "stationprogramselect",
+              label = NULL,
+              choices = programid()
+            )
           ),
-        column(
-          width = 6,
-          uiOutput("stationwaterbodiesselectUI")
-        )
+          column(
+            width = 6,
+            uiOutput("stationwaterbodiesselectUI")
+          )
         )
       )
     ),
@@ -566,14 +576,11 @@ stationwbs = reactive({
 
 #Select waterbody stations
 output$stationwaterbodiesselectUI = renderUI({
-
-  
   pickerInput(
     inputId = "stationwaterbodiesselect",
     label = NULL,
     choices = stationwbs()
   )
-  
 })
 
 wbstationnameselect = reactive({
@@ -620,7 +627,7 @@ output$aedstationsselectchoiceUI = renderUI({
         column(
           width = 4,
           actionBttn(
-            inputId = "addstation",
+            inputId = "addstationbttn",
             label = "Add",
             style = "fill",
             color = "success"
@@ -647,9 +654,8 @@ output$aedstationsselectchoiceUI = renderUI({
         ),
         column(
           width = 1,
-          
           actionBttn(
-            inputId = "editstation",
+            inputId = "editstationbttn",
             label = "Edit",
             style = "fill",
             color = "warning"
@@ -671,7 +677,7 @@ output$aedstationsselectchoiceUI = renderUI({
         column(
           width = 4,
           actionBttn(
-            inputId = "deletestation",
+            inputId = "deletestationbttn",
             label = "Delete",
             style = "fill",
             color = "danger"
@@ -684,11 +690,9 @@ output$aedstationsselectchoiceUI = renderUI({
 
 #Edit Waterbody Name and ID UI
 output$editstationnameUI = renderUI({
- 
   stationcoor = stations()
-
+  
   stationcoor = stationcoor[which(stationcoor$StationID == input$editstationnamechoices),]
-  print(stationcoor)
   tagList(
     textInput(
       inputId = "editstationname",
@@ -705,11 +709,11 @@ output$editstationnameUI = renderUI({
     fluidRow(
       column(
         width = 6,
-      textInput(
-        inputId = "stationlatedit",
-        label = "Latitude",
-        value = stationcoor$Lat,
-        placeholder = "Add Station Latitude"
+        textInput(
+          inputId = "stationlatedit",
+          label = "Latitude",
+          value = stationcoor$Lat,
+          placeholder = "Add Station Latitude"
         )
       ),
       column(
@@ -727,11 +731,9 @@ output$editstationnameUI = renderUI({
 
 #Add new station
 observeEvent(
-  input$addstation,
-  {
+  input$addstationbttn,{
     if (nchar(input$addstationname) > 0){
       addstationname = stations()
-      
       newstationid = random_id(1,12)
       
       stationsrow =  data.frame(
@@ -784,8 +786,7 @@ observeEvent(
 
 #Edit Station
 observeEvent(
-  input$editstation,
-  {
+  input$editstationbttn,{
     editstations = stations()
     editstations$Station_Name[which(editstations$StationID == input$editstationnamechoices)] = input$editstationname
     editstationnameUI$ProgramStationID[which(editstations$StationID == input$editstationnamechoices)] = input$editprogramstationid
@@ -799,8 +800,7 @@ observeEvent(
 
 #Delete Station
 observeEvent(
-  input$deletestation,
-  {
+  input$deletestationbttn,{
     deletestations = stations()
     deletestations = deletestations[which(deletestations$StationID != input$deletestationnamechoices),]
     stations(deletestations)

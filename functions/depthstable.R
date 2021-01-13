@@ -117,7 +117,6 @@ output$depthstableoutputUI = renderUI({
             ),
             column(
               width = col2,
-              
               uiOutput("zoptionUI")
             ),
             column(
@@ -125,7 +124,7 @@ output$depthstableoutputUI = renderUI({
               #Add serial number and depth data to lookup table
               tags$br(),
               actionBttn(
-                inputId = "add",
+                inputId = "addbttn",
                 label = "Add",
                 color = "success",
                 style = "fill",
@@ -139,12 +138,10 @@ output$depthstableoutputUI = renderUI({
     tags$br(),
     HTML("<CENTER>"),
     #Table output for lookup table
-    
     DTOutput("depthstableoutput"),
     HTML("</CENTER>"),
     textOutput("testx")
   )
-  
 })
 
 output$zoptionUI = renderUI({
@@ -165,10 +162,7 @@ output$zoptionUI = renderUI({
       inputId = "inputdepth",
       label = zvalue
     )
-    
   }else{}
-  
-  
 })
 
 depthstablefilter = reactive({
@@ -176,10 +170,7 @@ depthstablefilter = reactive({
     need(input$procwaterbody,"Loading...")
   )
   proclogs = processinglogs()
-  
   proclogs = proclogs[which(proclogs$StationID == input$procstationname & proclogs$ModelID == input$procmodel & is.na(proclogs$Processed)),]
-  
-  
   return(proclogs)
 })
 
@@ -197,36 +188,34 @@ output$depthstableoutput = renderDataTable({
 })
 
 #In-table delete
-observeEvent(input$deletePressed, {
-  rowNum = parseDeleteEvent(input$deletePressed)
-  allproclogs = processinglogs()
-  depthstableselect = depthstablefilter()
-  depthstabledel = depthstableselect$ProcID[rowNum]
-  
-  allproclogs = allproclogs[which(allproclogs$ProcID != depthstabledel),]
-  
-  processinglogs(allproclogs)
-  
-  updatebaseconfig()
-  
-})
+observeEvent(
+  input$deletePressed,{
+    rowNum = parseDeleteEvent(input$deletePressed)
+    allproclogs = processinglogs()
+    depthstableselect = depthstablefilter()
+    depthstabledel = depthstableselect$ProcID[rowNum]
+    
+    allproclogs = allproclogs[which(allproclogs$ProcID != depthstabledel),]
+    
+    processinglogs(allproclogs)
+    
+    updatebaseconfig()
+  }
+)
 
 observeEvent(
-  input$add,
-  {
+  input$addbttn,{
     if (!is.null(input$procmodel)){
       if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) > 0){
-        
         addproclogs = processinglogs()
         
         addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = input$inputdepth,"Processed" = NA,
-                                    "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,"ProcID" = random_id(n=1,bytes = 12),
-                                    stringsAsFactors = FALSE)
+                                    "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
+                                    "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
         
         addproclogs = rbind(addproclogs,addproclogsrow)
         
         processinglogs(addproclogs)
-        
         updatebaseconfig()
         
         updateTextInput(
@@ -240,15 +229,13 @@ observeEvent(
           inputId = "inputdepth",
           value = ""
         )
-        
       }else if (nchar(input$inputsn) == 0 & nchar(input$inputdepth) > 0){
-        
       }else if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) == 0){
         
         addproclogs = processinglogs()
         addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = NA,"Processed" = NA,
-                                    "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,"ProcID" = random_id(n=1,bytes = 12),
-                                    stringsAsFactors = FALSE)
+                                    "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
+                                    "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
         addproclogs = rbind(addproclogs,addproclogsrow)
         
         processinglogs(addproclogs)
@@ -274,15 +261,16 @@ observeEvent(
         type = "error"
       )
     }
-  })
+  }
+)
 
-#Updates the Processed date in the depthsfile when the "Process Data" button is clicked
-# observeEvent(
-#   input$processing,
-#   {
-#     updatedates = processinglogs()
-#     updatedates$Processed[which(updatedates$StationID == input$procstationname &
-#                                   updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
-#     processinglogs(updatedates)
-#     updatebaseconfig()
-#   })
+# Updates the Processed date in the depthsfile when the "Process Data" button is clicked
+observeEvent(
+  input$processingbttn,{
+    updatedates = processinglogs()
+    updatedates$Processed[which(updatedates$StationID == input$procstationname &
+                                  updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
+    processinglogs(updatedates)
+    updatebaseconfig()
+  }
+)

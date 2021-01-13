@@ -1,11 +1,7 @@
 #Export Data----
 
 #Updated Valuebox from: https://jkunst.com/blog/posts/2020-06-26-valuebox-and-sparklines/
-
-
-
 valueBox2 <- function(value, title, subtitle, icon = NULL, color = "aqua", width = 4, href = NULL){
-  
   shinydashboard:::validateColor(color)
   
   if (!is.null(icon))
@@ -32,7 +28,6 @@ valueBox2 <- function(value, title, subtitle, icon = NULL, color = "aqua", width
 }
 
 valueBoxFlags = function(inputdata,flagfield,status){
-  
   if (flagfield == "Gross"){
     if (status == 'F'){
       inputdataselect = inputdata[which(inputdata$FlagGross == 'F' | inputdata$FlagGross == 'X'),]
@@ -59,7 +54,7 @@ valueBoxFlags = function(inputdata,flagfield,status){
     }
   }else if (flagfield == "Vis"){
     if (status == 'F'){
-    inputdataselect = inputdata[which(inputdata$FlagVis == 'F' | inputdata$FlagVis == 'X'),]
+      inputdataselect = inputdata[which(inputdata$FlagVis == 'F' | inputdata$FlagVis == 'X'),]
     }else{
       inputdataselect = inputdata[which(inputdata$FlagVis == status),]
     }
@@ -149,11 +144,11 @@ output$summaryUI = renderUI({
   loggermodeltype = loggerfiledefs()
   loggermodeltype = loggermodeltype$Logger_Model[which(loggermodeltype$ModelID == input$procmodel)]
   
+  #Deployment number and number of loggers
   deploydata = deploylogs()
   deploydata = deploydata[which(deploydata$DeployID == deployid()),]
   deploycount = deploydata$Deployment_Count
   loggercount = deploydata$Logger_Count
-
   
   tagList(
     box(
@@ -253,7 +248,7 @@ output$summaryUI = renderUI({
             options = list(
               style = "btn-primary")
           )
-          ),
+        ),
         column(
           width = 2,
           uiOutput("summarysnchoicesUI")
@@ -261,8 +256,7 @@ output$summaryUI = renderUI({
         column(
           width = 7,
           uiOutput("summaryloggerinfoUI")
-
-        ),
+        )
       )
     ),
     box(
@@ -274,7 +268,7 @@ output$summaryUI = renderUI({
           width = 1,
           HTML("<CENTER>"),
           radioGroupButtons(
-            inputId = "flagtype",
+            inputId = "sumflagtype",
             label = NULL,
             choiceNames = c("Gross","Spike","Rate of Change","Flat","Visual"),
             choiceValues = c("Gross","Spike","RoC","Flat","Vis"),
@@ -292,15 +286,15 @@ output$summaryUI = renderUI({
         ),
         column(
           width = 3,
-          uiOutput("vbfail")
+          uiOutput("vbfailUI")
         ),
         column(
           width = 3,
-          uiOutput("vbsuspect")
+          uiOutput("vbsuspectUI")
         ),
         column(
           width = 3,
-          uiOutput("vbpass")
+          uiOutput("vbpassUI")
         )
       ),
       fluidRow(
@@ -316,14 +310,46 @@ output$summaryUI = renderUI({
   )
 })
 
-output$summaryloggerinfoUI = renderUI({
+summarydatatypes = reactive({
+  summarydataselect = VisQCdata()
+  summarydata = summarydataselect[[input$summaryloggerchoices]]
+  return(summarydata)
+})
+
+output$summarysnchoicesUI = renderUI({
+  summarysn = summarydatatypes()
+  summarysn = unique(summarysn$UnitID)
+  #fieldnames() sourced from depthstable.R
+  summaryunitidname = fieldnames()
   
+  if (nrow(summaryunitidname) > 0){
+    summaryunitid = summaryunitidname$UnitID
+  }else{
+    summaryunitid = "Unit ID"
+  }
+  
+  pickerInput(
+    inputId = "summarysnchoices",
+    choices = summarysn,
+    label = summaryunitid,
+    options = list(
+      style = "btn-primary")
+  )
+})
+
+summaryselectdata = reactive({
+  summaryselect = summarydatatypes()
+  summaryselect = summaryselect[which(summaryselect$UnitID == input$summarysnchoices),]
+  
+  return(summaryselect)
+})
+
+output$summaryloggerinfoUI = renderUI({
   validate(
     need(summaryselectdata(),"Loading...")
   )
   
   summaryinfo = summaryselectdata()
-  
   summaryfilestartdate = unique(min(summaryinfo$DateTime))
   summaryfileenddate = unique(max(summaryinfo$DateTime))
   summarydatastartdate = unique(min(summaryinfo$DateTime[which(summaryinfo$FlagVis == 'P')]))
@@ -385,103 +411,62 @@ output$summaryloggerinfoUI = renderUI({
     )
   )
 })
-  
-  
-summarydatatypes = reactive({
-  summarydataselect = VisQCdata()
-  summarydata = summarydataselect[[input$summaryloggerchoices]]
-  return(summarydata)
-})
 
-output$summarysnchoicesUI = renderUI({
-
-  summarysn = summarydatatypes()
-  summarysn = unique(summarysn$UnitID)
-  summaryunitidname = fieldnames()
-  
-  if (nrow(summaryunitidname) > 0){
-    summaryunitid = summaryunitidname$UnitID
-  }else{
-    summaryunitid = "Unit ID"
-  }
-  
-  pickerInput(
-    inputId = "summarysnchoices",
-    choices = summarysn,
-    label = summaryunitid,
-    options = list(
-      style = "btn-primary")
-  )
-})
-
-summaryselectdata = reactive({
-  summaryselect = summarydatatypes()
-  summaryselect = summaryselect[which(summaryselect$UnitID == input$summarysnchoices),]
-  
-  return(summaryselect)
-})
-
-output$vbfail = renderUI({
+output$vbfailUI = renderUI({
   tagList(
     valueBoxFlags(
       inputdata = summaryselectdata(),
-      flagfield = input$flagtype,
+      flagfield = input$sumflagtype,
       status = "F"
     )
   )
 })
 
-output$vbsuspect = renderUI({
+output$vbsuspectUI = renderUI({
   tagList(
     valueBoxFlags(
       inputdata = summaryselectdata(),
-      flagfield = input$flagtype,
+      flagfield = input$sumflagtype,
       status = "S"
     )
   )
 })
 
-output$vbpass = renderUI({
+output$vbpassUI = renderUI({
   tagList(
     valueBoxFlags(
       inputdata = summaryselectdata(),
-      flagfield = input$flagtype,
+      flagfield = input$sumflagtype,
       status = "P"
     )
   )
 })
 
 output$summaryplot = renderPlotly({
-  
   validate(
     need(summaryselectdata(),"Loading...")
   )
   
   summaryplotdata = summaryselectdata()
   
-  if (input$flagtype == "Gross"){
-    
+  if (input$sumflagtype == "Gross"){
     pointdata = summaryplotdata[which(summaryplotdata$FlagGross != 'P'),]
-  }else if (input$flagtype == "Spike"){
-    
+  }else if (input$sumflagtype == "Spike"){
     pointdata = summaryplotdata[which(summaryplotdata$FlagSpike != 'P'),]
-  }else if (input$flagtype == "RoC"){
-    
+  }else if (input$sumflagtype == "RoC"){
     pointdata = summaryplotdata[which(summaryplotdata$FlagRoC != 'P'),]
-  }else if (input$flagtype == "Flat"){
-    
+  }else if (input$sumflagtype == "Flat"){
     pointdata = summaryplotdata[which(summaryplotdata$FlagFlat != 'P'),]
-  }else if (input$flagtype == "Vis"){
-    
+  }else if (input$sumflagtype == "Vis"){
     pointdata = summaryplotdata[which(summaryplotdata$FlagVis != 'P'),]
   }
   
-  flagplot = sym(paste0("Flag",input$flagtype))
+  flagplot = sym(paste0("Flag",input$sumflagtype))
   
   summaryflagcolors=c(
-               "S"="orange",
-               "F"="red",
-               "X" = "red")
+    "S"="orange",
+    "F"="red",
+    "X" = "red")
   
   Theme = theme(
     panel.border = element_rect(color = "black",fill = NA,size = 1),
@@ -493,7 +478,7 @@ output$summaryplot = renderPlotly({
     axis.text = element_text(size = 12),
     legend.position = 'none'
   )
-
+  
   if (nrow(summaryplotdata) > 0){
     p = ggplot() + 
       geom_line(

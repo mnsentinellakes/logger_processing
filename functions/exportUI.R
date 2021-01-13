@@ -25,7 +25,6 @@ output$exportUI = renderUI({
           )
         ),
         tags$br(),
-          # tags$h3("Data Preview"),
         box(
           title = "Data Preview",
           collapsible = TRUE,
@@ -39,7 +38,6 @@ output$exportUI = renderUI({
           outputId = "dlddata",
           label = "Download Data",
           style = "material-flat",
-          # color = "success",
           size = "lg"
         )
       )
@@ -75,9 +73,7 @@ output$finaltable = renderDT(
     # paging = FALSE
   ),
   rownames = FALSE,
-  
-  extensions = 'Responsive',
-  {
+  extensions = 'Responsive',{
     if (!is.null(finaldata())){
       finaldatatable = finaldata()
       print(is.data.frame(finaldatatable))
@@ -88,5 +84,5 @@ output$finaltable = renderDT(
         return(finaldatatableselect)
       }
     }else{}
-  })
-
+  }
+)

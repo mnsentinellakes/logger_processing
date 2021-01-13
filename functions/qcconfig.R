@@ -1,21 +1,12 @@
 #Update object names to reflect qcconfig usage
-
-
-savestatus=reactiveVal("")
-
-# output$test=renderText({
-#  x=input$baseconfigload
-#  return(x$datapath)
-#  
-# })
+savestatus = reactiveVal("")
 
 #Create a named vector of ProgramIDs and assign appropriate names to render selectprogramsUI
 programid = reactive({
-  programselect=programs()
-  programselectvec=programselect$ProgramID
+  programselect = programs()
+  programselectvec = programselect$ProgramID
   
-  names(programselectvec)=programselect$Program_Name
-  print(names(programselectvec))
+  names(programselectvec) = programselect$Program_Name
   return(programselectvec)
 })
 
@@ -30,17 +21,17 @@ output$selectprogramsUI = renderUI({
 
 #Create a vector of AppIDS that are in the selected Program
 programappids = reactive({
-  programwbschoice=programwbs()
-  programwbschoice=programwbschoice$AppID[which(programwbschoice$ProgramID == input$selectedprogram)]
+  programwbschoice = programwbs()
+  programwbschoice = programwbschoice$AppID[which(programwbschoice$ProgramID == input$selectedprogram)]
   return(programwbschoice)
 })
 
 #Create a vector of Waterbody Names from the AppIDS
 waterbody_names = reactive({
-  wbnamesselect=wbnames()
-  wbnamesselect=wbnamesselect[which(wbnamesselect$AppID %in% programappids()),]
-  wbnamesselectvec=wbnamesselect$AppID
-  names(wbnamesselectvec)=wbnamesselect$Waterbody_Name
+  wbnamesselect = wbnames()
+  wbnamesselect = wbnamesselect[which(wbnamesselect$AppID %in% programappids()),]
+  wbnamesselectvec = wbnamesselect$AppID
+  names(wbnamesselectvec) = wbnamesselect$Waterbody_Name
   return(wbnamesselectvec)
 })
 
@@ -49,7 +40,7 @@ output$selectwbsUI = renderUI({
   validate(
     need(input$selectedprogram,"Loading...")
   )
-
+  
   tagList(
     # textOutput("test"),
     fluidRow(
@@ -66,7 +57,7 @@ output$selectwbsUI = renderUI({
         tags$table(
           tags$tr(
             tags$td(
-              style="vertical-align:center; padding-top:6px;",
+              style = "vertical-align:center; padding-top:6px;",
               HTML("<font size=4><b>"),
               textOutput("selectwbidText"),
               HTML("</font></b>")
@@ -80,9 +71,8 @@ output$selectwbsUI = renderUI({
 
 #Render the waterbodyid text to show next to the selected waterbody name
 output$selectwbidText = renderText({
-  
-  programwaterbodyidchoice=programwbs()
-  programwaterbodyidchoice=programwaterbodyidchoice$ProgramWaterbodyID[which(programwaterbodyidchoice$AppID==input$selectedwb)]
+  programwaterbodyidchoice = programwbs()
+  programwaterbodyidchoice = programwaterbodyidchoice$ProgramWaterbodyID[which(programwaterbodyidchoice$AppID==input$selectedwb)]
   return(programwaterbodyidchoice)
 })
 
@@ -91,40 +81,30 @@ output$loggerconfigselectUI = renderUI({
   fluidRow(
     column(
       width = 6,
-  pickerInput(
-    inputId = "loggerconfigselect",
-    label = NULL,
-    choices = loggerchoices
-  )
-  ),
-  column(
-    width = 2,
-    tags$b("Units")
-  ),
-  column(
-    width = 4,
-    uiOutput("loggerunitselectUI")
-  )
+      pickerInput(
+        inputId = "loggerconfigselect",
+        label = NULL,
+        #logger choices sourced from baseconfigload.R
+        choices = loggerchoices
+      )
+    ),
+    column(
+      width = 2,
+      tags$b("Units")
+    ),
+    column(
+      width = 4,
+      uiOutput("loggerunitselectUI")
+    )
   )
 })
 
-#Generate waterbody id Event
-observeEvent(
-  input$generatewbid,
-  {
-    updateTextInput(
-      session = session,
-      inputId = "addwaterbodiesid",
-      value = random_id(1,4)
-    )
-  })
-
 loggerunits = data.frame(
-  "Logger_Type" = c("AirBP","AirBP","AirBP","AirBP","AirBP","AirBP","WaterP","WaterP","WaterP","WaterP","WaterP","WaterP","AirTemp","AirTemp","WaterTemp","WaterTemp",
-                    "Chlorophylla","Chlorophylla","Chlorophylla","DO","DO","DO","Discharge","Discharge","GageHeight","GageHeight","GageHeight","GageHeight","Cond","pH",
-                    "Turbidity"),
-  "Unit" = c("psi","Pa","hPa","mm Hg","in Hg","atm","psi","Pa","hPa","mm Hg","in Hg","atm","C","F","C","F","g/cm3","g/L","mg/L","g/cm3","g/L","mg/L","ft3/s","m3/s",
-             "ft","in","m","cm","uS/cm","SU","NTU"),
+  "Logger_Type" = c("AirBP","AirBP","AirBP","AirBP","AirBP","AirBP","WaterP","WaterP","WaterP","WaterP","WaterP","WaterP","AirTemp",
+                    "AirTemp","WaterTemp","WaterTemp","Chlorophylla","Chlorophylla","Chlorophylla","DO","DO","DO","Discharge","Discharge",
+                    "GageHeight","GageHeight","GageHeight","GageHeight","Cond","pH","Turbidity"),
+  "Unit" = c("psi","Pa","hPa","mm Hg","in Hg","atm","psi","Pa","hPa","mm Hg","in Hg","atm","C","F","C","F","g/cm3","g/L","mg/L","g/cm3",
+             "g/L","mg/L","ft3/s","m3/s","ft","in","m","cm","uS/cm","SU","NTU"),
   stringsAsFactors = FALSE
 )
 
@@ -152,7 +132,7 @@ loggerunitsconversion = function(qcvalue,Logger_Type,startunit,endunit){
       }else if (endunit == "Pa"){
         outputvalue = qcvalue
       }else if (endunit == "hPa"){
-       outputvalue = qcvalue/100 
+        outputvalue = qcvalue/100 
       }else if (endunit == "mm Hg"){
         outputvalue = qcvalue * 0.00750062
       }else if (endunit == "in Hg"){
@@ -333,13 +313,12 @@ loggerunitsconversion = function(qcvalue,Logger_Type,startunit,endunit){
     }
   }
   
-  # outputvalue = round(outputvalue,digits = 1)
   return(outputvalue)
 }
 
+#Select Logger Units
 output$loggerunitselectUI = renderUI({
   logunitselection = loggerunits$Unit[which(loggerunits$Logger_Type == input$loggerconfigselect)]
-  print(logunitselection)
   
   qcvalues=wbqcvalues()
   qcunit = unique(qcvalues$Units[which(qcvalues$QC_Metric == "Gross.Fail.Hi" & qcvalues$Logger_Type == input$loggerconfigselect)])
@@ -350,14 +329,6 @@ output$loggerunitselectUI = renderUI({
     choices = logunitselection,
     selected = qcunit
   )
-  
-})
-
-#Select QC configuration data for appid
-qcconfigselect = reactive({
-  selectedqc = qc_config()
-  selectedqc = selectedqc[which(selectedqc$AppID == input$selectedwb),]
-  return(selectedqc)
 })
 
 #RenderUI with QC settings
@@ -410,7 +381,7 @@ output$configUI = renderUI({
       column(
         width = 4,
         actionBttn(
-          inputId = "saveqc",
+          inputId = "saveqcbttn",
           label = "Save QC Settings",
           style = "fill",
           color = "success",
@@ -427,7 +398,7 @@ output$configUI = renderUI({
       column(
         width = 3,
         actionBttn(
-          inputId = "restoreqcdefaults",
+          inputId = "restoreqcdefaultsbttn",
           label = "Restore Defaults",
           style = "fill",
           color = "primary",
@@ -451,9 +422,8 @@ output$grossqcUI = renderUI({
     need(input$loggerconfigselect,"Loading..."),
     need(input$loggerunitselect,"Loading...")
   )
-  qcvalues=wbqcvalues()
+  qcvalues = wbqcvalues()
   qcunit = unique(qcvalues$Units[which(qcvalues$QC_Metric == "Gross.Fail.Hi" & qcvalues$Logger_Type == input$loggerconfigselect)])
-  print(qcunit)
   
   #AirBP
   airbpqcvalues=qcvalues[which(qcvalues$Logger_Type == "AirBP"),]
@@ -1214,7 +1184,6 @@ output$spikeqcUI = renderUI({
   )
   qcvalues=wbqcvalues()
   qcunit = unique(qcvalues$Units[which(qcvalues$QC_Metric == "Spike.Hi" & qcvalues$Logger_Type == input$loggerconfigselect)])
-  print(qcunit)
   
   #AirBP
   airbpqcvalues = qcvalues[which(qcvalues$Logger_Type == "AirBP"),]
@@ -1634,7 +1603,6 @@ output$spikeqcUI = renderUI({
   else if (input$loggerconfigselect == "WaterTemp"){
     return(watertempspike)
   }
-  
 })
 
 #Rate of Change Values UI
@@ -2492,8 +2460,7 @@ output$flatqcUI = renderUI({
 
 #Save changes to QC values
 observeEvent(
-  input$saveqc,
-  {
+  input$saveqcbttn,{
     updateqcconfig = qc_config()
     waterbody = input$selectedwb
     
@@ -2764,23 +2731,23 @@ observeEvent(
     }
     
     updateqcconfig$Units[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & !is.na(updateqcconfig$Units))] = input$loggerunitselect
-      
+    
     qc_config(updateqcconfig)
     updatebaseconfig()
     savestatus("Saved")
-  })
+  }
+)
 
 #Remove the save status text when the logger type is changed
 observeEvent(
-  input$loggerconfigselect,
-  {
+  input$loggerconfigselect,{
     savestatus("")
-  })
+  }
+)
 
 #Restore Default Values
 observeEvent(
-  input$restoreqcdefaults,
-  {
+  input$restoreqcdefaultsbttn,{
     restoredefaultsqc=qc_config()
     defaultvalues=restoredefaultsqc[which(restoredefaultsqc$AppID == 1111111111111111),]
     waterbody = input$selectedwb
@@ -3075,7 +3042,8 @@ observeEvent(
     qc_config(restoredefaultsqc)
     updatebaseconfig()
     savestatus("Defaults Restored")
-  })
+  }
+)
 
 #QC Config Description UI
 output$configdescUI = renderUI({
@@ -3084,6 +3052,5 @@ output$configdescUI = renderUI({
     "Edit the QC thresholds and limits of the ContDataQC automatic quality control checks. Select the program, waterbody, and logger type. After changing the values, click the 
     Save QC Settings button. If you want to revert back to the original values, click Restore Defaults button.",
     HTML("</i></font>")
-    
   )
 })

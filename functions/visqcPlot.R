@@ -1,5 +1,4 @@
 #Plot Data for Visual QC---------------
-# VQCselect = reactiveVal()
 
 flagtype = reactive({
   if(input$flagselect == "Visual"){
@@ -15,23 +14,18 @@ flagtype = reactive({
   }
   
   return(flagfield)
-  
 })
 
 output$VisQCplot = renderPlotly({
   #datatypedf() from visqcUI code file
   QCdata = datatypedf()
-  
   QCdata = QCdata[which(QCdata$UnitID == input$unitidchoice),]
   
   flagfield = sym(flagtype())
-  
   flagcolors=c("P"="royalblue1",
                "F"="red",
                "S"="orange",
                "X" = "slategray3")
-  
-  
   
   Theme = theme(
     panel.border = element_rect(color = "black",fill = NA,size = 1),
@@ -41,7 +35,6 @@ output$VisQCplot = renderPlotly({
     panel.background = element_blank(),
     title = element_text(size = 12),
     axis.text = element_text(size = 10),
-    # panel.ontop = T,
     legend.key = element_blank(),
     legend.key.height = unit(20,"mm"),
     legend.key.width = unit(12,"mm")
@@ -51,7 +44,6 @@ output$VisQCplot = renderPlotly({
     toWebGL(
       ggplotly(
         dynamicTicks = TRUE,
-        
         source = "V",
         ggplot(
           data = QCdata
@@ -64,7 +56,6 @@ output$VisQCplot = renderPlotly({
               key = DateTime
             ),
             size = 2.5
-            
           ) +
           xlab("Date and Time") +
           ylab(input$visqcloggerchoices) +
@@ -81,10 +72,9 @@ VisQCdataupdate = function(updatedata){
   VisQCdata(VisQCdataselect)
 }
 
-
 #FlagV=Fail for selected data-----
 observeEvent(
-  input$fail,{
+  input$failbttn,{
     VQCfaildataF = event_data(
       event = "plotly_selected",
       source = "V"
@@ -94,12 +84,12 @@ observeEvent(
     VQCFail[which(VQCFail$UnitID == input$unitidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),flagtype()] = "F"
     VQCFail[which(VQCFail$UnitID == input$unitidchoice & as.character(VQCFail$DateTime) %in% VQCfaildataF$key),paste0(flagtype(),"chng")] = "F"
     VisQCdataupdate(VQCFail)
-    
-  })
+  }
+)
 
 #FlagV=Suspect for selected data------
 observeEvent(
-  input$susp,{
+  input$suspbttn,{
     VQCfaildataS = event_data(
       event = "plotly_selected",
       source = "V"
@@ -109,19 +99,20 @@ observeEvent(
     VQCSusp[which(VQCSusp$UnitID == input$unitidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),flagtype()] = "S"
     VQCSusp[which(VQCSusp$UnitID == input$unitidchoice & as.character(VQCSusp$DateTime) %in% VQCfaildataS$key),paste0(flagtype(),"chng")] = "S"
     VisQCdataupdate(VQCSusp)
-    
-  })
+  }
+)
 
 #FlagV=Pass for selected data-----
 observeEvent(
-  input$pass,{
+  input$passbttn,{
     VQCfaildataP = event_data(
       event = "plotly_selected",
-      source = "V")
+      source = "V"
+    )
     #datatypedf() from visqcUI code file
     VQCPass = datatypedf()
     VQCPass[which(VQCPass$UnitID == input$unitidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),flagtype()] = "P"
     VQCPass[which(VQCPass$UnitID == input$unitidchoice & as.character(VQCPass$DateTime) %in% VQCfaildataP$key),paste0(flagtype(),"chng")] = "P"
     VisQCdataupdate(VQCPass)
-    
-  })
+  }
+)

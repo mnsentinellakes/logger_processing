@@ -1,4 +1,3 @@
-
 output$saveconfigUI = renderUI({
   tagList(
     textInput(

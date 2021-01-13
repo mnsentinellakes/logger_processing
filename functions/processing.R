@@ -1,15 +1,14 @@
 turnoffprocessupdate = TRUE
 
-
-procwbs = reactive({
-  wbs = programwbs()
-  wbname = wbnames()
-  wbs = wbs[which(wbs$AppID == input$procwaterbody),]
-  wbname = wbname$Waterbody_Name[which(wbname$AppID == input$procwaterbody)]
-  wbs = cbind(wbs,wbname)
-  
-  return(wbs)
-})
+# procwbs = reactive({
+#   wbs = programwbs()
+#   wbname = wbnames()
+#   wbs = wbs[which(wbs$AppID == input$procwaterbody),]
+#   wbname = wbname$Waterbody_Name[which(wbname$AppID == input$procwaterbody)]
+#   wbs = cbind(wbs,wbname)
+# 
+#   return(wbs)
+# })
 
 #Format Raw input data for QC
 #datafilepath - raw input data file
@@ -22,7 +21,6 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   
   #Function for reading data
   readloggerdata = function(loggerfile,loggerfields){
-    
     skiprows = loggerfields$FieldNamesRow-1
     if (skiprows==0){
       skiprows=FALSE
@@ -42,7 +40,6 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
       delrow = seq(1,endrow)
       datafile = datafile[-delrow,]
     }
-    
     return(datafile)
   }
   
@@ -59,18 +56,14 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   
   #Select data fields
   datafields = Filter(function(x)!all(is.na(x)),loggerfields[,c(8:18)])
-  
-  
   datafieldnames = data.frame("qcfield"=names(datafields),"datafield"=unname(unlist(datafields[1,])),stringsAsFactors = FALSE)
   datafieldnames = datafieldnames[which(nchar(datafieldnames$datafield)>0),]
-  
   qctypes = datafieldnames$qcfield
   
   #Add units to to datafields table
   datafieldnames$Units = NA
   for (i in 1:nrow(datafieldnames)){
     datafieldnames[i,3] = qcunits$Units[which(qcunits$Logger_Type == datafieldnames[i,1] & qcunits$QC_Metric == "Gross.Fail.Hi")]
-    print(1)
   }
   datafieldnames$type = datafieldnames$qcfield
   datafieldnames$qcfield = paste0(datafieldnames$qcfield,datafieldnames$Units)
@@ -89,28 +82,22 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   datetimefieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$datafield),perl = TRUE))
   datafieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$qcfield),perl = TRUE))
   datafieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$datafield),perl = TRUE))
-  print(2)
   names(datafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(datafile)),perl = TRUE))
-  print(names(datafile))
+  
   #Rebuild dataset
   
   for (i in 1:nrow(datafieldnames)){
     
     builddata=data.frame("RowID" = seq(1:nrow(datafile)))
-    
     builddatacolumn = data.frame(datafile[which(names(datafile) == datafieldnames$datafield[i])])
-    
     
     names(builddatacolumn) = datafieldnames$qcfield[i]
     builddata = cbind(builddata,builddatacolumn)
     
-    
     #Convert Date and Time to correct format
     datetimeformat = paste0(loggerfields$Date_Format," ",loggerfields$Time_Format)
     if ("DateTime" %in% datetimefieldnames$qcfield){
-      
       builddatecolumn = datafile[which(names(datafile) == datetimefieldnames$datafield[which(datetimefieldnames$qcfield == "DateTime")])]
-      
     }else{
       builddatecolumn = paste0(datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Date"])]," ",
                                datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Time"])])
@@ -185,7 +172,6 @@ QCProcess = function(qcinfo,siteid){
       text = "Please ensure the date format in the Logger File Definitions match the input logger data",
       type = "error"
     )
-    
   }
 }
 
@@ -200,7 +186,6 @@ compileQCdata = function(qcinfo,depthstable){
   for (i in loggertypes){
     loggertypecompile = NULL
     for (j in siteids){
-      
       if (stopprocess == FALSE){
         qcpath = paste0("processing/",i,"/QC/")
         qcfiles = list.files(qcpath,full.names = TRUE)
@@ -208,40 +193,32 @@ compileQCdata = function(qcinfo,depthstable){
         
         if(length(qcfile)>0){
           readdata = read.csv(qcfile,stringsAsFactors = FALSE)
-      
-      datacompile = data.frame("UnitID" = j,
-                               "DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
-                               "Data" = readdata[,ncol(readdata)],
-                               "Z" = depthstable$Z[which(depthstable$UnitID == j)],
-                               "FlagGrossorig" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
-                               "FlagSpikeorig" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
-                               "FlagRoCorig" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
-                               "FlagFlatorig" = readdata[,which(grepl("Flag.Flat",names(readdata)))],
-                               "FlagVisorig" = "P",
-                               "FlagGrosschng" = as.character(NA),
-                               "FlagSpikechng" = as.character(NA),
-                               "FlagRoCchng" = as.character(NA),
-                               "FlagFlatchng" = as.character(NA),
-                               "FlagVischng" = as.character(NA),
-                               "FlagGross" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
-                               "FlagSpike" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
-                               "FlagRoC" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
-                               "FlagFlat" = readdata[,which(grepl("Flag.Flat",names(readdata)))],
-                               "FlagVis" = "P",
-                               stringsAsFactors = FALSE)
-      
-      loggertypecompile = rbind(loggertypecompile,datacompile)
-      }else{
-        
-        sendSweetAlert(
-          session = session,
-          title = paste("No file with ID:",j),
-          text = "Ensure the IDs in the Depths Table match the file names",
-          type = "error"
-        )
-        stopprocess = TRUE
-    }
-    datalist[[i]] = loggertypecompile
+          
+          datacompile = data.frame("UnitID" = j,"DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
+                                   "Data" = readdata[,ncol(readdata)],"Z" = depthstable$Z[which(depthstable$UnitID == j)],
+                                   "FlagGrossorig" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
+                                   "FlagSpikeorig" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
+                                   "FlagRoCorig" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
+                                   "FlagFlatorig" = readdata[,which(grepl("Flag.Flat",names(readdata)))],
+                                   "FlagVisorig" = "P","FlagGrosschng" = as.character(NA),"FlagSpikechng" = as.character(NA),
+                                   "FlagRoCchng" = as.character(NA),"FlagFlatchng" = as.character(NA),"FlagVischng" = as.character(NA),
+                                   "FlagGross" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
+                                   "FlagSpike" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
+                                   "FlagRoC" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
+                                   "FlagFlat" = readdata[,which(grepl("Flag.Flat",names(readdata)))],"FlagVis" = "P",
+                                   stringsAsFactors = FALSE)
+          
+          loggertypecompile = rbind(loggertypecompile,datacompile)
+        }else{
+          sendSweetAlert(
+            session = session,
+            title = paste("No file with ID:",j),
+            text = "Ensure the IDs in the Depths Table match the file names",
+            type = "error"
+          )
+          stopprocess = TRUE
+        }
+        datalist[[i]] = loggertypecompile
       }else{}
     }
   }
@@ -263,7 +240,7 @@ deployid = reactiveVal()
 
 #Run Data Processing and QC
 observeEvent(
-  input$processing,{
+  input$processingbttn,{
     
     #Disable processing button to prevent duplicate processing
     toggleState("processing")
@@ -298,7 +275,6 @@ observeEvent(
       progval = 5
       #Iterates through the uploaded files, reformats them and runs QC
       for (j in 1:length(datapaths)){
-        
         #Format input csv name
         inputname=as.character(filetable$name[j])
         inputname=as.character(gsub(".csv","",inputname))
@@ -307,7 +283,6 @@ observeEvent(
         
         #Continue if input name is in the depthstable
         if (inputname %in% depthstableselect$UnitID){
-          
           #Create processing folder
           file.create("processing",showWarnings = FALSE)
           
@@ -348,7 +323,7 @@ observeEvent(
           )
           stopqc = FALSE
           
-        #If the input csv name is not in the depthstable, send an alert and stop the process
+          #If the input csv name is not in the depthstable, send an alert and stop the process
         }else{
           sendSweetAlert(
             session = session,
@@ -377,7 +352,6 @@ observeEvent(
           depthstable = depthstableselect
         )
         
-        
         if(compiledata[[2]] == FALSE){
           
           compiledata = compiledata[[1]]
@@ -402,7 +376,6 @@ observeEvent(
           stationupdate = stations()
           
           #Update the depths table processed date
-          
           if (turnoffprocessupdate == FALSE){
             updatedates$Processed[which(updatedates$StationID == input$procstationname &
                                           updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
@@ -417,11 +390,9 @@ observeEvent(
             selectunit = unique(qctable$Units[which(qctable$AppID == input$procwaterbody & qctable$Logger_Type == k)])
             selectunit = selectunit[!is.na(selectunit)]
             
-            
-            # print(paste(sort(unique(compiledata$Z)),collapse = ","))
-            
             deployaddrow = data.frame(
               "DeployID" = deployidcreate,
+              "ModelID" = input$procmodel,
               "Logger_Type" = k,
               "Lat" = input$lat,
               "Lon" = input$lon,
@@ -502,11 +473,11 @@ output$dataoutput=renderDT(
   options=list(
     lengthChange = FALSE
   ),
-  extensions = 'Responsive',
-  {
-
+  extensions = 'Responsive',{
+    
     qcdatadisplay=VisQCdata()
     datatypeselect = head(qcdatadisplay[[input$prevloggerchoices]])
     
     return(datatypeselect[,c(1:4,15:18)])
-  })
+  }
+)

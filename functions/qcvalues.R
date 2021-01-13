@@ -1,4 +1,3 @@
-
 #Build the config file used by ContDataQC
 observe({
   qcconfigdata=qc_config()
