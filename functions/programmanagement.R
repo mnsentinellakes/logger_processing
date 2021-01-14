@@ -789,7 +789,7 @@ observeEvent(
   input$editstationbttn,{
     editstations = stations()
     editstations$Station_Name[which(editstations$StationID == input$editstationnamechoices)] = input$editstationname
-    editstationnameUI$ProgramStationID[which(editstations$StationID == input$editstationnamechoices)] = input$editprogramstationid
+    editstations$ProgramStationID[which(editstations$StationID == input$editstationnamechoices)] = input$editprogramstationid
     editstations$Lat[which(editstations$StationID == input$editstationnamechoices)] = input$stationlatedit
     editstations$Lon[which(editstations$StationID == input$editstationnamechoices)] = input$stationlonedit
     
