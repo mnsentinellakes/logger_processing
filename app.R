@@ -19,12 +19,13 @@ library(xts)
 library(readr)
 library(rmarkdown)
 library(DT)
-library(mnsentinellakes)
+# library(mnsentinellakes)
 library(ids)
 library(lubridate)
 library(zip)
 source("functions/dashboard.R")
 options(scipen = 999)
+baseconfigversion = 0.5
 # function definitions are located in the dashboard.R file
 ui <- dashboardPagePlus(
     header = dashboardHeaderPlus(
