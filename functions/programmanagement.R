@@ -26,12 +26,22 @@ output$loadconfigfileUI = renderUI({
   )
 })
 
+#All code used to update potential changes to tables in baseconfig
+updatebaseconfigversion = function(){
+  if(is.null(baseconfig$version)){
+    baseconfig$version = 0.5
+  }
+}
+
 #Observe Config Load Button
 observeEvent(
   input$baseconfigloadbttn,{
     baseconfiginput=input$baseconfigload
     
     load(baseconfiginput$datapath)
+    
+    updatebaseconfigversion()
+    
     save(baseconfig,file = "config/baseconfig.RData")
     
     #Assign programs data frame to a reactive value
