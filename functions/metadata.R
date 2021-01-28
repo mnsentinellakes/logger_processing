@@ -102,22 +102,42 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
 }
 
 #Compile QC Settings for export
-getqcsettings = function(appid,deployid,deploylogs,qcconfig,programwbs,wbnames){
+getqcsettings = function(appid,stationid,deployid,deploylogs,qcconfig,programwbs,wbnames,stations){
   
   selectdeploy = deploylogs
-  
   #deployid() sourced from processing.R
-  selectdeploy = selectdeploy$Logger_Type[which(selectdeploy$DeployID == deployid)]
+  #Select Logger Type
+  selectdeploylogger = unique(selectdeploy$Logger_Type[which(selectdeploy$DeployID == deployid)])
+  #Select Deployment Count
+  selectdeploycount = unique(selectdeploy$Deployment_Count[which(selectdeploy$DployID == deployid)])
   
+  selectstation = stations
+  selectstation = stations[which(stations$StationID == stationid),]
+  selectstationprogid = selectstation$ProgramStationID
+  selectstationname = selectstation$Station_Name
+  
+  #Select QC Data
   selectqcdata = qcconfig
   #input$procwaterbody sourced from processingUI.R
-  selectqcdata = selectqcdata[which(selectqcdata$AppID == input$procwaterbody & selectqcdata$Logger_Type %in% selectdeploy),]
+  selectqcdata = selectqcdata[which(selectqcdata$AppID == input$procwaterbody & selectqcdata$Logger_Type %in% selectdeploylogger),]
   qcwbid = programwbs$ProgramWaterbodyID[which(programwbs$AppID == appid)]
   qcwbname = wbnames$Waterbody_Name[which(wbnames$AppID == appid)]
   selectqcdata$AppID = NULL
-  selectqcdata$WaterbodyID = qcwbid
-  selectqcdata$WaterbodyName = qcwbname
-  selectqcdata = selectqcdata[,c(5,6,1:4)]
+  #Add Fields
+  if (!is.na(qcwbid)){
+    selectqcdata$WaterbodyID = qcwbid
+  }
+  if (!is.na(qcwbname)){
+    selectqcdata$WaterbodyName = qcwbname
+  }
+  if(!is.na(selectstationprogid)){
+    selectqcdata$StationID = selectstationprogid
+  }
+  if(!is.na(selectstationname)){
+    selectqcdata$StationName = selectstationname
+  }
+  
+  # selectqcdata = selectqcdata[,c(5,6,1:4)]
   
   write.csv(selectqcdata,"temp/qcsettings.csv",row.names = FALSE)
 }
