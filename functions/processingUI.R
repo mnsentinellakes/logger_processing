@@ -11,12 +11,14 @@ output$pwlmUI = renderUI({
         fluidRow(
           column(
             width = 3,
-            pickerInput(
-              inputId = "procprogram",
-              label = "Program",
-              choices = programid(),
-              options = list(
-                style = "btn-success"
+            isolate(
+              pickerInput(
+                inputId = "procprogram",
+                label = "Program",
+                choices = programid(),
+                options = list(
+                  style = "btn-success"
+                )
               )
             )
           ),
@@ -57,12 +59,14 @@ procwaterbody_names = reactive({
 
 #Processing Waterbody Choices
 output$procwaterbodyUI = renderUI({
-  pickerInput(
-    inputId = "procwaterbody",
-    label = "Waterbody",
-    choices = procwaterbody_names(),
-    options = list(
-      style = "btn-success"
+  isolate(
+    pickerInput(
+      inputId = "procwaterbody",
+      label = "Waterbody",
+      choices = procwaterbody_names(),
+      options = list(
+        style = "btn-success"
+      )
     )
   )
 })
@@ -80,12 +84,14 @@ output$procstationnameUI = renderUI({
   stationnamechoices = stationnametable$StationID
   names(stationnamechoices) = stationnametable$Station_Name
   
-  pickerInput(
-    inputId = "procstationname",
-    choices = stationnamechoices,
-    label = "Station Name",
-    options = list(
-      style = "btn-success"
+  isolate(
+    pickerInput(
+      inputId = "procstationname",
+      choices = stationnamechoices,
+      label = "Station Name",
+      options = list(
+        style = "btn-success"
+      )
     )
   )
 })
@@ -94,12 +100,14 @@ output$procstationnameUI = renderUI({
 output$procmodelUI = renderUI({
   
   #loggermodelsedit() reactive sourced from logfiledefs.R
-  pickerInput(
-    inputId = "procmodel",
-    label = "Logger Model",
-    choices = loggermodelsedit(),
-    options = list(
-      style = "btn-success"
+  isolate(
+    pickerInput(
+      inputId = "procmodel",
+      label = "Logger Model",
+      choices = loggermodelsedit(),
+      options = list(
+        style = "btn-success"
+      )
     )
   )
 })
@@ -115,53 +123,77 @@ deploycounter = reactive({
   deployidselect = processinglogs()
   deploycountdata = deploylogs()
   
-  deployidselect = unique(deployidselect$DeployID[which(deployidselect$AppID == input$procwaterbody & 
+  if (nrow(deployidselect) > 0){
+    if (all(is.na(deployidselect$DeployID))){
+      deploycountdata = 1
+    }else{
+ 
+      deployidselect = unique(deployidselect$DeployID[which(deployidselect$StationID == input$procstationname & 
                                                           deployidselect$ModelID == input$procmodel)])
-  
-  if (length(deployidselect)>0){
-    deploycountdata = max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)]) + 1
+      
+      if (length(deployidselect)>0){
+        # print(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)]))
+        
+        deploycountdata = as.numeric(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)])) + 1
+        
+      }else{
+        deploycountdata = 1
+      }
+
+    }
   }else{
     deploycountdata = 1
   }
+  
   return(deploycountdata)
 })
 
 output$procmetadataUI = renderUI({
   coords = coordselect()
+  deploynumber = deploycounter()
   
   tagList(
     fluidRow(
       column(
         width = 6,
-        numericInput(
-          inputId = "lat",
-          label = "Latitude",
-          value = coords$Lat
+        isolate(
+          numericInput(
+            inputId = "lat",
+            label = "Latitude",
+            value = coords$Lat
+          )
         )
       ),
       column(
         width = 6,
-        numericInput(
-          inputId = "lon",
-          label = "Longitude",
-          value = coords$Lon
+        isolate(
+          numericInput(
+            inputId = "lon",
+            label = "Longitude",
+            value = coords$Lon
+          )
         )
       )
     ),
     fluidRow(
       column(
         width = 3,
-        textInput(
-          inputId = "deploynum",
-          label = "Deployment",
-          value = deploycounter()
+        isolate(
+          numericInput(
+            inputId = "deploynum",
+            label = "Deployment",
+            value = deploynumber,
+            step = 1
+          )
         )
       ),
       column(
         width = 9,
-        textInput(
-          inputId = "username",
-          label = "User Name"
+        isolate(
+          textInput(
+            inputId = "username",
+            label = "User Name"
+          )
         )
       )
     ),
