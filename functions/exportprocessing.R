@@ -53,6 +53,9 @@ observeEvent(
     wbnamessettings = wbnames()
     #Stations
     stationssettings = stations()
+    #Deploy Logs
+    deploylogssettings = deploylogs()
+    
     #LoggerFiles
     loggerfilesettings = loggerfiledefs()
     #Export Data
@@ -140,14 +143,14 @@ observeEvent(
     if (exportsettings$IncDeploy == TRUE){
       
       #input$deploynum sourced from processingUI.R
-      startfields$deploy = input$deploynum
+      startfields$deploy = unique(deploylogssettings$Deployment_Count[which(deploylogssettings$DeployID == deployid())])
       names(startfields)[ncol(startfields)] = exportsettings$Deployment
     }
     
     #Add User Name
     if (exportsettings$IncUser == TRUE){
       #input$username sourced from processingUI.R
-      startfields$user = input$username
+      startfields$user = unique(deploylogssettings$Processedby[which(deploylogssettings$DeployID == deployid())])
       names(startfields)[ncol(startfields)] = exportsettings$User
     }
     
@@ -331,6 +334,11 @@ observeEvent(
       }
       finaldata(combinelist)
     }
+
+    
+        
+    #Clear VisQCdata
+    VisQCdata(NULL)
   }
 )
 
@@ -428,11 +436,13 @@ output$dlddata = downloadHandler(
       
       getqcsettings(
         appid = input$procwaterbody,
+        stationid = input$procstationname
         deployid = deployid(),
         deploylogs = deploylogs(),
         qcconfig = qc_config(),
         programwbs = programwbs(),
-        wbnames = wbnames()
+        wbnames = wbnames(),
+        stations = stations()
       )
       
       zip_append(
