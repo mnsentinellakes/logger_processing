@@ -265,12 +265,12 @@ observeEvent(
 )
 
 # Updates the Processed date in the depthsfile when the "Process Data" button is clicked
-observeEvent(
-  input$processingbttn,{
-    updatedates = processinglogs()
-    updatedates$Processed[which(updatedates$StationID == input$procstationname &
-                                  updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
-    processinglogs(updatedates)
-    updatebaseconfig()
-  }
-)
+# observeEvent(
+#   input$processingbttn,{
+#     updatedates = processinglogs()
+#     updatedates$Processed[which(updatedates$StationID == input$procstationname &
+#                                   updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
+#     processinglogs(updatedates)
+#     updatebaseconfig()
+#   }
+# )
