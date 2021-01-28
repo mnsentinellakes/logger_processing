@@ -52,6 +52,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   
   #Select datetime fields
   datetimefields = Filter(function(x)!all(is.na(x)),loggerfields[,2:4])
+  
   datetimefieldnames = data.frame("qcfield"=names(datetimefields),"datafield"=unname(unlist(datetimefields[1,])),stringsAsFactors = FALSE)
   
   #Select data fields
@@ -85,12 +86,12 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   names(datafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(datafile)),perl = TRUE))
   
   #Rebuild dataset
-  
   for (i in 1:nrow(datafieldnames)){
     
     builddata=data.frame("RowID" = seq(1:nrow(datafile)))
-    builddatacolumn = data.frame(datafile[which(names(datafile) == datafieldnames$datafield[i])])
     
+    builddatacolumn = data.frame(datafile[which(names(datafile) == datafieldnames$datafield[i])])
+
     names(builddatacolumn) = datafieldnames$qcfield[i]
     builddata = cbind(builddata,builddatacolumn)
     
@@ -188,7 +189,9 @@ compileQCdata = function(qcinfo,depthstable){
     for (j in siteids){
       if (stopprocess == FALSE){
         qcpath = paste0("processing/",i,"/QC/")
+        
         qcfiles = list.files(qcpath,full.names = TRUE)
+        
         qcfile = qcfiles[which(grepl(j,qcfiles))]
         
         if(length(qcfile)>0){
@@ -212,8 +215,9 @@ compileQCdata = function(qcinfo,depthstable){
         }else{
           sendSweetAlert(
             session = session,
-            title = paste("No file with ID:",j),
-            text = "Ensure the IDs in the Depths Table match the file names",
+            title = paste("No file with ID:",j,"or incorrect date/time format"),
+            text = "Ensure the IDs in the Depths Table match the file names and that the date/time format set in the Logger File Definitions
+            tab matches the date/time format in the logger file.",
             type = "error"
           )
           stopprocess = TRUE
@@ -368,22 +372,29 @@ observeEvent(
             title = paste("Saving Metadata")
           )
           
+          #Create random deployid
+          deployidcreate = random_id(n = 1,bytes = 16)
+          deployid(deployidcreate)
+          
           ##Update tables
           #Load tables
-          updatedates = processinglogs()
+          updateproclogs = processinglogs()
           deployadd = deploylogs()
           qctable = qc_config()
           stationupdate = stations()
           
+          updateproclogs$DeployID[which(updateproclogs$StationID == input$procstationname & 
+                                          updateproclogs$ModelID == input$procmodel & 
+                                          is.na(updateproclogs$Processed))] = deployid()
+          
           #Update the depths table processed date
           if (turnoffprocessupdate == FALSE){
-            updatedates$Processed[which(updatedates$StationID == input$procstationname &
-                                          updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
-            processinglogs(updatedates)
+            updateproclogs$Processed[which(updateproclogs$StationID == input$procstationname &
+                                          updateproclogs$ModelID == input$procmodel & is.na(updateproclogs$Processed))] = Sys.Date()
           }
+          processinglogs(updateproclogs)
+          
           #Update deploy table
-          deployidcreate = random_id(n = 1,bytes = 16)
-          deployid(deployidcreate)
           
           deployaddrows = NULL
           for (k in names(compiledata)){
@@ -450,6 +461,10 @@ observeEvent(
     }
     
     unlink("processing/*",recursive = TRUE,force = TRUE)
+    
+    
+      finaldata(NULL)
+    
     
   })
 
