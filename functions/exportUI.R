@@ -43,7 +43,14 @@ output$exportUI = renderUI({
       )
     ),
     column(
-      width = 3
+      width = 3,
+      box(
+        solidHeader = TRUE,
+        status = "success",
+        width = NULL,
+        title = "",
+        uiOutput("exportdescUI")
+      )
     )
   )
 })
@@ -86,3 +93,12 @@ output$finaltable = renderDT(
     }else{}
   }
 )
+
+output$exportdescUI = renderUI({
+  tags$p(
+    HTML("<font size = 4><i>"),
+    "Click the Process Data for Export button to organize the data into its final state. The data can be previewed in the Data Preview box.
+    If the data formatting looks correct, click on the Download Data button to begin the download process.",
+    HTML("</i></font>")
+  )
+})
