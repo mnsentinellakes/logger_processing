@@ -30,7 +30,14 @@ output$exportoptionsUI = renderUI({
         )
       ),
       column(
-        width = 3
+        width = 3,
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "",
+          uiOutput("exportoptionsdescUI")
+        )
       )
     )
   )
@@ -1237,3 +1244,21 @@ observeEvent(
     updatebaseconfig()
   }
 )
+
+output$exportoptionsdescUI = renderUI({
+  tags$p(
+    HTML("<font size = 4><i>"),
+    "Customize which data the app will export and how the data will be organized.",
+    tags$br(),
+    tags$br(),
+    "If a logger model collects multiple metrics, they can all be combined into a single file or each metric can be exported into 
+    separate files.",
+    tags$br(),
+    tags$br(),
+    "Select which fields should included in the data file and what those field names should be. Note that the Unit ID Field is required.",
+    tags$br(),
+    tags$br(),
+    "The Date and Time fields can either be combined or separated and the relevant time zone needs to be selected.",
+    HTML("</i></font>")
+  )
+})
