@@ -92,7 +92,8 @@ tabItems(
           solidHeader = TRUE,
           status = "success",
           width = NULL,
-          title = ""
+          title = "",
+          uiOutput("aedstationsdescUI")
         )
       )
     )
@@ -256,6 +257,16 @@ tabItems(
             title = "Begin Processing"
           )
         )
+      ),
+      column(
+        width = 3,
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "",
+          uiOutput("procdescUI")
+        )
       )
     ),
     box(
@@ -283,6 +294,15 @@ tabItems(
           width = NULL,
           #UI output of qc options rendered in the server side of the app
           uiOutput("visqcoptionsUI")
+        ),
+        box(
+          solidHeader = TRUE,
+          status = "success",
+          width = NULL,
+          title = "Description",
+          collapsible = TRUE,
+          collapsed = TRUE,
+          uiOutput("visqcdescUI")
         )
       ),
       column(
