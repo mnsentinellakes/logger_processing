@@ -276,9 +276,9 @@ output$aedwaterbodiesUI = renderUI({
 output$aedwaterbodiesdescUI = renderUI({
   tags$p(
     HTML("<font size = 4><i>"),
-    "For the selected program, add new waterbodies, edit the name and/or id of existing waterbodies, or delete waterbodies. If a waterbody 
-    does not already have a unique id provided by the program or organization it is associated with, an id will need to be created by 
-    clicking the Generate Waterbody ID button before adding the waterbody to the configuration file",
+    "For the selected program, add new waterbodies, edit the name and/or id of existing waterbodies, or delete waterbodies. Each waterbody 
+    is required to be named. If it does not already have an existing id, one can be generated using the Generate Waterbody ID button. This can 
+    also be left blank. Select the type of waterbody.",
     HTML("</i></font>")
   )
 })
@@ -736,6 +736,15 @@ output$editstationnameUI = renderUI({
         )
       )
     )
+  )
+})
+
+output$aedstationsdescUI = renderUI({
+  tags$p(
+    HTML("<font size = 4><i>"),
+    "For the selected waterbody, add a new station, edit existing stations or delete them. A station name is required for each station. Adding
+    a station id is optional. The latitude and longitude fields can be left blank.",
+    HTML("</i></font>")
   )
 })
 
