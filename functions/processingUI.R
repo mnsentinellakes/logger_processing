@@ -208,6 +208,19 @@ output$procmetadataUI = renderUI({
   )
 })
 
+#Processing Description
+output$procdescUI = renderUI({
+  tags$p(
+    HTML("<font size = 4><i>"),
+    "Select the relevant Program, Waterbody, Station, and Logger Model in the Setup box at the top. Each file to be processed should be named
+    according to a logger unit id. This could be a Serial Number or some other unique identifier. Enter each of these identifiers into the
+    Logger Units Box along with any associated Z/Depth/Altitude values (if relevant). Upload the data for processing. Ensure the Latitude,
+    Longitude, Deployment, and User Name fields are correct and click the Process Data button. Wait for the progres bar to reach 100% before
+    moving on to the next steps. The processed data can be viewed in the Data Preview box by clicking the + sign on the right.",
+    HTML("</i></font>")
+  )
+})
+
 #Data Preview Table UI
 output$dataprevUI = renderUI({
   tagList(
