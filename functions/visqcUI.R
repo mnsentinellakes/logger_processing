@@ -143,3 +143,15 @@ output$depthoutUI = renderUI({
     )
   )
 })
+
+output$visqcdescUI = renderUI({
+  
+  tags$p(
+    HTML("<font size = 4><i>"),
+    "These tools allow the user to interactively select and flag data points for QC. The QC Tools choices can be used to cycle through the 
+    logger data types, unit ids, and qc flags. There is an additional toolbar located at the top right corner of the main plot. These tools 
+    can be used to zoom and pan around the plot as well as select the data points. Once data points are selected, they can be flagged using
+    the QC Flag buttons.",
+    HTML("</i></font>")
+  )
+})
