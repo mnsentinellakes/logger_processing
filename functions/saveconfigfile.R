@@ -15,7 +15,7 @@ output$saveconfigUI = renderUI({
 
 output$saveconfigbttn = downloadHandler(
   filename = function() {
-    paste0(input$saveconfigname,".Rdata")
+    paste0(input$saveconfigname,".RData")
   },
   content = function(file){
     load("config/baseconfig.RData")
