@@ -436,7 +436,7 @@ output$dlddata = downloadHandler(
       
       getqcsettings(
         appid = input$procwaterbody,
-        stationid = input$procstationname
+        stationid = input$procstationname,
         deployid = deployid(),
         deploylogs = deploylogs(),
         qcconfig = qc_config(),
