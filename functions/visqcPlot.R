@@ -17,6 +17,9 @@ flagtype = reactive({
 })
 
 output$VisQCplot = renderPlotly({
+  validate(
+    need(!is.null(VisQCdata()),"Loading...")
+  )
   #datatypedf() from visqcUI code file
   QCdata = datatypedf()
   QCdata = QCdata[which(QCdata$UnitID == input$unitidchoice),]
