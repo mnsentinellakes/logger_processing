@@ -1,6 +1,6 @@
 #Metadata-----------------------------------------------------------------------
 #Name: Logger Processing and QC App
-#Version: 0.5b
+#Version: 0.5
 #Purpose: Process and QC Aquatic Loggers
 #Developed by: Tim Martin
 #Contact: tim.martin@state.mn.us
@@ -13,13 +13,13 @@ library(ContDataQC)
 library(shinyjs)
 library(shinyWidgets)
 library(dplyr)
+library(ggplot2)
 library(plotly)
 library(grDevices)
 library(xts)
 library(readr)
 library(rmarkdown)
 library(DT)
-# library(mnsentinellakes)
 library(ids)
 library(lubridate)
 library(zip)
@@ -28,6 +28,7 @@ options(scipen = 999)
 baseconfigversion = 0.5
 # function definitions are located in the dashboard.R file
 ui <- dashboardPagePlus(
+    # enable_preloader = TRUE,
     header = dashboardHeaderPlus(
         #Title
         title = "Data Logger Processing",
@@ -45,6 +46,9 @@ ui <- dashboardPagePlus(
 
 # Define server logic 
 server <- function(input,output,session) {
+    
+    #Code for about page
+    source("functions/about.R",local = TRUE)$value
     
     #Code for loading baseconfig data, holding all metadata and configuration data
     source("functions/baseconfigload.R",local = TRUE)$value
