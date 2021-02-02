@@ -584,18 +584,20 @@ output$useUI = renderUI({
           class = "use-text",
           tags$p(
             "This spot is reserved for language about how the user takes all the risk when using this app and that the developers do not 
-        guarantee the results."
+            guarantee the results."
           )
         )
       )
-      ),
-      tags$br(),
-      HTML("</CENTER>")
-    )
-    
+    ),
+    tags$br(),
+    HTML("</CENTER>")
+  )
+  
 })
 
-output$furtherdevUI = renderUI({
-  
-  
-})
+# output$furtherdevUI = renderUI({
+#   tagList(
+#     tags$style()
+#   )
+#   
+# })
