@@ -1,4 +1,4 @@
-sendask = FALSE
+sendask = TRUE
 
 output$aboutUI = renderUI({
   tagList(
@@ -7,8 +7,8 @@ output$aboutUI = renderUI({
         session = session,
         title = "Help Develop the Logger Processing App",
         text = "This app has been developed to be open-source and community-run. We are looking for aquatic natural resources professionals who
-      are interested in helping with further development to increase the functionality of the app and ensure its long-term viability. If you
-      are interested, please e-mail on of the individuals listed under the Contacts tab on the About page.",
+        are interested in helping further develop the app to increase its functionality and ensure its long-term viability. If this interest 
+        you, please e-mail one of the individuals listed under the Contacts tab on the About page.",
         type = "info"
       )
     },
