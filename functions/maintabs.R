@@ -1,9 +1,10 @@
 #Setup and Processing Tab----
 #Interface for setting up the data for processing and processing
 tabItems(
-  #Home Tab----
+  #About Tab----
   tabItem(
     tabName = "abouttab",
+    uiOutput("aboutUI"),
     useSweetAlert()
   ),
   #Programs and Waterbodies Tab----
