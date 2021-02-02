@@ -357,7 +357,7 @@ output$dlddata = downloadHandler(
     unlink(paste0(getwd(),"/temp"),recursive = FALSE)
     
     #Create Temp folder
-    dir.create(paste0(getwd(),"/temp"))
+    dir.create("temp")
     
     #Get Waterbody Name
     wbnamedld = wbnames()
