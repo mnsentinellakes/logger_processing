@@ -256,6 +256,8 @@ observeEvent(
       #Table with information about the uploaded data
       filetable=input$dataupload
       
+      print(paste("WD1",list.dirs(getwd(),recursive = TRUE,full.names = TRUE)))
+      
       #Temp paths to the uploaded data
       datapaths=filetable$datapath
       #Logger lookup table for associating loggers to depths
@@ -288,7 +290,7 @@ observeEvent(
         #Continue if input name is in the depthstable
         if (inputname %in% depthstableselect$UnitID){
           #Create processing folder
-          file.create("processing",showWarnings = FALSE)
+          dir.create("processing",showWarnings = FALSE)
           
           #Update Progress Bar
           progval = progval + progvaltotal
@@ -299,7 +301,7 @@ observeEvent(
             status = "success",
             title = paste("Formatting",inputname,"for QC")
           )
-          
+          print(paste("WD2",list.dirs(getwd(),recursive = TRUE,full.names = TRUE)))
           #Run formatforQC
           qcinfo = formatforQC(
             datafilepath = datapaths[j],
@@ -319,14 +321,14 @@ observeEvent(
             status = "success",
             title = paste("Running automatic QC checks for",inputname)
           )
-          
+          print(paste("WD3",list.dirs(getwd(),recursive = TRUE,full.names = TRUE)))
           #Run QCProcess
           QCProcess(
             qcinfo = qcinfo,
             siteid = inputname
           )
           stopqc = FALSE
-          
+          print(paste("WD4",list.dirs(getwd(),recursive = TRUE,full.names = TRUE)))
           #If the input csv name is not in the depthstable, send an alert and stop the process
         }else{
           sendSweetAlert(
@@ -349,7 +351,7 @@ observeEvent(
           status = "success",
           title = paste("Compiling and formatting QCed data for",inputname)
         )
-        
+        print(paste("WD5",list.dirs(getwd(),recursive = TRUE,full.names = TRUE)))
         #Run compileQCdata
         compiledata = compileQCdata(
           qcinfo = qcinfo,
