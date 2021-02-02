@@ -28,7 +28,6 @@ options(scipen = 999)
 baseconfigversion = 0.5
 # function definitions are located in the dashboard.R file
 ui <- dashboardPagePlus(
-    # enable_preloader = TRUE,
     header = dashboardHeaderPlus(
         #Title
         title = "Data Logger Processing",
