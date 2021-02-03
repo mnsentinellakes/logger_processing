@@ -1,4 +1,5 @@
 loadstatus = reactiveVal("")
+`%notin%` <- Negate(`%in%`)
 
 #Load Configuration File UI
 output$loadconfigfileUI = renderUI({
@@ -7,7 +8,9 @@ output$loadconfigfileUI = renderUI({
       width = 6,
       fileInput(
         inputId = "baseconfigload",
-        label = NULL
+        label = NULL,
+        accept = ".RData",
+        multiple = FALSE
       )
     ),
     column(
@@ -26,37 +29,60 @@ output$loadconfigfileUI = renderUI({
   )
 })
 
+
+
 #All code used to update potential changes to tables in baseconfig
-updatebaseconfigversion = function(){
-  if(is.null(baseconfig$version)){
-    baseconfig$version = 0.5
+updatebaseconfigversion = function(baseconfig){
+  print(names(baseconfig))
+  
+  print("version" %notin% names(baseconfig))
+  if("version" %notin% names(baseconfig)){
+    baseconfig = c(baseconfig,"version" = 0.5)
   }
+  
+  
 }
 
 #Observe Config Load Button
 observeEvent(
   input$baseconfigloadbttn,{
-    baseconfiginput=input$baseconfigload
     
-    load(baseconfiginput$datapath)
-    
-    updatebaseconfigversion()
-    
-    save(baseconfig,file = "config/baseconfig.RData")
-    
-    #Assign programs data frame to a reactive value
-    programs(baseconfig$programs)
-    #Assign program waterbodies data frame to a reactive value
-    programwbs(baseconfig$programwbs)
-    #Assign waterbody names data frame to a reactive value
-    wbnames(baseconfig$wbnames)
-    #Assign processing logs data frame to a reactive value
-    processinglogs(baseconfig$processinglogs)
-    #Assign QC configuration settings data frame to a reactive value
-    qc_config=reactiveVal(baseconfig$qc_config)
-    #Assign Logger File definitions to a reactive value
-    loggerfiledefs(baseconfig$loggerfiledefs)
-    loadstatus("Configuration File Loaded")
+    if (!is.null(input$baseconfigload)){
+      
+      baseconfiginput=input$baseconfigload
+      
+      if (grepl(".RData",baseconfiginput$name,fixed = TRUE)){
+        load(baseconfiginput$datapath)
+        
+        if (names(baseconfig)[1] == "programs"){
+          
+         baseconfig = updatebaseconfigversion(baseconfig)
+          print(names(baseconfig))
+          save(baseconfig,file = "config/baseconfig.RData")
+          
+          #Assign programs data frame to a reactive value
+          programs(baseconfig$programs)
+          #Assign program waterbodies data frame to a reactive value
+          programwbs(baseconfig$programwbs)
+          #Assign waterbody names data frame to a reactive value
+          wbnames(baseconfig$wbnames)
+          #Assign processing logs data frame to a reactive value
+          processinglogs(baseconfig$processinglogs)
+          #Assign QC configuration settings data frame to a reactive value
+          qc_config=reactiveVal(baseconfig$qc_config)
+          #Assign Logger File definitions to a reactive value
+          loggerfiledefs(baseconfig$loggerfiledefs)
+          loadstatus("Configuration File Loaded")
+        }else{
+          loadstatus("Incompatible File")
+        }
+      } else{
+        loadstatus("Incorrect File Type")
+      }
+    }else{
+      loadstatus("Uploaded Configuration File Missing")
+      
+    }
   }
 )
 
