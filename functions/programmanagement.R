@@ -61,17 +61,24 @@ observeEvent(
           save(baseconfig,file = "config/baseconfig.RData")
           
           #Assign programs data frame to a reactive value
-          programs(baseconfig$programs)
+          programs = reactiveVal(baseconfig$programs)
           #Assign program waterbodies data frame to a reactive value
-          programwbs(baseconfig$programwbs)
+          programwbs = reactiveVal(baseconfig$programwbs)
           #Assign waterbody names data frame to a reactive value
-          wbnames(baseconfig$wbnames)
+          wbnames = reactiveVal(baseconfig$wbnames)
+          #Assign stations data frame to a reactive value
+          stations = reactiveVal(baseconfig$stations)
           #Assign processing logs data frame to a reactive value
-          processinglogs(baseconfig$processinglogs)
+          processinglogs = reactiveVal(baseconfig$processinglogs)
           #Assign QC configuration settings data frame to a reactive value
-          qc_config=reactiveVal(baseconfig$qc_config)
+          qc_config = reactiveVal(baseconfig$qc_config)
           #Assign Logger File definitions to a reactive value
-          loggerfiledefs(baseconfig$loggerfiledefs)
+          loggerfiledefs = reactiveVal(baseconfig$loggerfiledefs)
+          #Assign Deploy Logs to a reactive value
+          deploylogs = reactiveVal(baseconfig$deploylogs)
+          #Assign Export Settings to a reactive value
+          export = reactiveVal(baseconfig$export)
+          
           loadstatus("Configuration File Loaded")
         }else{
           loadstatus("Incompatible File")
