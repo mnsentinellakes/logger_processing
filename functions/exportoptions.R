@@ -701,7 +701,8 @@ modelnamesselectexport = reactive({
   
   modelexport = modelexport[which(modelexport$ModelID == input$selectloggerexport),]
   modelexport = modelexport[,8:18]
-  modelexportnona = modelexport %>% select_if(function(x){all(!is.na(x))})
+  modelexportnona = modelexport %>% select_if(function(x){all(!is.na(x)) & all(x != "")})
+  
   loggermodeltypes = colnames(modelexportnona)
   
   return(loggermodeltypes)
@@ -1004,7 +1005,7 @@ observeEvent(
       exportfinal$TZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$tzexport
       
       #Data Field Names
-      if (!is.na(loggerexportfinal$AirBP)){
+      if (!is.na(loggerexportfinal$AirBP) ){
         exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airbpexport
       }else{
         exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
