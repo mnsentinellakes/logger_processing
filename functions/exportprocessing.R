@@ -77,7 +77,6 @@ observeEvent(
       tzone = exportsettings$TZ
     )
     
-    
     #Split or separate dates
     if (exportsettings$DateTimeSep == "Combined"){
       names(startfields)[2] = exportsettings$Date_Time
@@ -119,6 +118,7 @@ observeEvent(
       names(startfields)[ncol(startfields)] = exportsettings$WBName
     }
     
+    #Add WaterBody Type
     if (exportsettings$IncWBType == TRUE){
       #input$procwaterbody sourced from processingUI.R
       startfields$wbtype = wbnamessettings$programwbssettings$WB_Type[which(programwbssettings$AppID == input$procwaterbody)]
@@ -141,7 +141,6 @@ observeEvent(
     
     #Add Deployment Count
     if (exportsettings$IncDeploy == TRUE){
-      
       #input$deploynum sourced from processingUI.R
       startfields$deploy = unique(deploylogssettings$Deployment_Count[which(deploylogssettings$DeployID == deployid())])
       names(startfields)[ncol(startfields)] = exportsettings$Deployment
@@ -258,6 +257,7 @@ observeEvent(
       
       finaldata(combinefields)
     }else if (exportsettings$FileSep == "Multiple"){
+      
       combinelist = list()
       for (i in qcloggertypes()){
         #Select data by logger type
@@ -331,14 +331,346 @@ observeEvent(
         combinedata = combinedata[,fieldorder]
         
         combinelist[[i]] = combinedata
+        
       }
       finaldata(combinelist)
     }
 
-    
-        
     #Clear VisQCdata
-    VisQCdata(NULL)
+    
+    if (exportsettings$IncSum == FALSE){
+      VisQCdata(NULL)
+    }
+  }
+)
+
+summarydata = reactiveVal()
+
+observeEvent(
+  input$exportprocessbttn,
+  ignoreNULL = FALSE,{
+    validate(
+      need(selectexportdata(),"Loading...")
+    )
+    
+    sumexportsettings = selectexportdata()
+
+    if (sumexportsettings$IncSum == TRUE){
+          
+      deploydatesupdate()
+      
+      #Program Names
+      sumprogramsettings = programs()
+      #Waterbodies
+      sumprogramwbssettings = programwbs()
+      sumwbnamessettings = wbnames()
+      #Stations
+      sumstationssettings = stations()
+      #Deploy Logs
+      sumdeploylogssettings = deploylogs()
+      #LoggerFiles
+      sumloggerfilesettings = loggerfiledefs()
+      #
+      origdata = VisQCdata()
+      
+      #Summarize Data
+      sumdata = NULL
+      for (i in qcloggertypes()){
+        origdataselect = origdata[[i]]
+        origdataselect = origdataselect[which(origdataselect$FlagVis != 'F'),]
+        origdataselect = origdataselect[,1:4]
+        origdataselect$DateTime = with_tz(origdataselect$DateTime,tzone = sumexportsettings$TZ)
+        
+        origz = unique(origdataselect$Z)
+        
+        sumdataz = NULL
+        for (j in origz){
+          
+          origzselect = origdataselect[which(origdataselect$Z == j),]
+          
+          origzunitid = unique(origzselect$UnitID)
+          
+          sumdataz.xts = as.xts(as.numeric(as.numeric(origzselect$Data)),order.by = origzselect$DateTime)
+          sumdataz.mean.xts = apply.daily(sumdataz.xts,mean)
+          sumdataz.max.xts = apply.daily(sumdataz.xts,max)
+          sumdataz.min.xts = apply.daily(sumdataz.xts,min)
+          sumdataz.sd.xts = apply.daily(sumdataz.xts,sd)
+          sumdataz.count.xts = apply.daily(sumdataz.xts,nrow)
+          sumdatazmean = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.mean.xts),"z" = j,"mean" = coredata(sumdataz.mean.xts))
+          sumdatazmax = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.max.xts),"z" = j,"max" = coredata(sumdataz.max.xts))
+          sumdatazmin = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.min.xts),"z" = j,"min" = coredata(sumdataz.min.xts))
+          sumdatazsd = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.sd.xts),"z" = j,"sd" = coredata(sumdataz.sd.xts))
+          sumdatazcount = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.count.xts),"z" = j,
+                                     "count" = coredata(sumdataz.count.xts))
+          
+          sumdatazday = left_join(sumdatazmean,sumdatazmax,by = c("unitid","datetime","z"))
+          sumdatazday = left_join(sumdatazday,sumdatazmin,by = c("unitid","datetime","z"))
+          sumdatazday = left_join(sumdatazday,sumdatazsd,by = c("unitid","datetime","z"))
+          sumdatazday = left_join(sumdatazday,sumdatazcount,by = c("unitid","datetime","z"))
+          
+          sumdataz = rbind(sumdataz,sumdatazday)
+        }
+        sumdata[[i]] = sumdataz
+      }
+      
+      #Select the first data frame to begin building the final table
+      sumstartfields = sumdata[[1]]
+      
+      #Convert datetime to date
+      sumstartfields$datetime = as.Date(sumstartfields$datetime)
+      
+      #Select the UnitId and DateTime Fields
+      sumstartfields = sumstartfields[,c(1:2)]
+      
+      
+      #Rename UnitID Field
+      names(sumstartfields)[1] = sumexportsettings$UnitID
+      
+      #Rename Date Fields
+      names(sumstartfields)[2] = "Date"
+      
+      #Add Model Name
+      if (sumexportsettings$IncModelName == TRUE){
+        #input$procmodel sourced from processingUI.R
+        summodname = sumloggerfilesettings$Logger_Model[which(sumloggerfilesettings$ModelID == input$procmodel)]
+        sumstartfields$summodname = summodname
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ModelName
+      }
+      
+      
+      #Add Program Name
+      if (sumexportsettings$IncProgramName == TRUE){
+        #input$procprogram sourced from processingUI.R
+        sumprogname = sumprogramsettings$Program_Name[which(sumprogramsettings$ProgramID == input$procprogram)]
+        sumstartfields$progname = sumprogname
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramName
+      }
+      
+      #Add WaterBody ID
+      if (sumexportsettings$IncProgramWBID == TRUE){
+        #input$procwaterbody sourced from processingUI.R
+        sumstartfields$wbid = sumprogramwbssettings$ProgramWaterbodyID[which(sumprogramwbssettings$AppID == input$procwaterbody)]
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramWBID
+      }
+      
+      #Add WaterBody Name
+      if (sumexportsettings$IncWBName == TRUE){
+        #input$procwaterbody sourced from processingUI.R
+        sumstartfields$wbname = sumwbnamessettings$Waterbody_Name[which(sumwbnamessettings$AppID == input$procwaterbody)]
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$WBName
+      }
+      
+      #Add WaterBody Type
+      if (sumexportsettings$IncWBType == TRUE){
+        #input$procwaterbody sourced from processingUI.R
+        sumstartfields$wbtype = sumwbnamessettings$programwbssettings$WB_Type[which(sumprogramwbssettings$AppID == input$procwaterbody)]
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$WBType
+      }
+      
+      #Add Station ID
+      if (sumexportsettings$IncProgramStationID == TRUE){
+        #input$procstations sourced from processingUI.R
+        sumstartfields$stationid = sumstationssettings$ProgramStationID[which(sumstationssettings$StationID == input$procstation)]
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramStationID
+      }
+      
+      #Add Station Name
+      if (sumexportsettings$IncStationName == TRUE){
+        #input$procstations sourced from processingUI.R
+        sumstartfields$stationname = sumstationssettings$Station_Name[which(sumstationssettings$StationID == input$procstationname)]
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$StationName
+      }
+      
+      #Add Deployment Count
+      if (sumexportsettings$IncDeploy == TRUE){
+        #input$deploynum sourced from processingUI.R
+        sumstartfields$deploy = unique(sumdeploylogssettings$Deployment_Count[which(sumdeploylogssettings$DeployID == deployid())])
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$Deployment
+      }
+      
+      #Add User Name
+      if (sumexportsettings$IncUser == TRUE){
+        #input$username sourced from processingUI.R
+        sumstartfields$user = unique(sumdeploylogssettings$Processedby[which(sumdeploylogssettings$DeployID == deployid())])
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$User
+      }
+      
+      if (sumexportsettings$FileSep == "Single"){
+        sumcombinefields = sumstartfields
+        #qcloggertypes() sourced from processing.R
+        
+        for (i in qcloggertypes()){
+          #Select parameter Data and Depth Fields and rename them
+          sumparadata = sumdata[[i]]
+          
+          sumparadata = sumparadata[,c(3:8)]
+          
+          sumunitidname = as.character(dplyr::select(sumexportsettings,matches(i)))
+          
+          if (sumexportsettings$IncZ == TRUE){
+            names(sumparadata)[1] = sumexportsettings$Z
+            names(sumparadata)[2] = paste0(sumunitidname,"_mean")
+            names(sumparadata)[3] = paste0(sumunitidname,"_max")
+            names(sumparadata)[4] = paste0(sumunitidname,"_min")
+            names(sumparadata)[5] = paste0(sumunitidname,"_sd")
+            names(sumparadata)[6] = "Count"
+          }else if (sumexportsettings$IncZ == FALSE){
+            sumparadata[,1] = NULL
+            names(sumparadata)[1] = paste0(sumunitidname,"_mean")
+            names(sumparadata)[2] = paste0(sumunitidname,"_max")
+            names(sumparadata)[3] = paste0(sumunitidname,"_min")
+            names(sumparadata)[4] = paste0(sumunitidname,"_sd")
+            names(sumparadata)[5] = "Count"
+          }
+          
+          #Combine logger types
+          sumcombinefields = cbind(sumcombinefields,sumparadata)
+        }
+        
+        #Create vector for sorting fields in the table
+        #Start with UnitID (required)
+        sumfieldorder = c(sumexportsettings$UnitID)
+        #Model Name
+        if (sumexportsettings$IncModelName == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$ModelName)
+        }
+        
+        #Program Name
+        if (sumexportsettings$IncProgramName == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$ProgramName)
+        }
+        #Waterbody ID
+        if (sumexportsettings$IncProgramWBID == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$ProgramWBID)
+        }
+        #Waterbody Name
+        if (sumexportsettings$IncWBName == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$WBName)
+        }
+        #Waterbody Type
+        if (sumexportsettings$IncWBType == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$WBType)
+        }
+        #Station ID
+        if (sumexportsettings$IncProgramStationID == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$ProgramStationID)
+        }
+        #Station Name
+        if (sumexportsettings$IncStationName == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$StationName)
+        }
+        #Deployment
+        if (sumexportsettings$IncDeploy == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$Deployment)
+        }
+        #User Name
+        if (sumexportsettings$IncUser == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$User)
+        }
+        #Z
+        if (sumexportsettings$IncZ == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$Z)
+        }
+        #Add Date and Time
+        sumfieldorder = c(sumfieldorder,"Date")
+      
+        #Add Parameters
+        for (i in qcloggertypes()){
+          sumparametertype = as.character(dplyr::select(sumexportsettings,matches(i)))
+          
+          sumfieldorder = c(sumfieldorder,paste0(sumparametertype,"_mean"),paste0(sumparametertype,"_max"),paste0(sumparametertype,"_min"),
+                         paste0(sumparametertype,"_sd"),"Count")
+        }
+
+        sumcombinefields = sumcombinefields[,sumfieldorder]
+        
+        summarydata(sumcombinefields)
+      }else if (sumexportsettings$FileSep == "Multiple"){
+        sumcombinefields = sumstartfields
+        
+        sumcombinelist = list()
+        sumcombinedata = NULL
+        for (i in qcloggertypes()){
+          
+          #Select parameter Data and Depth Fields and rename them
+          sumparadata = sumdata[[i]]
+          sumparadata = sumparadata[,c(3:8)]
+          
+          sumunitidname = as.character(dplyr::select(sumexportsettings,matches(i)))
+          
+          if (sumexportsettings$IncZ == TRUE){
+            names(sumparadata)[1] = sumexportsettings$Z
+            names(sumparadata)[2] = paste0(sumunitidname,"_mean")
+            names(sumparadata)[3] = paste0(sumunitidname,"_max")
+            names(sumparadata)[4] = paste0(sumunitidname,"_min")
+            names(sumparadata)[5] = paste0(sumunitidname,"_sd")
+            names(sumparadata)[6] = "Count"
+          }else if (sumexportsettings$IncZ == FALSE){
+            sumparadata[,1] = NULL
+            names(sumparadata)[1] = paste0(sumunitidname,"_mean")
+            names(sumparadata)[2] = paste0(sumunitidname,"_max")
+            names(sumparadata)[3] = paste0(sumunitidname,"_min")
+            names(sumparadata)[4] = paste0(sumunitidname,"_sd")
+            names(sumparadata)[5] = "Count"
+          }
+          
+          sumfieldorder = c(sumexportsettings$UnitID)
+          sumcombinedata = cbind(sumcombinefields,sumparadata)
+          #Model Name
+          if (sumexportsettings$IncModelName == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$ModelName)
+          }
+          #Program Name
+          if (sumexportsettings$IncProgramName == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$ProgramName)
+          }
+          #Waterbody ID
+          if (sumexportsettings$IncProgramWBID == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$ProgramWBID)
+          }
+          #Waterbody Name
+          if (sumexportsettings$IncWBName == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$WBName)
+          }
+          #Waterbody Type
+          if (sumexportsettings$IncWBType == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$WBType)
+          }
+          #Station ID
+          if (sumexportsettings$IncProgramStationID == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$ProgramStationID)
+          }
+          #Station Name
+          if (sumexportsettings$IncStationName == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$StationName)
+          }
+          #Deployment
+          if (sumexportsettings$IncDeploy == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$Deployment)
+          }
+          #User Name
+          if (sumexportsettings$IncUser == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$User)
+          }
+          #Z
+          if (sumexportsettings$IncZ == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$Z)
+          }
+          
+          #Add Parameters
+          sumdatafieldname = as.character(dplyr::select(sumexportsettings,matches(i)))
+          
+          sumfieldorder = c(sumfieldorder,paste0(sumdatafieldname,"_mean"),paste0(sumdatafieldname,"_max"),paste0(sumdatafieldname,"_min"),
+                            paste0(sumdatafieldname,"_sd"),"Count")
+          
+          sumcombinedata = sumcombinedata[,sumfieldorder]
+          
+          sumcombinelist[[i]] = sumcombinedata
+        }
+        summarydata(sumcombinelist)
+      }
+      VisQCdata(NULL)
+    }
   }
 )
 
@@ -367,20 +699,41 @@ output$dlddata = downloadHandler(
     
     #Process Data for Single File
     if (exportdldsettings$FileSep == "Single"){
-      dldname = paste0(dldname,"_",qcloggertypes(),collapse = "_")
-      dldname = gsub("\\s+","_",gsub("[[:punct:]]","",dldname))
-      dldname = paste0(dldname,".csv")
-      dldpath = paste0("temp/",dldname)
+      
+      dldnamestart = paste0(dldname)
+      
+      dldnamestart = gsub("\\s+","_",gsub("[[:punct:]]","",dldnamestart))
+      
+      dldnameprime = paste0(dldnamestart,".csv")
+      
+      dldpathprime = paste0("temp/",dldnameprime)
       
       #Create the csv and zip it
-      write.csv(finaldata(),dldpath,row.names = FALSE)
+      write.csv(finaldata(),dldpathprime,row.names = FALSE)
+      
       zip(
         zipfile = fname,
-        files = dldpath,
+        files = dldpathprime,
         include_directories = FALSE,  
         recurse = FALSE,
         mode = "cherry-pick"
       )
+      
+      if (exportdldsettings$IncSum == TRUE){
+        dldnamesum = paste0(dldnamestart,"_summary.csv")
+        dldpathsum = paste0("temp/",dldnamesum)
+        
+        write.csv(summarydata(),dldpathsum,row.names = FALSE)
+        
+        zip_append(
+          zipfile = fname,
+          files = dldpathsum,
+          include_directories = FALSE,
+          recurse = FALSE,
+          mode = "cherry-pick"
+        )
+      }
+      
     }else{
       finaldataout = finaldata()
       #Get a list of logger types from the final data
@@ -407,6 +760,30 @@ output$dlddata = downloadHandler(
         recurse = FALSE,
         mode = "cherry-pick"
       )
+      
+      if (exportdldsettings$IncSum == TRUE){
+        summarydataout = summarydata()
+        sumlistnames = names(summarydataout)
+        
+        sumlistoutput = NULL
+        for (i in sumlistnames){
+          selectsumdata = summarydataout[[i]]
+          sumdldname = paste0(dldname,coll = "_")
+          sumdldname = gsub("\\s+","_",gsub("[[:punct:]]","",sumdldname))
+          sumdldnameend = paste0(sumdldname,"_",i,"_summary.csv")
+          sumdldpath = paste0("temp/",sumdldnameend)
+          
+          write.csv(selectsumdata,sumdldpath,row.names = FALSE)
+          sumlistoutput = c(sumlistoutput,sumdldpath)
+        }
+        zip_append(
+          zipfile = fname,
+          files = sumlistoutput,
+          include_directories = FALSE,
+          recurse = FALSE,
+          mode = "cherry-pick"
+        )
+      }
     }
     #Add Config File
     if (exportdldsettings$IncConfig == TRUE){
