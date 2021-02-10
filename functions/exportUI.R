@@ -64,7 +64,7 @@ output$exportviewUI = renderUI({
         inputId = "exportviewloggertype",
         label = "Logger Types",
         #qcloggertypes() sourced from processing.R
-        choices = qcloggertypes()
+        choices = names(finaldata())
       )
     }
   }else{}
@@ -83,10 +83,13 @@ output$finaltable = renderDT(
   extensions = 'Responsive',{
     if (!is.null(finaldata())){
       finaldatatable = finaldata()
-      print(is.data.frame(finaldatatable))
+      
       if (is.data.frame(finaldatatable)){
         return(finaldatatable)
       }else{
+        validate(
+          need(input$exportviewloggertype,"Loading...")
+        )
         finaldatatableselect = finaldatatable[[input$exportviewloggertype]]
         return(finaldatatableselect)
       }
