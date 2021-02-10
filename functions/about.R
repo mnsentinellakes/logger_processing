@@ -64,7 +64,7 @@ output$aboutUI = renderUI({
         ),
         tags$p(
           style = "color: ghostwhite;",
-          "a product of the Lake Regional Monitoring Network"
+          "a product of the Regional Lake Monitoring Network"
         ),
         tags$br()
       ),
