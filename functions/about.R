@@ -62,10 +62,10 @@ output$aboutUI = renderUI({
           style = "color: ghostwhite;",
           "Aquatic Ecological Logger Processing App"
         ),
-        tags$p(
-          style = "color: ghostwhite;",
-          "a product of the Regional Lake Monitoring Network"
-        ),
+        # tags$p(
+        #   style = "color: ghostwhite;",
+        #   "a product of the Regional Lake Monitoring Network"
+        # ),
         tags$br()
       ),
       tags$div(
@@ -106,10 +106,10 @@ output$aboutUI = renderUI({
         title = "Contacts",
         uiOutput("contactsUI")
       ),
-      tabPanel(
-        title = "R packages",
-        uiOutput("packagesUI")
-      ),
+      # tabPanel(
+      #   title = "R packages",
+      #   uiOutput("packagesUI")
+      # ),
       tabPanel(
         title = "Use",
         uiOutput("useUI")
@@ -364,195 +364,195 @@ output$contactsUI = renderUI({
   )
 })
 
-output$packagesUI = renderUI({
-  
-  tagList(
-    tags$style(
-      HTML("
-        .package-item {
-          background-color: ghostwhite;
-          border: 1px solid darkslategrey;
-          color: darkslategrey;
-          font-size: medium;
-          padding: 6px;
-          text-align:center;
-        }
-         ")
-    ),
-    HTML("<CENTER>"),
-    tags$br(),
-    tags$br(),
-    tags$table(
-      tags$tr(
-        tags$td(
-          style = "vertical-align: top;",
-          tags$table(
-            
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/shiny/index.html",
-                  "shiny"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/shinydashboard/index.html",
-                  "shinydashboard"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/shinydashboardplus/index.html",
-                  "shinydashboardplus"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/shinyjs/index.html",
-                  "shinyjs"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/shinyWidgets/index.html",
-                  "shinyWidgets"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/devtools/index.html",
-                  "devtools"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://github.com/leppott/ContDataQC",
-                  "ContDataQC"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/dplyr/index.html",
-                  "dplyr"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/readr/index.html",
-                  "readr"
-                )
-              )
-            )
-          )
-        ),
-        tags$td(
-          style = "vertical-align: top;",
-          tags$table(
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/ggplo2/index.html",
-                  "ggplot2"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/plotly/index.html",
-                  "plotly"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/grDevices/index.html",
-                  "grDevices"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/DT/index.html",
-                  "DT"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/xts/index.html",
-                  "xts"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/ids/index.html",
-                  "ids"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/lubridate/index.html",
-                  "lubridate"
-                )
-              )
-            ),
-            tags$tr(
-              tags$td(
-                class = "package-item",
-                tags$a(
-                  href = "https://cran.r-project.org/web/packages/zip/index.html",
-                  "zip"
-                )
-              )
-            )
-          )
-        )
-      )
-    ),
-    HTML("</CENTER>")
-  )
-})
+# output$packagesUI = renderUI({
+#   
+#   tagList(
+#     tags$style(
+#       HTML("
+#         .package-item {
+#           background-color: ghostwhite;
+#           border: 1px solid darkslategrey;
+#           color: darkslategrey;
+#           font-size: medium;
+#           padding: 6px;
+#           text-align:center;
+#         }
+#          ")
+#     ),
+#     HTML("<CENTER>"),
+#     tags$br(),
+#     tags$br(),
+#     tags$table(
+#       tags$tr(
+#         tags$td(
+#           style = "vertical-align: top;",
+#           tags$table(
+#             
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/shiny/index.html",
+#                   "shiny"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/shinydashboard/index.html",
+#                   "shinydashboard"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/shinydashboardplus/index.html",
+#                   "shinydashboardplus"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/shinyjs/index.html",
+#                   "shinyjs"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/shinyWidgets/index.html",
+#                   "shinyWidgets"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/devtools/index.html",
+#                   "devtools"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://github.com/leppott/ContDataQC",
+#                   "ContDataQC"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/dplyr/index.html",
+#                   "dplyr"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/readr/index.html",
+#                   "readr"
+#                 )
+#               )
+#             )
+#           )
+#         ),
+#         tags$td(
+#           style = "vertical-align: top;",
+#           tags$table(
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/ggplo2/index.html",
+#                   "ggplot2"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/plotly/index.html",
+#                   "plotly"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/grDevices/index.html",
+#                   "grDevices"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/DT/index.html",
+#                   "DT"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/xts/index.html",
+#                   "xts"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/ids/index.html",
+#                   "ids"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/lubridate/index.html",
+#                   "lubridate"
+#                 )
+#               )
+#             ),
+#             tags$tr(
+#               tags$td(
+#                 class = "package-item",
+#                 tags$a(
+#                   href = "https://cran.r-project.org/web/packages/zip/index.html",
+#                   "zip"
+#                 )
+#               )
+#             )
+#           )
+#         )
+#       )
+#     ),
+#     HTML("</CENTER>")
+#   )
+# })
 
 output$useUI = renderUI({
   
@@ -595,9 +595,141 @@ output$useUI = renderUI({
   
 })
 
-# output$furtherdevUI = renderUI({
-#   tagList(
-#     tags$style()
-#   )
-#   
-# })
+output$furtherdevUI = renderUI({
+  tagList(
+    tags$style(
+      HTML(
+        "
+        body {
+          background-color: white;
+          color: black;
+          }
+          
+        .sections-header {
+          background-color: #3c8dbc;
+          border: 2px solid darkslategrey;
+          color: ghostwhite;
+          font-size: large;
+          padding: 8px;
+          border-collapse: collapse;
+         }
+           
+        .sections-name {
+          background-color: ghostwhite;
+          border: 1px solid darkslategrey;
+          color: darkslategrey;
+          font-size: large;
+          padding: 8px;
+        }
+           
+        .sections-text {
+          background-color: ghostwhite;
+          border: 1px solid darkslategrey;
+          color: darkslategrey;
+          font-size: medium;
+          padding: 8px;
+        }
+        "
+      )
+    ),
+    HTML("<CENTER>"),
+    tags$br(),
+    tags$br(),
+    tags$table(
+      tags$tr(
+        tags$td(
+          class = "sections-header",
+          colspan = 3,
+          tags$b(
+            "Configuration Updates"
+          )
+        )
+      ),
+      tags$tr(
+        tags$td(
+          class = "sections-name",
+          "QC Settings"
+        ),
+        tags$td(
+          class = "sections-text",
+          "Develop stratified threshold settings based upon logger placement depth, latitude, and season. This will help minimize the number
+          of false positives flagged by the automatic QC process."
+        ),
+        tags$td(
+          class = "sections-text",
+          "Priority High"
+        )
+      ),
+      tags$tr(
+        tags$td(
+          class = "sections-header",
+          colspan = 3,
+          tags$b(
+            "Processing and QC Updates"
+          )
+        )
+      ),
+      tags$tr(
+        tags$td(
+          class = "sections-name",
+          "Setup/Processing"
+        ),
+        tags$td(
+          class = "sections-text",
+          "Allow the user to upload a .csv with pre-populated Unit IDs and Z values. This will remove the need to manually fill in the
+          Logger Units Table"
+        ),
+        tags$td(
+          class = "sections-text",
+          "Priority Low"
+        )
+      ),
+      tags$tr(
+        tags$td(
+          class = "sections-name",
+          "Discrete Data Comparison"
+        ),
+        tags$td(
+          class = "sections-text",
+          "Create a tool to upload discrete data, for example a Temperature/DO profile using a DO probe, to compare against the continuous data. Add
+          an additional QC Flag and/or metadata section to relay the results of this comparison."
+        ),
+        tags$td(
+          class = "sections-text",
+          "Priority Medium"
+        )
+      ),
+      tags$tr(
+        tags$td(
+          class = "sections-name",
+          "Previous Deployment Comparison"
+        ),
+        tags$td(
+          class = "sections-text",
+          "Check to see how the data from the previous deployment logger data at a station lines up with the processed data. Provide options for 
+          addressing any discrepancies."
+        ),
+        tags$td(
+          class = "sections-text",
+          "Priority Medium"
+        )
+      ),
+      tags$tr(
+        tags$td(
+          class = "sections-name",
+          "Z Comparison"
+        ),
+        tags$td(
+          class = "sections-text",
+          "Ensure that the logger data are vertically consistent. For example, in a stratified lake, the deeper the logger is located, the 
+          lower the temperature should be in relation to the loggers above it."
+        ),
+        tags$td(
+          class = "sections-text",
+          "Priority Medium"
+        )
+      )
+    )
+  )
+  
+})
