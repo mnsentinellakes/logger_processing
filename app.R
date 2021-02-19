@@ -109,18 +109,8 @@ shinyApp(ui = ui, server = server)
 # -indicate whether a logger model will be processed with multiple units, ie depths
 # -allow the user to rearrange the export fields
 
-
 #Notes
 
 # -need to figure out how to properly configure ContDataQC, re: Air vs. Water
-# -check for naming inconsistencies
-#   -make sure UI objects are named with "UI" at the end
 # -add saved notifications where needed to indicate something worked
-# -clean up formatting
 # -add many notes and documentation
-
-#Questions
-# -are there instances where a logger model collects multiple metrics, but at different times?
-# -do we need customized file names?
-# -do we need to have individual logger units exported in separate files?
-
