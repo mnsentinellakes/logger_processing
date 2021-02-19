@@ -728,6 +728,20 @@ output$furtherdevUI = renderUI({
           class = "sections-text",
           "Priority Medium"
         )
+      ),
+      tags$tr(
+        tags$td(
+          class = "sections-name",
+          "Generate Report"
+        ),
+        tags$td(
+          class = "sections-text",
+          "Develop code for exporting a report along with the processed data"
+        ),
+        tags$td(
+          class = "sections-text",
+          "Priority High"
+        )
       )
     )
   )
