@@ -75,6 +75,7 @@ output$selectloggerexportUI = renderUI({
 exportselect = reactive({
   namesdeploy = export()
   namesdeploy = namesdeploy[which(namesdeploy$ProgramID == input$selectedprogramexport & namesdeploy$ModelID == input$selectloggerexport),]
+  
   return(namesdeploy)
 })
 
@@ -659,7 +660,7 @@ output$datetimeexportUI = renderUI({
   }else{
     fluidRow(
       column(
-        width = 3,
+        width = 6,
         textInput(
           inputId = "datecolexport",
           label = "Date Field Name",
@@ -820,7 +821,7 @@ output$exportdatafieldsUI = renderUI({
     if ("AirTemp" %in% names(exportfieldnames)){
       textInput(
         inputId = "airtempexport",
-        label = "AirBP Field Name",
+        label = "AirTemp Field Name",
         value = exportfieldnames["AirTemp"]
       )
     },
@@ -895,6 +896,8 @@ observeEvent(
     exportfinal = export()
     loggerexportfinal = loggerfiledefs()
     loggerexportfinal = loggerexportfinal[which(loggerexportfinal$ModelID == input$selectloggerexport),]
+    print(loggerexportfinal)
+    print(nrow(exportselect()) > 0)
     
     #If settings already exist for the program and model combination
     if (nrow(exportselect()) > 0){
@@ -904,7 +907,6 @@ observeEvent(
       exportfinal$IncRep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$increp
       exportfinal$IncConfig[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incconfig
       exportfinal$IncSum[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incsummary
-      
       #Identification Field Names
       exportfinal$UnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$unitidexport
       
@@ -970,7 +972,6 @@ observeEvent(
       }else{
         exportfinal$User[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
-      
       #Location Field Names
       exportfinal$IncZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$inczexport
       if (input$inczexport == TRUE){
@@ -1003,8 +1004,8 @@ observeEvent(
       # exportfinal$Date_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dateformatexport
       # exportfinal$Time_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timeformatexport
       exportfinal$TZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$tzexport
-      
       #Data Field Names
+      
       if (!is.na(loggerexportfinal$AirBP) ){
         exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airbpexport
       }else{
@@ -1034,7 +1035,6 @@ observeEvent(
       }else{
         exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
-      
       if (!is.na(loggerexportfinal$DO)){
         exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$doexport
       }else{
@@ -1070,9 +1070,9 @@ observeEvent(
       }else{
         exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
+      
       #If settings do not exist for Program and Logger Model combination
     }else{
-      
       unitidfinal = input$unitidexport
       
       if (input$incmodelnameexport == TRUE){
@@ -1098,7 +1098,7 @@ observeEvent(
       }else{
         wbnamefinal = NA
       }
-      
+
       if (input$incwbtypeexport == TRUE){
         wbtypefinal = input$wbtypeexport
       }else{
@@ -1156,67 +1156,68 @@ observeEvent(
       }
       
       #Data Fields
-      if (!is.na(loggerexportfinal$AirBP)){
+      if (!is.na(loggerexportfinal$AirBP) & loggerexportfinal$AirBP != ""){
         airbpfinal = input$airbpexport
       }else{
         airbpfinal = NA
       }
       
-      if (!is.na(loggerexportfinal$AirTemp)){
+      if (!is.na(loggerexportfinal$AirTemp) & loggerexportfinal$AirTemp != ""){
         airtempfinal = input$airtempexport
       }else{
         airtempfinal = NA
       }
       
-      if (!is.na(loggerexportfinal$Chlorophylla)){
+      if (!is.na(loggerexportfinal$Chlorophylla) & loggerexportfinal$Chlorophylla != ""){
         chlorophyllafinal = input$chlorophyllaexport
       }else{
         chlorophyllafinal = NA
       }
       
-      if (!is.na(loggerexportfinal$Cond)){
+      
+      if (!is.na(loggerexportfinal$Cond) & loggerexportfinal$Cond != ""){
         condfinal = input$condexport
       }else{
         condfinal = NA
       }
       
-      if (!is.na(loggerexportfinal$Discharge)){
+      if (!is.na(loggerexportfinal$Discharge) & loggerexportfinal$Discharge != ""){
         dischargefinal = input$dischargeexport
       }else{
         dischargefinal = NA
       }
       
-      if (!is.na(loggerexportfinal$DO)){
+      if (!is.na(loggerexportfinal$DO) & loggerexportfinal$DO != ""){
         dofinal = input$doexport
       }else{
         dofinal = NA
       }
       
-      if (!is.na(loggerexportfinal$GageHeight)){
+      if (!is.na(loggerexportfinal$GageHeight) & loggerexportfinal$GageHeight != ""){
         gageheightfinal = input$gageheightexport
       }else{
         gageheightfinal = NA
       }
       
-      if (!is.na(loggerexportfinal$pH)){
+      if (!is.na(loggerexportfinal$pH) & loggerexportfinal$pH != ""){
         phfinal = input$phexport
       }else{
         phfinal = NA
       }
       
-      if (!is.na(loggerexportfinal$Turbidity)){
+      if (!is.na(loggerexportfinal$Turbidity) & loggerexportfinal$Turbidity != ""){
         turbidityfinal = input$turbidityexport
       }else{
         turbidityfinal = NA
       }
       
-      if (!is.na(loggerexportfinal$WaterP)){
+      if (!is.na(loggerexportfinal$WaterP) & loggerexportfinal$WaterP != ""){
         waterpfinal = input$waterpexport
       }else{
         waterpfinal = NA
       }
       
-      if (!is.na(loggerexportfinal$WaterTemp)){
+      if (!is.na(loggerexportfinal$WaterTemp) & loggerexportfinal$WaterTemp != ""){
         watertempfinal = input$watertempexport
       }else{
         watertempfinal = NA
