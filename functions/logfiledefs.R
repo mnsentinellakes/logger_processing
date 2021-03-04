@@ -421,28 +421,6 @@ observeEvent(
       
       newloggerdefs=rbind(newloggerdefs,newloggerdf)
       
-      getprograms = programs()
-      # addexport = export()
-      
-      # exportupdate = data.frame(
-      #   "ProgramID" = getprograms$ProgramID,"ModelID" = generatemodelid,"FileSep" = as.character("Single"),"IncMeta" = TRUE,
-      #   "IncRep" = TRUE,"IncConfig" = TRUE,"IncSum" = TRUE,"UnitID" = as.character(NA),"IncModelName" = TRUE,"ModelName" = as.character(NA),
-      #   "IncProgramName" = TRUE,"ProgramName" = as.character(NA),"IncProgramWBID" = TRUE,"ProgramWBID" = as.character(NA),"IncWBName" = TRUE,
-      #   "WBName" = as.character(NA),"IncWBType" = TRUE,"WBType" = as.character(NA),"IncProgramStationID" = TRUE,
-      #   "ProgramStationID" = as.character(NA),"IncStationName" = TRUE,"StationName" = as.character(NA),"IncDeploy" = TRUE,
-      #   "Deployment" = as.character(NA),"DateTimeSep" = as.character("Combined"),"Date_Time" = as.character(NA),"Date" = as.character(NA),
-      #   "Time" = as.character(NA),"TZ" = "UTC","IncZ" = TRUE,"Z" = as.character(NA),"IncLoc" = TRUE,"Lat" = as.character(NA),
-      #   "Lon" = as.character(NA),"IncUser" = TRUE,"User" = as.character(NA),"AirBP" = as.character(NA),"AirTemp" = as.character(NA),
-      #   "Chlorophylla" = as.character(NA),"Cond" = as.character(NA),"Discharge" = as.character(NA),"DO" = as.character(NA),
-      #   "GageHeight" = as.character(NA),"pH" = as.character(NA),"Turbidity" = as.character(NA),"WaterP" = as.character(NA),
-      #   "WaterTemp" = as.character(NA),stringsAsFactors = FALSE)
-      
-      
-      
-      # addexport = rbind(addexport,exportupdate)
-      
-      
-      # export(addexport)
       loggerfiledefs(newloggerdefs)
       updatebaseconfig()
       updateTextInput(
