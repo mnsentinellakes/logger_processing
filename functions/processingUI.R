@@ -42,14 +42,16 @@ output$pwlmUI = renderUI({
 
 #Create a vector of AppIDS that are in the selected Program
 procprogramappids = reactive({
-  programwbschoice=programwbs()
-  programwbschoice=programwbschoice$AppID[which(programwbschoice$ProgramID == input$procprogram)]
+  programwbschoice = programwbs()
+  print(input$procprogram)
+  programwbschoice = programwbschoice$AppID[which(programwbschoice$ProgramID == input$procprogram)]
   return(programwbschoice)
 })
 
 #Create a vector of Waterbody Names from the AppIDS
 procwaterbody_names = reactive({
-  wbnamesselect=wbnames()
+  wbnamesselect = wbnames()
+  # wbnamesselect = wbnamess
   wbnamesselect=wbnamesselect[which(wbnamesselect$AppID %in% procprogramappids()),]
   wbnamesselectvec=wbnamesselect$AppID
   names(wbnamesselectvec)=wbnamesselect$Waterbody_Name
@@ -59,7 +61,7 @@ procwaterbody_names = reactive({
 
 #Processing Waterbody Choices
 output$procwaterbodyUI = renderUI({
-  isolate(
+  # isolate(
     pickerInput(
       inputId = "procwaterbody",
       label = "Waterbody",
@@ -68,7 +70,7 @@ output$procwaterbodyUI = renderUI({
         style = "btn-success"
       )
     )
-  )
+  # )
 })
 
 #Select Station
