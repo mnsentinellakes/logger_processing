@@ -75,94 +75,107 @@ parseDeleteEvent = function(idstr) {
 
 output$depthstableoutputUI = renderUI({
   validate(
-    need(nrow(fieldnames())>0,"Loading...")
+    need(!is.null(fieldnames()),"Loading...")
   )
   
-  selectedinput = fieldnames()
-  
-  if (!is.na(selectedinput$UnitID)){
-    unitidlabel = selectedinput$UnitID
-  }else{
-    unitidlabel = "Unit ID"
-  }
-  
-  if (selectedinput$IncZ == TRUE){
-    col1 = 4
-    col2 = 4
-    col3 = 3
-  }else{
-    col1 = 4
-    col2 = 1
-    col3 = 4
-  }
-  
-  box(
-    title = "Logger Units Table",
-    solidHeader = TRUE,
-    collapsible = FALSE,
-    status = "primary",
-    width = NULL,
-    tags$table(
-      tags$tr(
-        tags$td(
-          style="vertical-align:center; border:1px solid lightgray; padding:5px; background-color:ghostwhite;",
-          fluidRow(
-            column(
-              width = col1,
-              #Serial Number Text Input
-              textInput(
-                inputId = "inputsn",
-                label = unitidlabel
-              )
-            ),
-            column(
-              width = col2,
-              uiOutput("zoptionUI")
-            ),
-            column(
-              width = col3,
-              #Add serial number and depth data to lookup table
-              tags$br(),
-              actionBttn(
-                inputId = "addbttn",
-                label = "Add",
-                color = "success",
-                style = "fill",
-                icon = icon("plus")
+  if (nrow(fieldnames()) > 0){
+    selectedinput = fieldnames()
+    
+    if (!is.na(selectedinput$UnitID)){
+      unitidlabel = selectedinput$UnitID
+    }else{
+      unitidlabel = "Unit ID"
+    }
+    
+    if (selectedinput$IncZ == TRUE){
+      col1 = 4
+      col2 = 4
+      col3 = 3
+    }else{
+      col1 = 4
+      col2 = 1
+      col3 = 4
+    }
+    
+    box(
+      title = "Logger Units Table",
+      solidHeader = TRUE,
+      collapsible = FALSE,
+      status = "primary",
+      width = NULL,
+      tags$table(
+        tags$tr(
+          tags$td(
+            style="vertical-align:center; border:1px solid lightgray; padding:5px; background-color:ghostwhite;",
+            fluidRow(
+              column(
+                width = col1,
+                #Serial Number Text Input
+                textInput(
+                  inputId = "inputsn",
+                  label = unitidlabel
+                )
+              ),
+              column(
+                width = col2,
+                uiOutput("zoptionUI")
+              ),
+              column(
+                width = col3,
+                #Add serial number and depth data to lookup table
+                tags$br(),
+                actionBttn(
+                  inputId = "addbttn",
+                  label = "Add",
+                  color = "success",
+                  style = "fill",
+                  icon = icon("plus")
+                )
               )
             )
           )
         )
-      )
-    ),
-    tags$br(),
-    HTML("<CENTER>"),
-    #Table output for lookup table
-    DTOutput("depthstableoutput"),
-    HTML("</CENTER>"),
-    textOutput("testx")
-  )
+      ),
+      tags$br(),
+      HTML("<CENTER>"),
+      #Table output for lookup table
+      DTOutput("depthstableoutput"),
+      HTML("</CENTER>"),
+      textOutput("testx")
+    )
+  }else if (nrow(fieldnames()) == 0){
+    box(
+      title = "Logger Model not configured for this Program",
+      solidHeader = TRUE,
+      status = "danger",
+      HTML("To process data for the selected Logger Model, the settings under the Export Options need to be configured."),
+      width = NULL
+    )
+  }
 })
 
 output$zoptionUI = renderUI({
-  validate(
-    need(fieldnames(),"Loading...")
-  )
-  zfields = fieldnames()
   
-  if (nrow(zfields) > 0){
-    zvalue = zfields$Z
-  }else{
-    zvalue = NA
+  if (nrow(fieldnames()) > 0){
+    # validate(
+    #   need(fieldnames(),"Loading...")
+    # )
+    zfields = fieldnames()
+    
+    if (nrow(zfields) > 0){
+      zvalue = zfields$Z
+    }else{
+      zvalue = NA
+    }
+    
+    if (zfields$IncZ == TRUE){
+      #Depth Text Input
+      textInput(
+        inputId = "inputdepth",
+        label = zvalue
+      )
+    }else{}
   }
-  
-  if (zfields$IncZ == TRUE){
-    #Depth Text Input
-    textInput(
-      inputId = "inputdepth",
-      label = zvalue
-    )
-  }else{}
 })
 
 depthstablefilter = reactive({
@@ -176,9 +189,9 @@ depthstablefilter = reactive({
 
 #Depths Table UI Display
 output$depthstableoutput = renderDataTable({
-  validate(
-    need(fieldnames(),"Loading...")
-  )  
+  # validate(
+  #   need(fieldnames(),"Loading...")
+  # )  
   
   deleteButtonColumn(
     df = depthstablefilter(),
@@ -263,14 +276,3 @@ observeEvent(
     }
   }
 )
-
-# Updates the Processed date in the depthsfile when the "Process Data" button is clicked
-# observeEvent(
-#   input$processingbttn,{
-#     updatedates = processinglogs()
-#     updatedates$Processed[which(updatedates$StationID == input$procstationname &
-#                                   updatedates$ModelID == input$procmodel & is.na(updatedates$Processed))] = Sys.Date()
-#     processinglogs(updatedates)
-#     updatebaseconfig()
-#   }
-# )
