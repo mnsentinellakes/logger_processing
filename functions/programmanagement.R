@@ -24,7 +24,7 @@ output$loadconfigfileUI = renderUI({
     ),
     column(
       width = 4,
-      HTML(paste0("<font size=5 color=gray> <p align = left>",loadstatus(),"</p></font>"))
+      HTML(paste0("<font size=4 color=gray> <p align = left>",loadstatus(),"</p></font>"))
     )
   )
 })
@@ -33,14 +33,13 @@ output$loadconfigfileUI = renderUI({
 
 #All code used to update potential changes to tables in baseconfig
 updatebaseconfigversion = function(baseconfig){
-  print(names(baseconfig))
   
-  print("version" %notin% names(baseconfig))
   if("version" %notin% names(baseconfig)){
     baseconfig = c(baseconfig,"version" = 0.5)
+  }else{
+    baseconfig
   }
-  
-  
+  return(baseconfig)
 }
 
 #Observe Config Load Button
@@ -49,7 +48,9 @@ observeEvent(
     
     if (!is.null(input$baseconfigload)){
       
-      baseconfiginput=input$baseconfigload
+      baseconfiginput = input$baseconfigload
+      
+      # print(grepl(".RData",baseconfiginput$name,fixed = TRUE))
       
       if (grepl(".RData",baseconfiginput$name,fixed = TRUE)){
         load(baseconfiginput$datapath)
@@ -57,29 +58,29 @@ observeEvent(
         if (names(baseconfig)[1] == "programs"){
           
          baseconfig = updatebaseconfigversion(baseconfig)
-          print(names(baseconfig))
-          save(baseconfig,file = "config/baseconfig.RData")
-          
-          #Assign programs data frame to a reactive value
-          programs = reactiveVal(baseconfig$programs)
-          #Assign program waterbodies data frame to a reactive value
-          programwbs = reactiveVal(baseconfig$programwbs)
-          #Assign waterbody names data frame to a reactive value
-          wbnames = reactiveVal(baseconfig$wbnames)
-          #Assign stations data frame to a reactive value
-          stations = reactiveVal(baseconfig$stations)
-          #Assign processing logs data frame to a reactive value
-          processinglogs = reactiveVal(baseconfig$processinglogs)
-          #Assign QC configuration settings data frame to a reactive value
-          qc_config = reactiveVal(baseconfig$qc_config)
-          #Assign Logger File definitions to a reactive value
-          loggerfiledefs = reactiveVal(baseconfig$loggerfiledefs)
-          #Assign Deploy Logs to a reactive value
-          deploylogs = reactiveVal(baseconfig$deploylogs)
-          #Assign Export Settings to a reactive value
-          export = reactiveVal(baseconfig$export)
-          
-          loadstatus("Configuration File Loaded")
+         
+         save(baseconfig,file = "config/baseconfig.RData")
+         
+         #Assign programs data frame to a reactive value
+         programs = reactiveVal(baseconfig$programs)
+         #Assign program waterbodies data frame to a reactive value
+         programwbs = reactiveVal(baseconfig$programwbs)
+         #Assign waterbody names data frame to a reactive value
+         wbnames = reactiveVal(baseconfig$wbnames)
+         #Assign stations data frame to a reactive value
+         stations = reactiveVal(baseconfig$stations)
+         #Assign processing logs data frame to a reactive value
+         processinglogs = reactiveVal(baseconfig$processinglogs)
+         #Assign QC configuration settings data frame to a reactive value
+         qc_config = reactiveVal(baseconfig$qc_config)
+         #Assign Logger File definitions to a reactive value
+         loggerfiledefs = reactiveVal(baseconfig$loggerfiledefs)
+         #Assign Deploy Logs to a reactive value
+         deploylogs = reactiveVal(baseconfig$deploylogs)
+         #Assign Export Settings to a reactive value
+         export = reactiveVal(baseconfig$export)
+         
+         loadstatus("Configuration File Loaded")
         }else{
           loadstatus("Incompatible File")
         }
@@ -88,7 +89,6 @@ observeEvent(
       }
     }else{
       loadstatus("Uploaded Configuration File Missing")
-      
     }
   }
 )
