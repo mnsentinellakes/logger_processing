@@ -896,9 +896,7 @@ observeEvent(
     exportfinal = export()
     loggerexportfinal = loggerfiledefs()
     loggerexportfinal = loggerexportfinal[which(loggerexportfinal$ModelID == input$selectloggerexport),]
-    print(loggerexportfinal)
-    print(nrow(exportselect()) > 0)
-    
+
     #If settings already exist for the program and model combination
     if (nrow(exportselect()) > 0){
       #File Setup
