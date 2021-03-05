@@ -1,14 +1,13 @@
 #Update object names to reflect qcconfig usage
 savestatus = reactiveVal("")
 
-#Create a named vector of ProgramIDs and assign appropriate names to render selectprogramsUI
-programid = reactive({
-  programselect = programs()
-  programselectvec = programselect$ProgramID
-  
-  names(programselectvec) = programselect$Program_Name
-  return(programselectvec)
-})
+# #Create a named vector of ProgramIDs and assign appropriate names to render selectprogramsUI
+# programid = reactive({
+#   programselect = programs()
+#   programselectvec = programselect$ProgramID
+#   names(programselectvec) = programselect$Program_Name
+#   return(programselectvec)
+# })
 
 #Render the UI for selecting the program
 output$selectprogramsUI = renderUI({
