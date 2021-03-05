@@ -1,6 +1,14 @@
 loadstatus = reactiveVal("")
 `%notin%` <- Negate(`%in%`)
 
+#Create a named vector of ProgramIDs and assign appropriate names to render selectprogramsUI
+programid = reactive({
+  programselect = programs()
+  programselectvec = programselect$ProgramID
+  names(programselectvec) = programselect$Program_Name
+  return(programselectvec)
+})
+
 #Load Configuration File UI
 output$loadconfigfileUI = renderUI({
   fluidRow(
@@ -29,28 +37,22 @@ output$loadconfigfileUI = renderUI({
   )
 })
 
-
-
 #All code used to update potential changes to tables in baseconfig
-updatebaseconfigversion = function(baseconfig){
+updatebaseconfigversion = function(baseconfigdata){
   
-  if("version" %notin% names(baseconfig)){
-    baseconfig = c(baseconfig,"version" = 0.5)
+  if("version" %notin% names(baseconfigdata)){
+    baseconfigdata = c(baseconfigdata,"version" = 0.5)
   }else{
-    baseconfig
+    baseconfigdata
   }
-  return(baseconfig)
+  return(baseconfigdata)
 }
 
 #Observe Config Load Button
 observeEvent(
   input$baseconfigloadbttn,{
-    
     if (!is.null(input$baseconfigload)){
-      
       baseconfiginput = input$baseconfigload
-      
-      # print(grepl(".RData",baseconfiginput$name,fixed = TRUE))
       
       if (grepl(".RData",baseconfiginput$name,fixed = TRUE)){
         load(baseconfiginput$datapath)
@@ -58,28 +60,28 @@ observeEvent(
         if (names(baseconfig)[1] == "programs"){
           
          baseconfig = updatebaseconfigversion(baseconfig)
-         
          save(baseconfig,file = "config/baseconfig.RData")
-         
+
          #Assign programs data frame to a reactive value
-         programs = reactiveVal(baseconfig$programs)
+         programs(baseconfig$programs)
          #Assign program waterbodies data frame to a reactive value
-         programwbs = reactiveVal(baseconfig$programwbs)
+         programwbs(baseconfig$programwbs)
          #Assign waterbody names data frame to a reactive value
-         wbnames = reactiveVal(baseconfig$wbnames)
+         wbnames(baseconfig$wbnames)
          #Assign stations data frame to a reactive value
-         stations = reactiveVal(baseconfig$stations)
+         stations(baseconfig$stations)
          #Assign processing logs data frame to a reactive value
-         processinglogs = reactiveVal(baseconfig$processinglogs)
+         processinglogs(baseconfig$processinglogs)
          #Assign QC configuration settings data frame to a reactive value
-         qc_config = reactiveVal(baseconfig$qc_config)
+         qc_config(baseconfig$qc_config)
          #Assign Logger File definitions to a reactive value
-         loggerfiledefs = reactiveVal(baseconfig$loggerfiledefs)
+         loggerfiledefs(baseconfig$loggerfiledefs)
          #Assign Deploy Logs to a reactive value
-         deploylogs = reactiveVal(baseconfig$deploylogs)
+         deploylogs(baseconfig$deploylogs)
          #Assign Export Settings to a reactive value
-         export = reactiveVal(baseconfig$export)
+         export(baseconfig$export)
          
+         # updatebaseconfig()
          loadstatus("Configuration File Loaded")
         }else{
           loadstatus("Incompatible File")
@@ -260,10 +262,10 @@ observeEvent(
     appids = deleteprogramwbsrv$AppID[which(deleteprogramwbsrv$ProgramID == input$deleteprogramnamechoices)]
     
     deleteprogramsrv = deleteprogramsrv[which(deleteprogramsrv$ProgramID != input$deleteprogramnamechoices),]
-    deleteprogramwbsrv = deleteprogramwbsrv[which(deleteprogramwbsrv$AppID %not in% appids),]
-    deleteprogramwbnamesrv = deleteprogramwbnamesrv[which(deleteprogramwbnamesrv$AppID %not in% appids),]
-    deletestationsrv = deletestationsrv[which(deletestationsrv$AppID %not in% appids),]
-    deleteprogramqcconfig = deleteprogramqcconfig[which(deleteprogramqcconfig$AppID %not in% appids),]
+    deleteprogramwbsrv = deleteprogramwbsrv[which(deleteprogramwbsrv$AppID %notin% appids),]
+    deleteprogramwbnamesrv = deleteprogramwbnamesrv[which(deleteprogramwbnamesrv$AppID %notin% appids),]
+    deletestationsrv = deletestationsrv[which(deletestationsrv$AppID %notin% appids),]
+    deleteprogramqcconfig = deleteprogramqcconfig[which(deleteprogramqcconfig$AppID %notin% appids),]
     
     programs(deleteprogramsrv)
     programwbs(deleteprogramwbsrv)
