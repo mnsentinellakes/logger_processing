@@ -52,9 +52,9 @@ procprogramappids = reactive({
 procwaterbody_names = reactive({
   wbnamesselect = wbnames()
   # wbnamesselect = wbnamess
-  wbnamesselect=wbnamesselect[which(wbnamesselect$AppID %in% procprogramappids()),]
-  wbnamesselectvec=wbnamesselect$AppID
-  names(wbnamesselectvec)=wbnamesselect$Waterbody_Name
+  wbnamesselect = wbnamesselect[which(wbnamesselect$AppID %in% procprogramappids()),]
+  wbnamesselectvec = wbnamesselect$AppID
+  names(wbnamesselectvec) = wbnamesselect$Waterbody_Name
   
   return(wbnamesselectvec)
 })
