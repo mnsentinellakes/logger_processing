@@ -21,9 +21,9 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   
   #Function for reading data
   readloggerdata = function(loggerfile,loggerfields){
-    skiprows = loggerfields$FieldNamesRow-1
-    if (skiprows==0){
-      skiprows=FALSE
+    skiprows = loggerfields$FieldNamesRow - 1
+    if (skiprows == 0){
+      skiprows = FALSE
     }
     
     datafile = read.table(
@@ -36,7 +36,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     )
     
     if (loggerfields$DataStartRow-loggerfields$FieldNamesRow != 1){
-      endrow = loggerfields$DataStartRow-2
+      endrow = loggerfields$DataStartRow - 2
       delrow = seq(1,endrow)
       datafile = datafile[-delrow,]
     }
@@ -58,7 +58,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   #Select data fields
   datafields = Filter(function(x)!all(is.na(x)),loggerfields[,c(8:18)])
   datafieldnames = data.frame("qcfield"=names(datafields),"datafield"=unname(unlist(datafields[1,])),stringsAsFactors = FALSE)
-  datafieldnames = datafieldnames[which(nchar(datafieldnames$datafield)>0),]
+  datafieldnames = datafieldnames[which(nchar(datafieldnames$datafield) > 0),]
   qctypes = datafieldnames$qcfield
   
   #Add units to to datafields table
@@ -68,7 +68,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   }
   datafieldnames$type = datafieldnames$qcfield
   datafieldnames$qcfield = paste0(datafieldnames$qcfield,datafieldnames$Units)
-  datafieldnames$Units=NULL
+  datafieldnames$Units = NULL
   
   #Read Data
   datafile = readloggerdata(
@@ -250,19 +250,19 @@ observeEvent(
     toggleState("processing")
     unlink("processing/*",recursive = TRUE,force = TRUE)
     #Ensures that data have been uploaded
-    if(length(input$dataupload)>0){
+    if(length(input$dataupload) > 0){
       
       ##Data QC and Processing
       #Table with information about the uploaded data
-      filetable=input$dataupload
+      filetable = input$dataupload
       
       #Temp paths to the uploaded data
-      datapaths=filetable$datapath
+      datapaths = filetable$datapath
       #Logger lookup table for associating loggers to depths
-      depthstable=processinglogs()
+      depthstable = processinglogs()
       
       #Selects lookup table rows for selected lake and that have not been processed
-      depthstableselect=depthstable[which(depthstable$StationID == input$procstationname & depthstable$ModelID == input$procmodel & 
+      depthstableselect = depthstable[which(depthstable$StationID == input$procstationname & depthstable$ModelID == input$procmodel & 
                                             is.na(depthstable$Processed)),]
       
       #Progress Update 1
@@ -280,10 +280,10 @@ observeEvent(
       #Iterates through the uploaded files, reformats them and runs QC
       for (j in 1:length(datapaths)){
         #Format input csv name
-        inputname=as.character(filetable$name[j])
-        inputname=as.character(gsub(".csv","",inputname))
-        inputname=as.character(gsub(".TXT","",inputname))
-        inputname=as.character(gsub(".txt","",inputname))
+        inputname = as.character(filetable$name[j])
+        inputname = as.character(gsub(".csv","",inputname))
+        inputname = as.character(gsub(".TXT","",inputname))
+        inputname = as.character(gsub(".txt","",inputname))
         
         #Continue if input name is in the depthstable
         if (inputname %in% depthstableselect$UnitID){
@@ -477,20 +477,20 @@ observeEvent(
 
 #Extract logger types
 qcloggertypes = reactive({
-  qcloggers=VisQCdata()
+  qcloggers = VisQCdata()
   qcloggers = names(qcloggers)
   
   return(qcloggers)
 })
 
 #Render Data Table for Review of Processed Data
-output$dataoutput=renderDT(
-  options=list(
+output$dataoutput = renderDT(
+  options = list(
     lengthChange = FALSE
   ),
   extensions = 'Responsive',{
     
-    qcdatadisplay=VisQCdata()
+    qcdatadisplay = VisQCdata()
     datatypeselect = head(qcdatadisplay[[input$prevloggerchoices]])
     
     return(datatypeselect[,c(1:4,15:18)])
