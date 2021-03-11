@@ -71,7 +71,7 @@ output$selectwbsUI = renderUI({
 #Render the waterbodyid text to show next to the selected waterbody name
 output$selectwbidText = renderText({
   programwaterbodyidchoice = programwbs()
-  programwaterbodyidchoice = programwaterbodyidchoice$ProgramWaterbodyID[which(programwaterbodyidchoice$AppID==input$selectedwb)]
+  programwaterbodyidchoice = programwaterbodyidchoice$ProgramWaterbodyID[which(programwaterbodyidchoice$AppID == input$selectedwb)]
   return(programwaterbodyidchoice)
 })
 
@@ -425,7 +425,7 @@ output$grossqcUI = renderUI({
   qcunit = unique(qcvalues$Units[which(qcvalues$QC_Metric == "Gross.Fail.Hi" & qcvalues$Logger_Type == input$loggerconfigselect)])
   
   #AirBP
-  airbpqcvalues=qcvalues[which(qcvalues$Logger_Type == "AirBP"),]
+  airbpqcvalues = qcvalues[which(qcvalues$Logger_Type == "AirBP"),]
   
   airbpgross = fluidRow(
     column(
@@ -491,7 +491,7 @@ output$grossqcUI = renderUI({
   )
   
   #AirTemp
-  airtempqcvalues=qcvalues[which(qcvalues$Logger_Type == "AirTemp"),]
+  airtempqcvalues = qcvalues[which(qcvalues$Logger_Type == "AirTemp"),]
   airtempgross = fluidRow(
     column(
       width = 2,
@@ -556,7 +556,7 @@ output$grossqcUI = renderUI({
   )
   
   #Chlorophyll A
-  chlorophyllaqcvalues=qcvalues[which(qcvalues$Logger_Type == "Chlorophylla"),]
+  chlorophyllaqcvalues = qcvalues[which(qcvalues$Logger_Type == "Chlorophylla"),]
   chlorophyllagross = fluidRow(
     column(
       width = 2,
@@ -621,7 +621,7 @@ output$grossqcUI = renderUI({
   )
   
   #Conductivity
-  condqcvalues=qcvalues[which(qcvalues$Logger_Type == "Cond"),]
+  condqcvalues = qcvalues[which(qcvalues$Logger_Type == "Cond"),]
   condgross = fluidRow(
     column(
       width = 2,
@@ -686,7 +686,7 @@ output$grossqcUI = renderUI({
   )
   
   #Discharge
-  dischargeqcvalues=qcvalues[which(qcvalues$Logger_Type == "Discharge"),]
+  dischargeqcvalues = qcvalues[which(qcvalues$Logger_Type == "Discharge"),]
   dischargegross = fluidRow(
     column(
       width = 2,
@@ -751,7 +751,7 @@ output$grossqcUI = renderUI({
   )
   
   #DO
-  doqcvalues=qcvalues[which(qcvalues$Logger_Type == "DO"),]
+  doqcvalues = qcvalues[which(qcvalues$Logger_Type == "DO"),]
   dogross = fluidRow(
     column(
       width = 2,
@@ -816,7 +816,7 @@ output$grossqcUI = renderUI({
   )
   
   #Gage Height
-  gageheightqcvalues=qcvalues[which(qcvalues$Logger_Type == "GageHeight"),]
+  gageheightqcvalues = qcvalues[which(qcvalues$Logger_Type == "GageHeight"),]
   gageheightgross = fluidRow(
     column(
       width = 2,
@@ -881,7 +881,7 @@ output$grossqcUI = renderUI({
   )
   
   #pH
-  phqcvalues=qcvalues[which(qcvalues$Logger_Type == "pH"),]
+  phqcvalues = qcvalues[which(qcvalues$Logger_Type == "pH"),]
   phgross = fluidRow(
     column(
       width = 2,
@@ -946,7 +946,7 @@ output$grossqcUI = renderUI({
   )
   
   #Turbidity
-  turbidityqcvalues=qcvalues[which(qcvalues$Logger_Type == "Turbidity"),]
+  turbidityqcvalues = qcvalues[which(qcvalues$Logger_Type == "Turbidity"),]
   turbiditygross = fluidRow(
     column(
       width = 2,
@@ -1011,7 +1011,7 @@ output$grossqcUI = renderUI({
   )
   
   #Water P
-  waterpqcvalues=qcvalues[which(qcvalues$Logger_Type == "WaterP"),]
+  waterpqcvalues = qcvalues[which(qcvalues$Logger_Type == "WaterP"),]
   waterpgross = fluidRow(
     column(
       width = 2,
@@ -1076,7 +1076,7 @@ output$grossqcUI = renderUI({
   )
   
   #Water Temp
-  watertempqcvalues=qcvalues[which(qcvalues$Logger_Type == "WaterTemp"),]
+  watertempqcvalues = qcvalues[which(qcvalues$Logger_Type == "WaterTemp"),]
   watertempgross = fluidRow(
     column(
       width = 2,
@@ -1181,7 +1181,7 @@ output$spikeqcUI = renderUI({
     need(input$loggerconfigselect,"Loading..."),
     need(input$loggerunitselect,"Loading...")
   )
-  qcvalues=wbqcvalues()
+  qcvalues = wbqcvalues()
   qcunit = unique(qcvalues$Units[which(qcvalues$QC_Metric == "Spike.Hi" & qcvalues$Logger_Type == input$loggerconfigselect)])
   
   #AirBP
@@ -1609,7 +1609,7 @@ output$rocqcUI = renderUI({
   qcvalues=wbqcvalues()
   
   #AirBP
-  airbpqcvalues=qcvalues[which(qcvalues$Logger_Type == "AirBP"),]
+  airbpqcvalues = qcvalues[which(qcvalues$Logger_Type == "AirBP"),]
   airbproc = fluidRow(
     column(
       width = 2,
@@ -1635,7 +1635,7 @@ output$rocqcUI = renderUI({
   
   
   #AirTemp
-  airtempqcvalues=qcvalues[which(qcvalues$Logger_Type == "AirTemp"),]
+  airtempqcvalues = qcvalues[which(qcvalues$Logger_Type == "AirTemp"),]
   airtemproc = fluidRow(
     column(
       width = 2,
@@ -1660,7 +1660,7 @@ output$rocqcUI = renderUI({
   )
   
   #Chlorophyll A
-  chlorophyllaqcvalues=qcvalues[which(qcvalues$Logger_Type == "Chlorophylla"),]
+  chlorophyllaqcvalues = qcvalues[which(qcvalues$Logger_Type == "Chlorophylla"),]
   chlorophyllaroc = fluidRow(
     column(
       width = 2,
@@ -1685,7 +1685,7 @@ output$rocqcUI = renderUI({
   )
   
   #Conductivity
-  condqcvalues=qcvalues[which(qcvalues$Logger_Type == "Cond"),]
+  condqcvalues = qcvalues[which(qcvalues$Logger_Type == "Cond"),]
   condroc = fluidRow(
     column(
       width = 2,
@@ -1710,7 +1710,7 @@ output$rocqcUI = renderUI({
   )
   
   #Discharge
-  dischargeqcvalues=qcvalues[which(qcvalues$Logger_Type == "Discharge"),]
+  dischargeqcvalues = qcvalues[which(qcvalues$Logger_Type == "Discharge"),]
   dischargeroc = fluidRow(
     column(
       width = 2,
@@ -1735,7 +1735,7 @@ output$rocqcUI = renderUI({
   )
   
   #DO
-  doqcvalues=qcvalues[which(qcvalues$Logger_Type == "DO"),]
+  doqcvalues = qcvalues[which(qcvalues$Logger_Type == "DO"),]
   doroc = fluidRow(
     column(
       width = 2,
@@ -1759,7 +1759,7 @@ output$rocqcUI = renderUI({
     )
   )
   
-  gageheightqcvalues=qcvalues[which(qcvalues$Logger_Type == "GageHeight"),]
+  gageheightqcvalues = qcvalues[which(qcvalues$Logger_Type == "GageHeight"),]
   gageheightroc = fluidRow(
     column(
       width = 2,
@@ -1784,7 +1784,7 @@ output$rocqcUI = renderUI({
   )
   
   #pH
-  phqcvalues=qcvalues[which(qcvalues$Logger_Type == "pH"),]
+  phqcvalues = qcvalues[which(qcvalues$Logger_Type == "pH"),]
   phroc = fluidRow(
     column(
       width = 2,
@@ -1809,7 +1809,7 @@ output$rocqcUI = renderUI({
   )
   
   #Turbidity
-  turbidityqcvalues=qcvalues[which(qcvalues$Logger_Type == "Turbidity"),]
+  turbidityqcvalues = qcvalues[which(qcvalues$Logger_Type == "Turbidity"),]
   turbidityroc = fluidRow(
     column(
       width = 2,
@@ -1834,7 +1834,7 @@ output$rocqcUI = renderUI({
   )
   
   #WaterP
-  waterpqcvalues=qcvalues[which(qcvalues$Logger_Type == "WaterP"),]
+  waterpqcvalues = qcvalues[which(qcvalues$Logger_Type == "WaterP"),]
   waterproc = fluidRow(
     column(
       width = 2,
@@ -1859,7 +1859,7 @@ output$rocqcUI = renderUI({
   )
   
   #WaterTemp
-  watertempqcvalues=qcvalues[which(qcvalues$Logger_Type == "WaterTemp"),]
+  watertempqcvalues = qcvalues[which(qcvalues$Logger_Type == "WaterTemp"),]
   watertemproc = fluidRow(
     column(
       width = 2,
@@ -1924,7 +1924,7 @@ output$flatqcUI = renderUI({
     need(input$loggerconfigselect,"Loading..."),
     need(input$loggerunitselect,"Loading...")
   )
-  qcvalues=wbqcvalues()
+  qcvalues = wbqcvalues()
   qcunit = unique(qcvalues$Units[which(qcvalues$QC_Metric == "Spike.Hi" & qcvalues$Logger_Type == input$loggerconfigselect)])
   
   #AirBP
