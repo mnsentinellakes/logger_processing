@@ -94,8 +94,8 @@ observe({
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "DO")]),perl = TRUE)
       ),"\"\n",
     
-    "ContData.env$myUnits.GageHeight <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "GageHeight")]),perl = TRUE)
+    "ContData.env$myUnits.WaterLevel <- \"",gsub(
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterLevel")]),perl = TRUE)
       ),"\"\n",
     
     "ContData.env$myUnits.pH <- \"",gsub(
@@ -143,8 +143,8 @@ observe({
     "ContData.env$myName.DO <- \"DO",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "DO")]),perl = TRUE)
     ),"\"\n",
-    "ContData.env$myName.GageHeight <- \"GageHeight",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "GageHeight")]),perl = TRUE)
+    "ContData.env$myName.WaterLevel <- \"WaterLevel",gsub(
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterLevel")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.pH <- \"pH",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "pH")]),perl = TRUE)
@@ -170,7 +170,7 @@ observe({
     "ContData.env$myLab.Cond <- \"",paste0("Conductivity (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "Cond")],")"),"\"\n",
     "ContData.env$myLab.Discharge <- \"",paste0("Discharge (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "Discharge")],")"),"\"\n",
     "ContData.env$myLab.DO <- \"",paste0("Dissolved Oxygen (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "DO")],")"),"\"\n",
-    "ContData.env$myLab.GageHeight <- \"",paste0("Gage Height (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "GageHeight")],")"),"\"\n",
+    "ContData.env$myLab.WaterLevel <- \"",paste0("Gage Height (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterLevel")],")"),"\"\n",
     "ContData.env$myLab.pH <- \"",paste0("pH (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "pH")],")"),"\"\n",
     "ContData.env$myLab.Turbidity <- \"",paste0("Turbidity (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "Turbidity")],")"),"\"\n",
     "ContData.env$myLab.WaterP <- \"",paste0("Pressure, Water (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterP")],")"),"\"\n",
@@ -191,7 +191,7 @@ observe({
     "ContData.env$myName.Discrete.Cond <- paste(ContData.env$myPrefix.Discrete,ContData.env$myName.Cond)\n",
     "ContData.env$myName.Discrete.Discharge <- paste(ContData.env$myPrefix.Discrete,ContData.env$myName.Discharge)\n",
     "ContData.env$myName.Discrete.DO <- paste(ContData.env$myPrefix.Discrete,ContData.env$myName.DO)\n",
-    "ContData.env$myName.Discrete.GageHeight <- paste(ContData.env$myPrefix.Discrete,ContData.env$myName.GageHeight)\n",
+    "ContData.env$myName.Discrete.WaterLevel <- paste(ContData.env$myPrefix.Discrete,ContData.env$myName.WaterLevel)\n",
     "ContData.env$myName.Discrete.pH <- paste(ContData.env$myPrefix.Discrete,ContData.env$myName.pH)\n",
     "ContData.env$myName.Discrete.Turbidity <- paste(ContData.env$myPrefix.Discrete,ContData.env$myName.Turbidity)\n",
     "ContData.env$myName.Discrete.WaterP <- paste(ContData.env$myPrefix.Discrete,ContData.env$myName.WaterP)\n",
@@ -206,7 +206,7 @@ observe({
     "ContData.env$myLab.Discrete.Cond <- paste(ContData.env$myLab.Cond,\"(Discrete)\")\n",
     "ContData.env$myLab.Discrete.Discharge <- paste(ContData.env$myLab.Discharge,\"(Discrete)\")\n",
     "ContData.env$myLab.Discrete.DO <- paste(ContData.env$myLab.DO,\"(Discrete)\")\n",
-    "ContData.env$myLab.Discrete.GageHeight <- paste(ContData.env$myLab.GageHeight,\"(Discrete)\")\n",
+    "ContData.env$myLab.Discrete.WaterLevel <- paste(ContData.env$myLab.WaterLevel,\"(Discrete)\")\n",
     "ContData.env$myLab.Discrete.pH <- paste(ContData.env$myLab.pH,\"(Discrete)\")\n",
     "ContData.env$myLab.Discrete.Turbidity <- paste(ContData.env$myLab.Turbidity,\"(Discrete)\")\n",
     "ContData.env$myLab.Discrete.WaterP <- paste(ContData.env$myLab.WaterP,\"(Discrete)\")\n",
@@ -246,7 +246,7 @@ observe({
       ContData.env$myName.pH, 
       ContData.env$myName.Turbidity, 
       ContData.env$myName.Chlorophylla, 
-      ContData.env$myName.GageHeight, 
+      ContData.env$myName.WaterLevel, 
       ContData.env$myName.Discrete.WaterTemp, 
       ContData.env$myName.Discrete.AirTemp, 
       ContData.env$myName.Discrete.WaterP, 
@@ -258,7 +258,7 @@ observe({
       ContData.env$myName.Discrete.pH, 
       ContData.env$myName.Discrete.Turbidity, 
       ContData.env$myName.Discrete.Chlorophylla, 
-      ContData.env$myName.Discrete.GageHeight
+      ContData.env$myName.Discrete.WaterLevel
     )\n\n",
     
     "ContData.env$myNames.DataFields.Lab <- c(
@@ -273,7 +273,7 @@ observe({
       ContData.env$myLab.pH, 
       ContData.env$myLab.Turbidity, 
       ContData.env$myLab.Chlorophylla, 
-      ContData.env$myLab.GageHeight, 
+      ContData.env$myLab.WaterLevel, 
       ContData.env$myLab.Discrete.WaterTemp, 
       ContData.env$myLab.Discrete.AirTemp, 
       ContData.env$myLab.Discrete.WaterP, 
@@ -285,7 +285,7 @@ observe({
       ContData.env$myLab.Discrete.pH, 
       ContData.env$myLab.Discrete.Turbidity, 
       ContData.env$myLab.Discrete.Chlorophylla, 
-      ContData.env$myLab.Discrete.GageHeight
+      ContData.env$myLab.Discrete.WaterLevel
     )\n\n",
     
     "ContData.env$myNames.DataFields.Col <- c(
@@ -312,7 +312,7 @@ observe({
       ContData.env$myName.pH, 
       ContData.env$myName.Turbidity, 
       ContData.env$myName.Chlorophylla, 
-      ContData.env$myName.GageHeight, 
+      ContData.env$myName.WaterLevel, 
       ContData.env$myName.LoggerID.Water, 
       ContData.env$myName.RowID.Water, 
       ContData.env$myName.Discrete.WaterTemp, 
@@ -326,7 +326,7 @@ observe({
       ContData.env$myName.Discrete.pH, 
       ContData.env$myName.Discrete.Turbidity, 
       ContData.env$myName.Discrete.Chlorophylla, 
-      ContData.env$myName.Discrete.GageHeight
+      ContData.env$myName.Discrete.WaterLevel
     )\n\n",
     
     "#--------------------------------------------------------------------\n",
@@ -353,7 +353,7 @@ observe({
     "ContData.env$myThresh.Gross.Fail.Hi.Cond <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.Gross.Fail.Hi.Discharge <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.Gross.Fail.Hi.DO <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.GageHeight <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.WaterLevel <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.Gross.Fail.Hi.pH <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.Gross.Fail.Hi.Turbidity <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.Gross.Fail.Hi.WaterP <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "WaterP")],"\n",
@@ -368,7 +368,7 @@ observe({
     "ContData.env$myThresh.Gross.Fail.Lo.Cond <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.Gross.Fail.Lo.Discharge <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.Gross.Fail.Lo.DO <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.GageHeight <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.WaterLevel <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.Gross.Fail.Lo.pH <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.Gross.Fail.Lo.Turbidity <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.Gross.Fail.Lo.WaterP <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "WaterP")],"\n",
@@ -383,7 +383,7 @@ observe({
     "ContData.env$myThresh.Gross.Suspect.Hi.Cond <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Hi.Discharge <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Hi.DO <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.GageHeight <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.WaterLevel <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Hi.pH <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Hi.Turbidity <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Hi.WaterP <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "WaterP")],"\n",
@@ -398,7 +398,7 @@ observe({
     "ContData.env$myThresh.Gross.Suspect.Lo.Cond <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Lo.Discharge <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Lo.DO <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.GageHeight <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.WaterLevel <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Lo.pH <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Lo.Turbidity <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.Gross.Suspect.Lo.WaterP <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "WaterP")],"\n",
@@ -413,7 +413,7 @@ observe({
     "ContData.env$myThresh.Spike.Hi.Cond <- ",spikehi$Value[which(spikehi$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.Spike.Hi.Discharge <- ",spikehi$Value[which(spikehi$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.Spike.Hi.DO <- ",spikehi$Value[which(spikehi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Spike.Hi.GageHeight <- ",spikehi$Value[which(spikehi$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.Spike.Hi.WaterLevel <- ",spikehi$Value[which(spikehi$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.Spike.Hi.pH <- ",spikehi$Value[which(spikehi$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.Spike.Hi.Turbidity <- ",spikehi$Value[which(spikehi$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.Spike.Hi.WaterP <- ",spikehi$Value[which(spikehi$Logger_Type == "WaterP")],"\n",
@@ -428,7 +428,7 @@ observe({
     "ContData.env$myThresh.Spike.Lo.Cond <- ",spikelo$Value[which(spikelo$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.Spike.Lo.Discharge <- ",spikelo$Value[which(spikelo$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.Spike.Lo.DO <- ",spikelo$Value[which(spikelo$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Spike.Lo.GageHeight <- ",spikelo$Value[which(spikelo$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.Spike.Lo.WaterLevel <- ",spikelo$Value[which(spikelo$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.Spike.Lo.pH <- ",spikelo$Value[which(spikelo$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.Spike.Lo.Turbidity <- ",spikelo$Value[which(spikelo$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.Spike.Lo.WaterP <- ",spikelo$Value[which(spikelo$Logger_Type == "WaterP")],"\n",
@@ -443,7 +443,7 @@ observe({
     "ContData.env$myThresh.RoC.SD.number.Cond <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.RoC.SD.number.Discharge <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.RoC.SD.number.DO <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.GageHeight <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.WaterLevel <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.RoC.SD.number.pH <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.RoC.SD.number.Turbidity <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.RoC.SD.number.WaterP <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "WaterP")],"\n",
@@ -458,7 +458,7 @@ observe({
     "ContData.env$myThresh.RoC.SD.period.Cond <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.RoC.SD.period.Discharge <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.RoC.SD.period.DO <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.GageHeight <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.WaterLevel <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.RoC.SD.period.pH <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.RoC.SD.period.Turbidity <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.RoC.SD.period.WaterP <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "WaterP")],"\n",
@@ -473,7 +473,7 @@ observe({
     "ContData.env$myThresh.Flat.Hi.Cond <- ",flathi$Value[which(flathi$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.Flat.Hi.Discharge <- ",flathi$Value[which(flathi$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.Flat.Hi.DO <- ",flathi$Value[which(flathi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Flat.Hi.GageHeight <- ",flathi$Value[which(flathi$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.Flat.Hi.WaterLevel <- ",flathi$Value[which(flathi$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.Flat.Hi.pH <- ",flathi$Value[which(flathi$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.Flat.Hi.Turbidity <- ",flathi$Value[which(flathi$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.Flat.Hi.WaterP <- ",flathi$Value[which(flathi$Logger_Type == "WaterP")],"\n",
@@ -488,7 +488,7 @@ observe({
     "ContData.env$myThresh.Flat.Lo.Cond <- ",flatlo$Value[which(flathi$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.Flat.Lo.Discharge <- ",flatlo$Value[which(flathi$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.Flat.Lo.DO <- ",flatlo$Value[which(flathi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Flat.Lo.GageHeight <- ",flatlo$Value[which(flathi$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.Flat.Lo.WaterLevel <- ",flatlo$Value[which(flathi$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.Flat.Lo.pH <- ",flatlo$Value[which(flathi$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.Flat.Lo.Turbidity <- ",flatlo$Value[which(flathi$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.Flat.Lo.WaterP <- ",flatlo$Value[which(flathi$Logger_Type == "WaterP")],"\n",
@@ -503,7 +503,7 @@ observe({
     "ContData.env$myThresh.Flat.Tolerance.Cond <- ",flattolerance$Value[which(flattolerance$Logger_Type == "Cond")],"\n",
     "ContData.env$myThresh.Flat.Tolerance.Discharge <- ",flattolerance$Value[which(flattolerance$Logger_Type == "Discharge")],"\n",
     "ContData.env$myThresh.Flat.Tolerance.DO <- ",flattolerance$Value[which(flattolerance$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.GageHeight <- ",flattolerance$Value[which(flattolerance$Logger_Type == "GageHeight")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.WaterLevel <- ",flattolerance$Value[which(flattolerance$Logger_Type == "WaterLevel")],"\n",
     "ContData.env$myThresh.Flat.Tolerance.pH <- ",flattolerance$Value[which(flattolerance$Logger_Type == "pH")],"\n",
     "ContData.env$myThresh.Flat.Tolerance.Turbidity <- ",flattolerance$Value[which(flattolerance$Logger_Type == "Turbidity")],"\n",
     "ContData.env$myThresh.Flat.Tolerance.WaterP <- ",flattolerance$Value[which(flattolerance$Logger_Type == "WaterP")],"\n",
@@ -520,7 +520,7 @@ observe({
       ContData.env$myThresh.Flat.Hi.pH, 
       ContData.env$myThresh.Flat.Hi.Turbidity, 
       ContData.env$myThresh.Flat.Hi.Chlorophylla, 
-      ContData.env$myThresh.Flat.Hi.GageHeight
+      ContData.env$myThresh.Flat.Hi.WaterLevel
     )\n\n",
     
     "#--------------------------------------------------------------------\n",
@@ -536,7 +536,7 @@ observe({
     "ContData.env$myName.Flag.Cond <- paste(ContData.env$myName.Flag,ContData.env$myName.Cond)\n",
     "ContData.env$myName.Flag.Discharge <- paste(ContData.env$myName.Flag,ContData.env$myName.Discharge)\n",
     "ContData.env$myName.Flag.DO <- paste(ContData.env$myName.Flag,ContData.env$myName.DO)\n",
-    "ContData.env$myName.Flag.GageHeight <- paste(ContData.env$myName.Flag,ContData.env$myName.GageHeight)\n",
+    "ContData.env$myName.Flag.WaterLevel <- paste(ContData.env$myName.Flag,ContData.env$myName.WaterLevel)\n",
     "ContData.env$myName.Flag.pH <- paste(ContData.env$myName.Flag,ContData.env$myName.pH)\n",
     "ContData.env$myName.Flag.Turbidity <- paste(ContData.env$myName.Flag,ContData.env$myName.Turbidity)\n",
     "ContData.env$myName.Flag.WaterP <- paste(ContData.env$myName.Flag,ContData.env$myName.WaterP)\n",
