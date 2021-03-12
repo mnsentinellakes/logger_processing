@@ -51,7 +51,7 @@ procprogramappids = reactive({
 #Create a vector of Waterbody Names from the AppIDS
 procwaterbody_names = reactive({
   wbnamesselect = wbnames()
-  # wbnamesselect = wbnamess
+  
   wbnamesselect = wbnamesselect[which(wbnamesselect$AppID %in% procprogramappids()),]
   wbnamesselectvec = wbnamesselect$AppID
   names(wbnamesselectvec) = wbnamesselect$Waterbody_Name
@@ -61,7 +61,7 @@ procwaterbody_names = reactive({
 
 #Processing Waterbody Choices
 output$procwaterbodyUI = renderUI({
-  # isolate(
+  
     pickerInput(
       inputId = "procwaterbody",
       label = "Waterbody",
@@ -70,7 +70,6 @@ output$procwaterbodyUI = renderUI({
         style = "btn-success"
       )
     )
-  # )
 })
 
 #Select Station
@@ -129,24 +128,17 @@ deploycounter = reactive({
     if (all(is.na(deployidselect$DeployID))){
       deploycountdata = 1
     }else{
- 
       deployidselect = unique(deployidselect$DeployID[which(deployidselect$StationID == input$procstationname & 
                                                           deployidselect$ModelID == input$procmodel)])
-      
       if (length(deployidselect)>0){
-        # print(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)]))
-        
         deploycountdata = as.numeric(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)])) + 1
-        
       }else{
         deploycountdata = 1
       }
-
     }
   }else{
     deploycountdata = 1
   }
-  
   return(deploycountdata)
 })
 
