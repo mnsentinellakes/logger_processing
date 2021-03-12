@@ -446,7 +446,6 @@ output$summaryplot = renderPlotly({
   validate(
     need(summaryselectdata(),"Loading...")
   )
-  
   summaryplotdata = summaryselectdata()
   
   if (input$sumflagtype == "Gross"){
