@@ -43,11 +43,11 @@ output$aedmodelnamesUI = renderUI({
       column(
         width = 6,
         isolate(
-        pickerInput(
-          inputId = "lfeditloggermodelchoices",
-          label = NULL,
-          choices = loggermodelsedit()
-        )
+          pickerInput(
+            inputId = "lfeditloggermodelchoices",
+            label = NULL,
+            choices = loggermodelsedit()
+          )
         )
       ),
       column(
@@ -79,8 +79,6 @@ output$lfeditloggermodelnameUI = renderUI({
 
 #Add Edit Delete 
 output$aedoptionschoiceUI = renderUI({
-  
-  # loggerpresets = loggerfiledefs()
   
   if (input$aedmodels == "Add"){
     tagList(
@@ -134,7 +132,7 @@ output$aedoptionschoiceUI = renderUI({
 output$lfaddmodeltableconfigUI = renderUI({
   tagList(
     tags$div(
-      style="vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
+      style = "vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
       
       fluidRow(
         column(
@@ -175,7 +173,7 @@ timeformats = c("%H:%M","%H:%M:%S","%I:%M %p","%I:%M:%S %p")
 output$lfaddmodeltimeconfigUI = renderUI({
   tagList(
     tags$div(
-      style="vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
+      style = "vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
       fluidRow(
         column(
           width = 2,
@@ -208,7 +206,7 @@ output$lfaddmodeltimeconfigUI = renderUI({
 #Add Logger Date Fields
 output$lfadddatefieldUI = renderUI({
   radioGroupButtons(
-    inputId ="datetypeadd",
+    inputId = "datetypeadd",
     label = "Field Organization",
     choices = c("Combined","Separate"),
     status = "primary"
@@ -338,11 +336,6 @@ output$lfaddmodeldataconfigUI = renderUI({
         column(
           width = 5,
           textInput(
-            inputId = "gageheightfieldadd",
-            label = "Gage Height Field",
-            value = NA
-          ),
-          textInput(
             inputId = "phfieldadd",
             label = "pH Field",
             value = NA
@@ -350,6 +343,11 @@ output$lfaddmodeldataconfigUI = renderUI({
           textInput(
             inputId = "turbidityfieldadd",
             label = "Turbidity Field",
+            value = NA
+          ),
+          textInput(
+            inputId = "waterlevelfieldadd",
+            label = "Water Level Field",
             value = NA
           ),
           textInput(
@@ -415,7 +413,7 @@ observeEvent(
                              "DateTime" = datetimeentry,"Date_Format" = input$dateformatadd,"Time_Format" = input$timeformatadd,
                              "AirBP" = input$airbpfieldadd,"AirTemp" = input$airtempfieldadd,"Chlorophylla" = input$chlorophyllafieldadd,
                              "Cond" = input$condfieldadd,"Discharge" = input$dischargefieldadd,"DO" = input$dofieldadd,
-                             "GageHeight" = input$gageheightfieldadd,"pH" = input$phfieldadd,"Turbidity" = input$turbidityfieldadd,
+                             "pH" = input$phfieldadd,"Turbidity" = input$turbidityfieldadd,"WaterLevel" = input$waterlevelfieldadd,
                              "WaterP" = input$waterpfieldadd,"WaterTemp" = input$watertempfieldadd,"TZ" = input$tzadd,
                              "FieldNamesRow" = input$fieldnamerownumadd,"DataStartRow" = input$datarownumadd)
       
@@ -692,9 +690,9 @@ output$lfeditmodeldataconfigUI = renderUI({
         column(
           width = 5,
           textInput(
-            inputId = "gageheightfieldedit",
-            label = "Gage Height Field",
-            value = datafieldsedit$GageHeight
+            inputId = "waterlevelfieldedit",
+            label = "Water Level Field",
+            value = datafieldsedit$WaterLevel
           ),
           textInput(
             inputId = "phfieldedit",
@@ -792,11 +790,11 @@ observeEvent(
       dofield = NA
     }
     
-    #Gageheight column
-    if(!is.null(input$gageheightfieldedit)){
-      gageheightfield = input$gageheightfieldedit
+    #WaterLevel column
+    if(!is.null(input$waterlevelfieldedit)){
+      waterlevelfield = input$waterlevelfieldedit
     }else{
-      gageheightfield = NA
+      waterlevelfield = NA
     }
     
     #pH column
@@ -840,9 +838,9 @@ observeEvent(
     editloggerdefs$Cond[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = condfield
     editloggerdefs$Discharge[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = dischargefield
     editloggerdefs$DO[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = dofield
-    editloggerdefs$GageHeight[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = gageheightfield
     editloggerdefs$pH[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = phfield
     editloggerdefs$Turbidity[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = turbidityfield
+    editloggerdefs$WaterLevel[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = waterlevelfield
     editloggerdefs$WaterP[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = waterpfield
     editloggerdefs$WaterTemp[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = watertempfield
     editloggerdefs$FieldNamesRow[which(editloggerdefs$ModelID == input$lfeditloggermodelchoices)] = input$fieldnamerownumedit
@@ -860,7 +858,7 @@ observeEvent(
   input$deleteloggermodelnamebttn,
   {
     deleteloggerdefs = loggerfiledefs()
-    deleteloggerdefs = deleteloggerdefs[which(deleteloggerdefs$ModelID !=input$deleteloggermodelchoices),]
+    deleteloggerdefs = deleteloggerdefs[which(deleteloggerdefs$ModelID != input$deleteloggermodelchoices),]
     
     loggerfiledefs(deleteloggerdefs)
     updatebaseconfig()
