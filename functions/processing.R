@@ -1,15 +1,5 @@
 turnoffprocessupdate = FALSE
 
-# procwbs = reactive({
-#   wbs = programwbs()
-#   wbname = wbnames()
-#   wbs = wbs[which(wbs$AppID == input$procwaterbody),]
-#   wbname = wbname$Waterbody_Name[which(wbname$AppID == input$procwaterbody)]
-#   wbs = cbind(wbs,wbname)
-# 
-#   return(wbs)
-# })
-
 #Format Raw input data for QC
 #datafilepath - raw input data file
 #siteid - Logger Serial Number
@@ -194,7 +184,7 @@ compileQCdata = function(qcinfo,depthstable){
         
         qcfile = qcfiles[which(grepl(j,qcfiles))]
         
-        if(length(qcfile)>0){
+        if(length(qcfile) > 0){
           readdata = read.csv(qcfile,stringsAsFactors = FALSE)
           
           datacompile = data.frame("UnitID" = j,"DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
@@ -395,7 +385,6 @@ observeEvent(
           processinglogs(updateproclogs)
           
           #Update deploy table
-          
           deployaddrows = NULL
           for (k in names(compiledata)){
             selectunit = unique(qctable$Units[which(qctable$AppID == input$procwaterbody & qctable$Logger_Type == k)])
@@ -462,11 +451,9 @@ observeEvent(
     
     unlink("processing/*",recursive = TRUE,force = TRUE)
     
-    
-      finaldata(NULL)
-    
-    
-  })
+    finaldata(NULL)
+  }
+)
 
 #Re-enable disabled Processing button upon uploading new data
 observeEvent(
