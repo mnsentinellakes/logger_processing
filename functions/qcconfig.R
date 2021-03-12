@@ -1,14 +1,6 @@
 #Update object names to reflect qcconfig usage
 savestatus = reactiveVal("")
 
-# #Create a named vector of ProgramIDs and assign appropriate names to render selectprogramsUI
-# programid = reactive({
-#   programselect = programs()
-#   programselectvec = programselect$ProgramID
-#   names(programselectvec) = programselect$Program_Name
-#   return(programselectvec)
-# })
-
 #Render the UI for selecting the program
 output$selectprogramsUI = renderUI({
   pickerInput(
@@ -101,7 +93,7 @@ output$loggerconfigselectUI = renderUI({
 loggerunits = data.frame(
   "Logger_Type" = c("AirBP","AirBP","AirBP","AirBP","AirBP","AirBP","WaterP","WaterP","WaterP","WaterP","WaterP","WaterP","AirTemp",
                     "AirTemp","WaterTemp","WaterTemp","Chlorophylla","Chlorophylla","Chlorophylla","DO","DO","DO","Discharge","Discharge",
-                    "GageHeight","GageHeight","GageHeight","GageHeight","Cond","pH","Turbidity"),
+                    "WaterLevel","WaterLevel","WaterLevel","WaterLevel","Cond","pH","Turbidity"),
   "Unit" = c("psi","Pa","hPa","mm Hg","in Hg","atm","psi","Pa","hPa","mm Hg","in Hg","atm","C","F","C","F","g/cm3","g/L","mg/L","g/cm3",
              "g/L","mg/L","ft3/s","m3/s","ft","in","m","cm","uS/cm","SU","NTU"),
   stringsAsFactors = FALSE
@@ -250,7 +242,7 @@ loggerunitsconversion = function(qcvalue,Logger_Type,startunit,endunit){
         outputvalue =qcvalue
       }
     }
-  }else if (Logger_Type == "GageHeight"){
+  }else if (Logger_Type == "WaterLevel"){
     if (startunit == "ft"){
       if (endunit == "ft"){
         outputvalue = qcvalue
@@ -311,7 +303,6 @@ loggerunitsconversion = function(qcvalue,Logger_Type,startunit,endunit){
       }
     }
   }
-  
   return(outputvalue)
 }
 
@@ -815,71 +806,6 @@ output$grossqcUI = renderUI({
     )
   )
   
-  #Gage Height
-  gageheightqcvalues = qcvalues[which(qcvalues$Logger_Type == "GageHeight"),]
-  gageheightgross = fluidRow(
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightgrossmaxfail",
-        label = "Max",
-        width = 100,
-        value = loggerunitsconversion(
-          qcvalue = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "Gross.Fail.Hi")],
-          Logger_Type = input$loggerconfigselect,
-          startunit = qcunit,
-          endunit = input$loggerunitselect
-        ),
-        step = 0.1
-      ),
-    ),
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightgrossminfail",
-        label = "Min",
-        width = 100,
-        value = loggerunitsconversion(
-          qcvalue = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "Gross.Fail.Lo")],
-          Logger_Type = input$loggerconfigselect,
-          startunit = qcunit,
-          endunit = input$loggerunitselect
-        ),
-        step = 0.1
-      )
-    ),
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightgrossmaxsusp",
-        label = "Max",
-        width = 100,
-        value = loggerunitsconversion(
-          qcvalue = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "Gross.Suspect.Hi")],
-          Logger_Type = input$loggerconfigselect,
-          startunit = qcunit,
-          endunit = input$loggerunitselect
-        ),
-        step = 0.1
-      )
-    ),
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightgrossminsusp",
-        label = "Min",
-        width = 100,
-        value = loggerunitsconversion(
-          qcvalue = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "Gross.Suspect.Lo")],
-          Logger_Type = input$loggerconfigselect,
-          startunit = qcunit,
-          endunit = input$loggerunitselect
-        ),
-        step = 0.1
-      )
-    )
-  )
-  
   #pH
   phqcvalues = qcvalues[which(qcvalues$Logger_Type == "pH"),]
   phgross = fluidRow(
@@ -1001,6 +927,71 @@ output$grossqcUI = renderUI({
         width = 100,
         value = loggerunitsconversion(
           qcvalue = turbidityqcvalues$Value[which(turbidityqcvalues$QC_Metric == "Gross.Suspect.Lo")],
+          Logger_Type = input$loggerconfigselect,
+          startunit = qcunit,
+          endunit = input$loggerunitselect
+        ),
+        step = 0.1
+      )
+    )
+  )
+  
+  #Water Level
+  waterlevelqcvalues = qcvalues[which(qcvalues$Logger_Type == "WaterLevel"),]
+  waterlevelgross = fluidRow(
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelgrossmaxfail",
+        label = "Max",
+        width = 100,
+        value = loggerunitsconversion(
+          qcvalue = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "Gross.Fail.Hi")],
+          Logger_Type = input$loggerconfigselect,
+          startunit = qcunit,
+          endunit = input$loggerunitselect
+        ),
+        step = 0.1
+      ),
+    ),
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelgrossminfail",
+        label = "Min",
+        width = 100,
+        value = loggerunitsconversion(
+          qcvalue = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "Gross.Fail.Lo")],
+          Logger_Type = input$loggerconfigselect,
+          startunit = qcunit,
+          endunit = input$loggerunitselect
+        ),
+        step = 0.1
+      )
+    ),
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelgrossmaxsusp",
+        label = "Max",
+        width = 100,
+        value = loggerunitsconversion(
+          qcvalue = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "Gross.Suspect.Hi")],
+          Logger_Type = input$loggerconfigselect,
+          startunit = qcunit,
+          endunit = input$loggerunitselect
+        ),
+        step = 0.1
+      )
+    ),
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelgrossminsusp",
+        label = "Min",
+        width = 100,
+        value = loggerunitsconversion(
+          qcvalue = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "Gross.Suspect.Lo")],
           Logger_Type = input$loggerconfigselect,
           startunit = qcunit,
           endunit = input$loggerunitselect
@@ -1142,35 +1133,25 @@ output$grossqcUI = renderUI({
   
   if (input$loggerconfigselect == "AirBP"){
     return(airbpgross)
-  }
-  else if (input$loggerconfigselect == "AirTemp"){
+  }else if (input$loggerconfigselect == "AirTemp"){
     return(airtempgross)
-  }
-  else if (input$loggerconfigselect == "Chlorophylla"){
+  }else if (input$loggerconfigselect == "Chlorophylla"){
     return(chlorophyllagross)
-  }
-  else if (input$loggerconfigselect == "Cond"){
+  }else if (input$loggerconfigselect == "Cond"){
     return(condgross)
-  }
-  else if (input$loggerconfigselect == "Discharge"){
+  }else if (input$loggerconfigselect == "Discharge"){
     return(dischargegross)
-  }
-  else if (input$loggerconfigselect == "DO"){
+  }else if (input$loggerconfigselect == "DO"){
     return(dogross)
-  }
-  else if (input$loggerconfigselect == "GageHeight"){
-    return(gageheightgross)
-  }
-  else if (input$loggerconfigselect == "pH"){
+  }else if (input$loggerconfigselect == "pH"){
     return(phgross)
-  }
-  else if (input$loggerconfigselect == "Turbidity"){
+  }else if (input$loggerconfigselect == "Turbidity"){
     return(turbiditygross)
-  }
-  else if (input$loggerconfigselect == "WaterP"){
+  }else if (input$loggerconfigselect == "WaterLevel"){
+    return(waterlevelgross)
+  }else if (input$loggerconfigselect == "WaterP"){
     return(waterpgross)
-  }
-  else if (input$loggerconfigselect == "WaterTemp"){
+  }else if (input$loggerconfigselect == "WaterTemp"){
     return(watertempgross)
   }
 })
@@ -1393,42 +1374,7 @@ output$spikeqcUI = renderUI({
       )
     )
   )
-  
-  #Gage Height
-  gageheightqcvalues = qcvalues[which(qcvalues$Logger_Type == "GageHeight"),]
-  gageheightspike = fluidRow(
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightspikemaxfail",
-        label = "Fail",
-        width = 100,
-        value = loggerunitsconversion(
-          qcvalue = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "Spike.Hi")],
-          Logger_Type = input$loggerconfigselect,
-          startunit = qcunit,
-          endunit = input$loggerunitselect
-        ),
-        step = 0.1
-      ),
-    ),
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightspikeminfail",
-        label = "Suspect",
-        width = 100,
-        value = loggerunitsconversion(
-          qcvalue = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "Spike.Lo")],
-          Logger_Type = input$loggerconfigselect,
-          startunit = qcunit,
-          endunit = input$loggerunitselect
-        ),
-        step = 0.1
-      )
-    )
-  )
-  
+
   #pH
   phqcvalues = qcvalues[which(qcvalues$Logger_Type == "pH"),]
   phspike = fluidRow(
@@ -1490,6 +1436,41 @@ output$spikeqcUI = renderUI({
         width = 100,
         value = loggerunitsconversion(
           qcvalue = turbidityqcvalues$Value[which(turbidityqcvalues$QC_Metric == "Spike.Lo")],
+          Logger_Type = input$loggerconfigselect,
+          startunit = qcunit,
+          endunit = input$loggerunitselect
+        ),
+        step = 0.1
+      )
+    )
+  )
+  
+  #Water Level
+  waterlevelqcvalues = qcvalues[which(qcvalues$Logger_Type == "WaterLevel"),]
+  waterlevelspike = fluidRow(
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelspikemaxfail",
+        label = "Fail",
+        width = 100,
+        value = loggerunitsconversion(
+          qcvalue = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "Spike.Hi")],
+          Logger_Type = input$loggerconfigselect,
+          startunit = qcunit,
+          endunit = input$loggerunitselect
+        ),
+        step = 0.1
+      ),
+    ),
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelspikeminfail",
+        label = "Suspect",
+        width = 100,
+        value = loggerunitsconversion(
+          qcvalue = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "Spike.Lo")],
           Logger_Type = input$loggerconfigselect,
           startunit = qcunit,
           endunit = input$loggerunitselect
@@ -1571,42 +1552,32 @@ output$spikeqcUI = renderUI({
   
   if (input$loggerconfigselect == "AirBP"){
     return(airbpspike)
-  }
-  else if (input$loggerconfigselect == "AirTemp"){
+  }else if (input$loggerconfigselect == "AirTemp"){
     return(airtempspike)
-  }
-  else if (input$loggerconfigselect == "Chlorophylla"){
+  }else if (input$loggerconfigselect == "Chlorophylla"){
     return(chlorophyllaspike)
-  }
-  else if (input$loggerconfigselect == "Cond"){
+  }else if (input$loggerconfigselect == "Cond"){
     return(condspike)
-  }
-  else if (input$loggerconfigselect == "Discharge"){
+  }else if (input$loggerconfigselect == "Discharge"){
     return(dischargespike)
-  }
-  else if (input$loggerconfigselect == "DO"){
+  }else if (input$loggerconfigselect == "DO"){
     return(dospike)
-  }
-  else if (input$loggerconfigselect == "GageHeight"){
-    return(gageheightspike)
-  }
-  else if (input$loggerconfigselect == "pH"){
+  }else if (input$loggerconfigselect == "pH"){
     return(phspike)
-  }
-  else if (input$loggerconfigselect == "Turbidity"){
+  }else if (input$loggerconfigselect == "Turbidity"){
     return(turbidityspike)
-  }
-  else if (input$loggerconfigselect == "WaterP"){
+  }else if (input$loggerconfigselect == "WaterLevel"){
+    return(waterlevelspike)
+  }else if (input$loggerconfigselect == "WaterP"){
     return(waterpspike)
-  }
-  else if (input$loggerconfigselect == "WaterTemp"){
+  }else if (input$loggerconfigselect == "WaterTemp"){
     return(watertempspike)
   }
 })
 
 #Rate of Change Values UI
 output$rocqcUI = renderUI({
-  qcvalues=wbqcvalues()
+  qcvalues = wbqcvalues()
   
   #AirBP
   airbpqcvalues = qcvalues[which(qcvalues$Logger_Type == "AirBP"),]
@@ -1759,30 +1730,6 @@ output$rocqcUI = renderUI({
     )
   )
   
-  gageheightqcvalues = qcvalues[which(qcvalues$Logger_Type == "GageHeight"),]
-  gageheightroc = fluidRow(
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightrocsd",
-        label = "SDs",
-        width = 100,
-        value = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "RoC.SD.number")],
-        step = 0.1
-      ),
-    ),
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightrocperiod",
-        label = "Hours",
-        width = 100,
-        value = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "RoC.SD.period")],
-        step = 0.1
-      )
-    )
-  )
-  
   #pH
   phqcvalues = qcvalues[which(qcvalues$Logger_Type == "pH"),]
   phroc = fluidRow(
@@ -1828,6 +1775,31 @@ output$rocqcUI = renderUI({
         label = "Hours",
         width = 100,
         value = turbidityqcvalues$Value[which(turbidityqcvalues$QC_Metric == "RoC.SD.period")],
+        step = 0.1
+      )
+    )
+  )
+  
+  #Water Level
+  waterlevelqcvalues = qcvalues[which(qcvalues$Logger_Type == "WaterLevel"),]
+  waterlevelroc = fluidRow(
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelrocsd",
+        label = "SDs",
+        width = 100,
+        value = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "RoC.SD.number")],
+        step = 0.1
+      ),
+    ),
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelrocperiod",
+        label = "Hours",
+        width = 100,
+        value = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "RoC.SD.period")],
         step = 0.1
       )
     )
@@ -1885,35 +1857,25 @@ output$rocqcUI = renderUI({
   
   if (input$loggerconfigselect == "AirBP"){
     return(airbproc)
-  }
-  else if (input$loggerconfigselect == "AirTemp"){
+  }else if (input$loggerconfigselect == "AirTemp"){
     return(airtemproc)
-  }
-  else if (input$loggerconfigselect == "Chlorophylla"){
+  }else if (input$loggerconfigselect == "Chlorophylla"){
     return(chlorophyllaroc)
-  }
-  else if (input$loggerconfigselect == "Cond"){
+  }else if (input$loggerconfigselect == "Cond"){
     return(condroc)
-  }
-  else if (input$loggerconfigselect == "Discharge"){
+  }else if (input$loggerconfigselect == "Discharge"){
     return(dischargeroc)
-  }
-  else if (input$loggerconfigselect == "DO"){
+  }else if (input$loggerconfigselect == "DO"){
     return(doroc)
-  }
-  else if (input$loggerconfigselect == "GageHeight"){
-    return(gageheightroc)
-  }
-  else if (input$loggerconfigselect == "pH"){
+  }else if (input$loggerconfigselect == "pH"){
     return(phroc)
-  }
-  else if (input$loggerconfigselect == "Turbidity"){
+  }else if (input$loggerconfigselect == "Turbidity"){
     return(turbidityroc)
-  }
-  else if (input$loggerconfigselect == "WaterP"){
+  }else if (input$loggerconfigselect == "WaterLevel"){
+    return(waterlevelroc)
+  }else if (input$loggerconfigselect == "WaterP"){
     return(waterproc)
-  }
-  else if (input$loggerconfigselect == "WaterTemp"){
+  }else if (input$loggerconfigselect == "WaterTemp"){
     return(watertemproc)
   }
 })
@@ -2197,51 +2159,6 @@ output$flatqcUI = renderUI({
     )
   )
   
-  #Gage Height
-  gageheightqcvalues = qcvalues[which(qcvalues$Logger_Type == "GageHeight"),]
-  gageheightflat = fluidRow(
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightflathi",
-        label = "Fail",
-        width = 100,
-        value = loggerunitsconversion(
-          qcvalue = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "Flat.Hi")],
-          Logger_Type = input$loggerconfigselect,
-          startunit = qcunit,
-          endunit = input$loggerunitselect
-        ),
-        step = 0.1
-      ),
-    ),
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightflatlow",
-        label = "Suspect",
-        width = 100,
-        value = loggerunitsconversion(
-          qcvalue = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "Flat.Lo")],
-          Logger_Type = input$loggerconfigselect,
-          startunit = qcunit,
-          endunit = input$loggerunitselect
-        ),
-        step = 0.1
-      )
-    ),
-    column(
-      width = 2,
-      numericInput(
-        inputId = "gageheightflattol",
-        label = "Tolerance",
-        width = 100,
-        value = gageheightqcvalues$Value[which(gageheightqcvalues$QC_Metric == "Flat.Tolerance")],
-        step = 0.1
-      )
-    )
-  )
-  
   #pH
   phqcvalues = qcvalues[which(qcvalues$Logger_Type == "pH"),]
   phflat = fluidRow(
@@ -2327,6 +2244,51 @@ output$flatqcUI = renderUI({
         label = "Tolerance",
         width = 100,
         value = turbidityqcvalues$Value[which(turbidityqcvalues$QC_Metric == "Flat.Tolerance")],
+        step = 0.1
+      )
+    )
+  )
+  
+  #Water Level
+  waterlevelqcvalues = qcvalues[which(qcvalues$Logger_Type == "WaterLevel"),]
+  waterlevelflat = fluidRow(
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelflathi",
+        label = "Fail",
+        width = 100,
+        value = loggerunitsconversion(
+          qcvalue = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "Flat.Hi")],
+          Logger_Type = input$loggerconfigselect,
+          startunit = qcunit,
+          endunit = input$loggerunitselect
+        ),
+        step = 0.1
+      ),
+    ),
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelflatlow",
+        label = "Suspect",
+        width = 100,
+        value = loggerunitsconversion(
+          qcvalue = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "Flat.Lo")],
+          Logger_Type = input$loggerconfigselect,
+          startunit = qcunit,
+          endunit = input$loggerunitselect
+        ),
+        step = 0.1
+      )
+    ),
+    column(
+      width = 2,
+      numericInput(
+        inputId = "waterlevelflattol",
+        label = "Tolerance",
+        width = 100,
+        value = waterlevelqcvalues$Value[which(waterlevelqcvalues$QC_Metric == "Flat.Tolerance")],
         step = 0.1
       )
     )
@@ -2424,35 +2386,25 @@ output$flatqcUI = renderUI({
   
   if (input$loggerconfigselect == "AirBP"){
     return(airbpflat)
-  }
-  else if (input$loggerconfigselect == "AirTemp"){
+  }else if (input$loggerconfigselect == "AirTemp"){
     return(airtempflat)
-  }
-  else if (input$loggerconfigselect == "Chlorophylla"){
+  }else if (input$loggerconfigselect == "Chlorophylla"){
     return(chlorophyllaflat)
-  }
-  else if (input$loggerconfigselect == "Cond"){
+  }else if (input$loggerconfigselect == "Cond"){
     return(condflat)
-  }
-  else if (input$loggerconfigselect == "Discharge"){
+  }else if (input$loggerconfigselect == "Discharge"){
     return(dischargeflat)
-  }
-  else if (input$loggerconfigselect == "DO"){
+  }else if (input$loggerconfigselect == "DO"){
     return(doflat)
-  }
-  else if (input$loggerconfigselect == "GageHeight"){
-    return(gageheightflat)
-  }
-  else if (input$loggerconfigselect == "pH"){
+  }else if (input$loggerconfigselect == "pH"){
     return(phflat)
-  }
-  else if (input$loggerconfigselect == "Turbidity"){
+  }else if (input$loggerconfigselect == "Turbidity"){
     return(turbidityflat)
-  }
-  else if (input$loggerconfigselect == "WaterP"){
+  }else if (input$loggerconfigselect == "WaterLevel"){
+    return(waterlevelflat)
+  }else if (input$loggerconfigselect == "WaterP"){
     return(waterpflat)
-  }
-  else if (input$loggerconfigselect == "WaterTemp"){
+  }else if (input$loggerconfigselect == "WaterTemp"){
     return(watertempflat)
   }
 })
@@ -2487,7 +2439,7 @@ observeEvent(
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$airbpflatlow
       #Flat.Tolerance
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$airbpflattol
-    } else if (input$loggerconfigselect == "AirTemp"){
+    }else if (input$loggerconfigselect == "AirTemp"){
       logger = "AirTemp"
       #Gross.Fail.Hi
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$airtempgrossmaxfail
@@ -2511,7 +2463,7 @@ observeEvent(
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$airtempflatlow
       #Flat.Tolerance
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$airtempflattol
-    } else if (input$loggerconfigselect == "Chlorophylla"){
+    }else if (input$loggerconfigselect == "Chlorophylla"){
       logger = "Chlorophylla"
       #Gross.Fail.Hi
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$chlorophyllagrossmaxfail
@@ -2535,7 +2487,7 @@ observeEvent(
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$chlorophyllaflatlow
       #Flat.Tolerance
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$chlorophyllaflattol
-    } else if (input$loggerconfigselect == "Cond"){
+    }else if (input$loggerconfigselect == "Cond"){
       logger = "Cond"
       #Gross.Fail.Hi
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$condgrossmaxfail
@@ -2607,30 +2559,6 @@ observeEvent(
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$doflatlow
       #Flat.Tolerance
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$doflattol
-    }else if (input$loggerconfigselect == "GageHeight"){
-      logger = "GageHeight"
-      #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$gageheightgrossmaxfail
-      #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$gageheightgrossminfail
-      #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$gageheightgrossmaxsusp
-      #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$gageheightgrossminsusp
-      #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$gageheightspikemaxfail
-      #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$gageheightspikeminfail
-      #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$gageheightrocsd
-      #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$gageheightrocperiod
-      #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$gageheightflathi
-      #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$gageheightflatlow
-      #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$gageheightflattol
     }else if (input$loggerconfigselect == "pH"){
       logger = "pH"
       #Gross.Fail.Hi
@@ -2679,6 +2607,30 @@ observeEvent(
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$turbidityflatlow
       #Flat.Tolerance
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$turbidityflattol
+    }else if (input$loggerconfigselect == "WaterLevel"){
+      logger = "WaterLevel"
+      #Gross.Fail.Hi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$waterlevelgrossmaxfail
+      #Gross.Fail.Lo
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$waterlevelgrossminfail
+      #Gross.Suspect.Hi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$waterlevelgrossmaxsusp
+      #Gross.Suspect.Lo
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$waterlevelgrossminsusp
+      #Spike.Hi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$waterlevelspikemaxfail
+      #Spike.Lo
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$waterlevelspikeminfail
+      #RoC.SD.number
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$waterlevelrocsd
+      #RoC.SD.period
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$waterlevelrocperiod
+      #Flat.Hi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$waterlevelflathi
+      #Flat.Lo
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$waterlevelflatlow
+      #Flat.Tolerance
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$waterlevelflattol
     }else if (input$loggerconfigselect == "WaterP"){
       logger = "WaterP"
       #Gross.Fail.Hi
@@ -2728,7 +2680,6 @@ observeEvent(
       #Flat.Tolerance
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$watertempflattol
     }
-    
     updateqcconfig$Units[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & !is.na(updateqcconfig$Units))] = input$loggerunitselect
     
     qc_config(updateqcconfig)
@@ -2747,12 +2698,12 @@ observeEvent(
 #Restore Default Values
 observeEvent(
   input$restoreqcdefaultsbttn,{
-    restoredefaultsqc=qc_config()
-    defaultvalues=restoredefaultsqc[which(restoredefaultsqc$AppID == 1111111111111111),]
+    restoredefaultsqc = qc_config()
+    defaultvalues = restoredefaultsqc[which(restoredefaultsqc$AppID == 1111111111111111),]
     waterbody = input$selectedwb
     
     loggerunits = data.frame(
-      "Logger_Type" = c("AirBP","WaterP","AirTemp","WaterTemp","Chlorophylla","DO","Discharge","GageHeight","Cond","pH","Turbidity"),
+      "Logger_Type" = c("AirBP","WaterP","AirTemp","WaterTemp","Chlorophylla","DO","Discharge","WaterLevel","Cond","pH","Turbidity"),
       "Unit" = c("psi","psi","C","C","g/cm3","g/cm3","ft3/s","ft","uS/cm","SU","NTU"),
       stringsAsFactors = FALSE
     )
@@ -2909,31 +2860,6 @@ observeEvent(
       restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
       restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
-    }else if (input$loggerconfigselect == "GageHeight"){
-      logger = "GageHeight"
-      loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
-      #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
-      #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
-      #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
-      #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
-      #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
-      #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
-      #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
-      #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
-      #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
-      #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
-      #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "pH"){
       logger = "pH"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
@@ -2961,6 +2887,31 @@ observeEvent(
       restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "Turbidity"){
       logger = "Turbidity"
+      loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
+      #Gross.Fail.Hi
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      #Gross.Fail.Lo
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      #Gross.Suspect.Hi
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      #Gross.Suspect.Lo
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      #Spike.Hi
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      #Spike.Lo
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      #RoC.SD.number
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      #RoC.SD.period
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      #Flat.Hi
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      #Flat.Lo
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      #Flat.Tolerance
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+    }else if (input$loggerconfigselect == "WaterLevel"){
+      logger = "WaterLevel"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
       restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
@@ -3035,7 +2986,6 @@ observeEvent(
       #Flat.Tolerance
       restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }
-    
     restoredefaultsqc$Units[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & !is.na(restoredefaultsqc$Units))] = selectunit
     
     qc_config(restoredefaultsqc)
