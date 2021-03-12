@@ -1,5 +1,5 @@
 loadstatus = reactiveVal("")
-`%notin%` <- Negate(`%in%`)
+`%notin%` = Negate(`%in%`)
 
 #Create a named vector of ProgramIDs and assign appropriate names to render selectprogramsUI
 programid = reactive({
@@ -81,7 +81,6 @@ observeEvent(
          #Assign Export Settings to a reactive value
          export(baseconfig$export)
          
-         # updatebaseconfig()
          loadstatus("Configuration File Loaded")
         }else{
           loadstatus("Incompatible File")
@@ -289,7 +288,8 @@ output$aedwaterbodiesUI = renderUI({
           choices = c("Add","Edit","Delete"),
           status = "primary",
           checkIcon = list(
-            yes = icon("ok",lib = "glyphicon"))
+            yes = icon("ok",lib = "glyphicon")
+          )
         ),
         pickerInput(
           inputId = "waterbodyprogramselect",
@@ -330,7 +330,7 @@ programwbnamesselect = reactive({
   wbnamesselect=wbnames()
   wbnamesselect=wbnamesselect[which(wbnamesselect$AppID %in% programwbsselect()),]
   wbnamesselectvec=wbnamesselect$AppID
-  names(wbnamesselectvec)=wbnamesselect$Waterbody_Name
+  names(wbnamesselectvec) = wbnamesselect$Waterbody_Name
   return(wbnamesselectvec)
 })
 
@@ -488,14 +488,14 @@ observeEvent(
 observeEvent(
   input$addwaterbodiesbttn,{
     if (nchar(input$addwaterbodiesname) > 0){
-      programwbsrv=programwbs()
-      wbnamesrv=wbnames()
-      newwbqcconfig=qc_config()
-      defaultconfig=newwbqcconfig[which(newwbqcconfig$AppID == "1111111111111111"),]
+      programwbsrv = programwbs()
+      wbnamesrv = wbnames()
+      newwbqcconfig = qc_config()
+      defaultconfig = newwbqcconfig[which(newwbqcconfig$AppID == "1111111111111111"),]
       
       newappid = random_id(1,8)
       
-      programwbsrvrow = data.frame("ProgramID"=input$waterbodyprogramselect,"ProgramWaterbodyID"=input$addwaterbodiesid,"AppID"=newappid,
+      programwbsrvrow = data.frame("ProgramID" = input$waterbodyprogramselect,"ProgramWaterbodyID" = input$addwaterbodiesid,"AppID" = newappid,
                                    "WB_Type" = input$addwaterbodiestype)
       wbnamesrvrow = data.frame("AppID" = newappid,"Waterbody_Name" = input$addwaterbodiesname)
       
@@ -552,15 +552,15 @@ observeEvent(
 #Delete waterbodies
 observeEvent(
   input$deletewaterbodiesbttn,{
-    deleteprogramwbsrv=programwbs()
-    deletewbnamesrv=wbnames()
+    deleteprogramwbsrv = programwbs()
+    deletewbnamesrv = wbnames()
     deletestationsrv = stations()
     deleteqcconfig=qc_config()
     
-    deleteprogramwbsrv=deleteprogramwbsrv[which(deleteprogramwbsrv$AppID != input$deletewaterbodiesnamechoices),]
-    deletewbnamesrv=deletewbnamesrv[which(deletewbnamesrv$AppID != input$deletewaterbodiesnamechoices),]
+    deleteprogramwbsrv = deleteprogramwbsrv[which(deleteprogramwbsrv$AppID != input$deletewaterbodiesnamechoices),]
+    deletewbnamesrv = deletewbnamesrv[which(deletewbnamesrv$AppID != input$deletewaterbodiesnamechoices),]
     deletestationsrv = deletestationsrv[which(deletestationsrv$AppID != input$deletewaterbodiesnamechoices),]
-    deleteqcconfig=deleteqcconfig[which(deleteqcconfig$AppID != input$deletewaterbodiesnamechoices),]
+    deleteqcconfig = deleteqcconfig[which(deleteqcconfig$AppID != input$deletewaterbodiesnamechoices),]
     
     programwbs(deleteprogramwbsrv)
     wbnames(deletewbnamesrv)
@@ -612,10 +612,10 @@ output$aedstationsUI = renderUI({
 stationwbs = reactive({
   programwbselect = programwbs()
   programwbselect = programwbselect$AppID[which(programwbselect$ProgramID == input$stationprogramselect)]
-  wbnamesselect=wbnames()
-  wbnamesselect=wbnamesselect[which(wbnamesselect$AppID %in% programwbselect),]
-  wbnamesselectvec=wbnamesselect$AppID
-  names(wbnamesselectvec)=wbnamesselect$Waterbody_Name
+  wbnamesselect = wbnames()
+  wbnamesselect = wbnamesselect[which(wbnamesselect$AppID %in% programwbselect),]
+  wbnamesselectvec = wbnamesselect$AppID
+  names(wbnamesselectvec) = wbnamesselect$Waterbody_Name
   return(wbnamesselectvec)
 })
 
@@ -736,8 +736,8 @@ output$aedstationsselectchoiceUI = renderUI({
 #Edit Waterbody Name and ID UI
 output$editstationnameUI = renderUI({
   stationcoor = stations()
-  
   stationcoor = stationcoor[which(stationcoor$StationID == input$editstationnamechoices),]
+  
   tagList(
     textInput(
       inputId = "editstationname",
@@ -795,8 +795,8 @@ observeEvent(
         "StationID" = random_id(n = 1,bytes = 12),
         "Station_Name" = input$addstationname,
         "ProgramStationID" = input$addprogramstationid,
-        "Lat"=input$stationlatadd,
-        "Lon"=input$stationlonadd,
+        "Lat" = input$stationlatadd,
+        "Lon" = input$stationlonadd,
         stringsAsFactors = FALSE
       )
       addstationname = rbind(addstationname,stationsrow)
