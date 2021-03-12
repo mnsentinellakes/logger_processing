@@ -42,8 +42,14 @@ deleteButtonColumn = function(df, id, fieldnames, ...) {
   # function to create one action button as string
   f = function(i) {
     # https://shiny.rstudio.com/articles/communicating-with-js.html
-    as.character(actionButton(paste(id, i, sep="_"), label = NULL, icon = icon('trash'),
-                              onclick = 'Shiny.setInputValue(\"deletePressed\",  this.id, {priority: "event"})'))
+    as.character(
+      actionButton(
+        inputId = paste(id, i, sep="_"), 
+        label = NULL, 
+        icon = icon('trash'),
+        onclick = 'Shiny.setInputValue(\"deletePressed\",  this.id, {priority: "event"})'
+      )
+    )
   }
   
   deleteCol = unlist(lapply(seq_len(nrow(df)), f))
@@ -106,7 +112,7 @@ output$depthstableoutputUI = renderUI({
       tags$table(
         tags$tr(
           tags$td(
-            style="vertical-align:center; border:1px solid lightgray; padding:5px; background-color:ghostwhite;",
+            style = "vertical-align:center; border:1px solid lightgray; padding:5px; background-color:ghostwhite;",
             fluidRow(
               column(
                 width = col1,
