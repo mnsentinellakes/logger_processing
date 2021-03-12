@@ -1,6 +1,6 @@
 #Vis QC Options----
 
-output$visqcoptionsUI=renderUI({
+output$visqcoptionsUI = renderUI({
   isolate(
     tagList(
       uiOutput("visqcdatatypesUI"),
@@ -20,7 +20,7 @@ output$visqcoptionsUI=renderUI({
         inputId = "failbttn",
         label = "Fail",
         color = "danger",
-        style="fill",
+        style = "fill",
         block = TRUE
       ),
       tags$br(),
