@@ -17,7 +17,7 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
   if (is.na(stations$ProgramStationID[which(stations$StationID == stationid)])){
     statid = NA
   }else{
-  statid = stations$ProgramStationID[which(stations$StationID == stationid)]
+    statid = stations$ProgramStationID[which(stations$StationID == stationid)]
   }
   
   #Station Name
@@ -75,7 +75,6 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
     user = unique(deploylogs$Processedby[which(deploylogs$DeployID == deployid)])
   }
   
-  
   metadataframe = data.frame(
     "Program" = progname,
     "WaterbodyID" = wbid,
@@ -97,7 +96,6 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
     "Date_Processed" = procdate,
     "Processed_By" = user
   )
-  
   write.csv(metadataframe,"temp/metadata.csv",row.names = FALSE)
 }
 
@@ -136,8 +134,6 @@ getqcsettings = function(appid,stationid,deployid,deploylogs,qcconfig,programwbs
   if(!is.na(selectstationname)){
     selectqcdata$StationName = selectstationname
   }
-  
-  # selectqcdata = selectqcdata[,c(5,6,1:4)]
   
   write.csv(selectqcdata,"temp/qcsettings.csv",row.names = FALSE)
 }
