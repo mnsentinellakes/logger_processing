@@ -1,9 +1,9 @@
 #Load Configuration data file
 load("config/baseconfig.RData")
 
-loggerchoices = list("Air Pressure"="AirBP","Air Temperature"="AirTemp","Chlorophyll A"="Chlorophylla","Conductivity"="Cond","Discharge"="Discharge",
-                     "Dissolved Oxygen"="DO","Gage Height"="GageHeight","pH"="pH","Turbidity"="Turbidity","Water Pressure"="WaterP",
-                     "Water Temperature"="WaterTemp")
+loggerchoices = list("Air Pressure" = "AirBP","Air Temperature" = "AirTemp","Chlorophyll A" = "Chlorophylla","Conductivity" = "Cond",
+                     "Discharge" = "Discharge","Dissolved Oxygen" = "DO","pH" = "pH","Turbidity" = "Turbidity","Water Level" = "WaterLevel",
+                     "Water Pressure" = "WaterP","Water Temperature" = "WaterTemp")
 
 #Assign programs data frame to a reactive value
 programs = reactiveVal(baseconfig$programs)
