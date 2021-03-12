@@ -102,7 +102,7 @@ output$exportsettingsUI = renderUI({
       column(
         width = 3,
         tags$div(
-          style="vertical-align:center; border:1px solid lightgray; padding-right:10px; padding-left:10px; background-color:ghostwhite; 
+          style = "vertical-align:center; border:1px solid lightgray; padding-right:10px; padding-left:10px; background-color:ghostwhite; 
           width: 100%",
           tags$h4("Files"),
           awesomeRadio(
@@ -117,7 +117,7 @@ output$exportsettingsUI = renderUI({
       column(
         width = 9,
         tags$div(
-          style="vertical-align:center; border:1px solid lightgray; padding-right:10px; padding-left:10px; background-color:ghostwhite; 
+          style = "vertical-align:center; border:1px solid lightgray; padding-right:10px; padding-left:10px; background-color:ghostwhite; 
           width: 100%",
           tags$h4("Include Support Files"),
           fluidRow(
@@ -163,7 +163,7 @@ output$exportsettingsUI = renderUI({
     ),
     tags$br(),
     tags$div(
-      style="vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
+      style = "vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
       fluidRow(
         column(
           width = 3,
@@ -177,7 +177,7 @@ output$exportsettingsUI = renderUI({
     ),
     tags$br(),
     tags$div(
-      style="vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
+      style = "vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
       fluidRow(
         column(
           width = 3,
@@ -191,7 +191,7 @@ output$exportsettingsUI = renderUI({
     ),
     tags$br(),
     tags$div(
-      style="vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
+      style = "vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
       fluidRow(
         column(
           width = 3,
@@ -215,7 +215,7 @@ output$exportsettingsUI = renderUI({
     ),
     tags$br(),
     tags$div(
-      style="vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
+      style = "vertical-align:center; border:1px solid lightgray; padding:10px; background-color:ghostwhite; width: 100%",
       fluidRow(
         column(
           width = 3,
@@ -631,7 +631,7 @@ output$datefieldexportUI = renderUI({
   }
   
   radioGroupButtons(
-    inputId ="datetypeexport",
+    inputId = "datetypeexport",
     label = "Field Organization",
     choices = c("Combined","Separate"),
     selected = datetypevalue,
@@ -762,14 +762,6 @@ storedexportnames = reactive({
     }
   }
   
-  if ("GageHeight" %in% modelnamesselectexport()){
-    if (nrow(exportnames) > 0){
-      exportnameslist = c(exportnameslist,"GageHeight" = exportnames$GageHeight)
-    }else{
-      exportnameslist = c(exportnameslist,"GageHeight" = NA)
-    }
-  }
-  
   if ("pH" %in% modelnamesselectexport()){
     if (nrow(exportnames) > 0){
       exportnameslist = c(exportnameslist,"pH" = exportnames$pH)
@@ -783,6 +775,14 @@ storedexportnames = reactive({
       exportnameslist = c(exportnameslist,"Turbidity" = exportnames$Turbidity)
     }else{
       exportnameslist = c(exportnameslist,"Turbidity" = NA)
+    }
+  }
+  
+  if ("WaterLevel" %in% modelnamesselectexport()){
+    if (nrow(exportnames) > 0){
+      exportnameslist = c(exportnameslist,"WaterLevel" = exportnames$WaterLevel)
+    }else{
+      exportnameslist = c(exportnameslist,"WaterLevel" = NA)
     }
   }
   
@@ -853,13 +853,6 @@ output$exportdatafieldsUI = renderUI({
         value = exportfieldnames["DO"]
       )
     },
-    if ("GageHeight" %in% names(exportfieldnames)){
-      textInput(
-        inputId = "gageheightexport",
-        label = "GageHeight Field Name",
-        value = exportfieldnames["GageHeight"]
-      )
-    },
     if ("pH" %in% names(exportfieldnames)){
       textInput(
         inputId = "phexport",
@@ -872,6 +865,13 @@ output$exportdatafieldsUI = renderUI({
         inputId = "turbidityexport",
         label = "Turbidity Field Name",
         value = exportfieldnames["Turbidity"]
+      )
+    },
+    if ("WaterLevel" %in% names(exportfieldnames)){
+      textInput(
+        inputId = "waterlevelexport",
+        label = "WaterLevel Field Name",
+        value = exportfieldnames["WaterLevel"]
       )
     },
     if ("WaterP" %in% names(exportfieldnames)){
@@ -999,12 +999,10 @@ observeEvent(
         exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timecolexport
       }
       
-      # exportfinal$Date_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dateformatexport
-      # exportfinal$Time_Format[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timeformatexport
       exportfinal$TZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$tzexport
-      #Data Field Names
       
-      if (!is.na(loggerexportfinal$AirBP) ){
+      #Data Field Names
+      if (!is.na(loggerexportfinal$AirBP)){
         exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airbpexport
       }else{
         exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
@@ -1039,12 +1037,6 @@ observeEvent(
         exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$GageHeight)){
-        exportfinal$GageHeight[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$gageheightexport
-      }else{
-        exportfinal$GageHeight[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
       if (!is.na(loggerexportfinal$pH)){
         exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$phexport
       }else{
@@ -1055,6 +1047,12 @@ observeEvent(
         exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$turbidityexport
       }else{
         exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+      }
+      
+      if (!is.na(loggerexportfinal$WaterLevel)){
+        exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterlevelexport
+      }else{
+        exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
       if (!is.na(loggerexportfinal$WaterP)){
@@ -1172,7 +1170,6 @@ observeEvent(
         chlorophyllafinal = NA
       }
       
-      
       if (!is.na(loggerexportfinal$Cond) & loggerexportfinal$Cond != ""){
         condfinal = input$condexport
       }else{
@@ -1191,12 +1188,6 @@ observeEvent(
         dofinal = NA
       }
       
-      if (!is.na(loggerexportfinal$GageHeight) & loggerexportfinal$GageHeight != ""){
-        gageheightfinal = input$gageheightexport
-      }else{
-        gageheightfinal = NA
-      }
-      
       if (!is.na(loggerexportfinal$pH) & loggerexportfinal$pH != ""){
         phfinal = input$phexport
       }else{
@@ -1207,6 +1198,12 @@ observeEvent(
         turbidityfinal = input$turbidityexport
       }else{
         turbidityfinal = NA
+      }
+      
+      if (!is.na(loggerexportfinal$WaterLevel) & loggerexportfinal$WaterLevel != ""){
+        waterlevelfinal = input$waterlevelexport
+      }else{
+        waterlevelfinal = NA
       }
       
       if (!is.na(loggerexportfinal$WaterP) & loggerexportfinal$WaterP != ""){
@@ -1234,8 +1231,8 @@ observeEvent(
                                   "TZ" = input$tzexport,"IncZ" = input$inczexport,"Z" = zfinal,"IncLoc" = input$inclocexport,
                                   "Lat" = latfinal,"Lon" = lonfinal,"IncUser" = input$incusernameexport,"User" = usernamefinal,
                                   "AirBP" = airbpfinal,"AirTemp" = airtempfinal,"Chlorophylla" = chlorophyllafinal,"Cond" = condfinal,
-                                  "Discharge" = dischargefinal,"DO" = dofinal,"GageHeight" = gageheightfinal,"pH" = phfinal,
-                                  "Turbidity" = turbidityfinal,"WaterP" = waterpfinal,"WaterTemp" = watertempfinal,
+                                  "Discharge" = dischargefinal,"DO" = dofinal,"pH" = phfinal,
+                                  "Turbidity" = turbidityfinal,"WaterLevel" = waterlevelfinal,"WaterP" = waterpfinal,"WaterTemp" = watertempfinal,
                                   stringsAsFactors = FALSE)
       
       exportfinal = rbind(exportfinal,exportfinalrow)
