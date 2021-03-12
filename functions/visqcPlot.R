@@ -25,10 +25,10 @@ output$VisQCplot = renderPlotly({
   QCdata = QCdata[which(QCdata$UnitID == input$unitidchoice),]
   
   flagfield = sym(flagtype())
-  flagcolors=c("P"="royalblue1",
-               "F"="red",
-               "S"="orange",
-               "X" = "slategray3")
+  flagcolors = c("P" = "royalblue1",
+                 "F" = "red",
+                 "S" = "orange",
+                 "X" = "slategray3")
   
   Theme = theme(
     panel.border = element_rect(color = "black",fill = NA,size = 1),
