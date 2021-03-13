@@ -40,11 +40,24 @@ output$loadconfigfileUI = renderUI({
 #All code used to update potential changes to tables in baseconfig
 updatebaseconfigversion = function(baseconfigdata){
   
+  #Add a version object
   if("version" %notin% names(baseconfigdata)){
     baseconfigdata = c(baseconfigdata,"version" = 0.5)
   }else{
     baseconfigdata
   }
+  
+  if (baseconfigdata$version < 0.75){
+    #Change GaugeHeight to WaterLevel in the loggerfiledefs, export, and qc_config tables
+    names(baseconfigdata$loggerfiledefs)[14] = "WaterLevel"
+    baseconfigdata$loggerfiledefs = baseconfigdata$loggerfiledefs[,c(1:13,15,16,14,17:21)]
+    
+    names(baseconfigdata$export)[43] = "WaterLevel"
+    baseconfigdata$export = baseconfigdata$export[,c(1:42,44,45,43,46,47)]
+    
+    baseconfigdata$qc_config$Logger_Type[which(baseconfigdata$qc_config$Logger_Type == "GageHeight")] = "WaterLevel"
+  }
+  
   return(baseconfigdata)
 }
 
