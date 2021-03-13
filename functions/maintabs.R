@@ -14,20 +14,20 @@ tabItems(
       column(
         width = 7,
         box(
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
           title = "Load Configuration File",
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("loadconfigfileUI")
         )
       ),
       column(
         width = 5,
         box(
-          solidHeader = TRUE,
-          status = "success",
-          width = NULL,
           title = "",
+          status = "success",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("loadconfigfiledescUI")
         )
       )
@@ -36,20 +36,20 @@ tabItems(
       column(
         width = 7,
         box(
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
           title = "Add/Edit/Delete Programs",
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("aedprogramsUI")
         )
       ),
       column(
         width = 5,
         box(
-          solidHeader = TRUE,
-          status = "success",
-          width = NULL,
           title = "",
+          status = "success",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("aedprogramsdescUI")
         )
       )
@@ -58,20 +58,20 @@ tabItems(
       column(
         width = 7,
         box(
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
           title = "Add/Edit/Delete Waterbodies",
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("aedwaterbodiesUI")
         )
       ),
       column(
         width = 5,
         box(
-          solidHeader = TRUE,
-          status = "success",
-          width = NULL,
           title = "",
+          status = "success",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("aedwaterbodiesdescUI")
         )
       )
@@ -80,20 +80,21 @@ tabItems(
       column(
         width = 7,
         box(
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
           title = "Add/Edit/Delete Stations",
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("aedstationsUI")
         )
       ),
+      
       column(
         width = 5,
         box(
-          solidHeader = TRUE,
-          status = "success",
-          width = NULL,
           title = "",
+          status = "success",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("aedstationsdescUI")
         )
       )
@@ -101,39 +102,40 @@ tabItems(
   ),
   #QC Configuration Tab----
   tabItem(
+    
     tabName = "configqctab",
     fluidRow(
       column(
         width = 3,
         box(
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
           title = "Program",
-          uiOutput("selectprogramsUI"),
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
+          uiOutput("selectprogramsUI")
         ),
         box(
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
           title = "Waterbodies",
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("selectwbsUI")
         ),
         box(
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
           title = "Parameter",
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("loggerconfigselectUI")
         )
       ),
       column(
         width = 6,
         box(
-          solidHeader = TRUE,
-          status = "primary",
-          width = NULL,
           title = "QC Configuration",
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
           uiOutput("configUI")
         )
       ),
