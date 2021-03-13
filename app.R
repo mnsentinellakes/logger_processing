@@ -7,7 +7,7 @@
 
 library(shiny)
 library(shinydashboard)
-library(shinydashboardPlus)
+# library(shinydashboardPlus)
 library(devtools)
 library(ContDataQC)
 library(shinyjs)
@@ -27,12 +27,11 @@ source("functions/dashboard.R")
 options(scipen = 999)
 baseconfigversion = 0.5
 # function definitions are located in the dashboard.R file
-ui <- dashboardPagePlus(
-    header = dashboardHeaderPlus(
+ui <- dashboardPage(
+    header = dashboardHeader(
         #Title
         title = "Data Logger Processing",
-        titleWidth = 275,
-        enable_rightsidebar = FALSE
+        titleWidth = 275
     ),
     sidebar = dashboardSidebar(
         logprocsidebar("leftsidebarmenu")
