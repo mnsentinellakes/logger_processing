@@ -186,9 +186,9 @@ compileQCdata = function(qcinfo,depthstable){
         
         if(length(qcfile) > 0){
           readdata = read.csv(qcfile,stringsAsFactors = FALSE)
-          
+
           datacompile = data.frame("UnitID" = j,"DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
-                                   "Data" = readdata[,ncol(readdata)],"Z" = depthstable$Z[which(depthstable$UnitID == j)],
+                                   "Data" = readdata[,5],"Z" = depthstable$Z[which(depthstable$UnitID == j)],
                                    "FlagGrossorig" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
                                    "FlagSpikeorig" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
                                    "FlagRoCorig" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
@@ -216,7 +216,6 @@ compileQCdata = function(qcinfo,depthstable){
       }else{}
     }
   }
-  
   finaloutput = list(datalist,stopprocess)
   
   # save(datalist,file = "C:/Projects/Shiny_App_Development/Logger_Processing/Test/datalisttest.RDATA")
