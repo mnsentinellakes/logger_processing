@@ -75,16 +75,18 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   datafieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$datafield),perl = TRUE))
   names(datafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(datafile)),perl = TRUE))
   
+  
+  
   #Rebuild dataset
   for (i in 1:nrow(datafieldnames)){
     
     builddata=data.frame("RowID" = seq(1:nrow(datafile)))
     
     builddatacolumn = data.frame(datafile[which(names(datafile) == datafieldnames$datafield[i])])
-
     names(builddatacolumn) = datafieldnames$qcfield[i]
+
     builddata = cbind(builddata,builddatacolumn)
-    
+
     #Convert Date and Time to correct format
     datetimeformat = paste0(loggerfields$Date_Format," ",loggerfields$Time_Format)
     if ("DateTime" %in% datetimefieldnames$qcfield){
@@ -122,8 +124,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   
   #Compile QC metadata
   qcinfo = list("qcnames" = qctypes,"startdate" = as.character(max(as.Date(builddata$DateTime))),
-                "enddate" = as.character(min(as.Date(builddata$DateTime))))
-  
+                "enddate" = as.character(min(as.Date(builddata$DateTime))),"fieldnames" = datafieldnames)
 }
 
 #Run QC Processes on data
@@ -170,10 +171,12 @@ QCProcess = function(qcinfo,siteid){
 compileQCdata = function(qcinfo,depthstable){
   loggertypes = qcinfo$qcnames
   
+  datafields = qcinfo$fieldnames
   siteids = depthstable$UnitID
   
   stopprocess = FALSE
   datalist = list()
+  
   for (i in loggertypes){
     loggertypecompile = NULL
     for (j in siteids){
@@ -186,9 +189,13 @@ compileQCdata = function(qcinfo,depthstable){
         
         if(length(qcfile) > 0){
           readdata = read.csv(qcfile,stringsAsFactors = FALSE)
+          
+          datafieldname = datafields$qcfield[which(datafields$type == i)]
 
+          datafield = readdata[[datafieldname]]
+          
           datacompile = data.frame("UnitID" = j,"DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
-                                   "Data" = readdata[,5],"Z" = depthstable$Z[which(depthstable$UnitID == j)],
+                                   "Data" = datafield,"Z" = depthstable$Z[which(depthstable$UnitID == j)],
                                    "FlagGrossorig" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
                                    "FlagSpikeorig" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
                                    "FlagRoCorig" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
@@ -241,6 +248,8 @@ observeEvent(
     #Ensures that data have been uploaded
     if(length(input$dataupload) > 0){
       
+      #Update Config File
+      # updateconfigfile(qcconfigdata = qc_config())
       ##Data QC and Processing
       #Table with information about the uploaded data
       filetable = input$dataupload
@@ -273,7 +282,7 @@ observeEvent(
         inputname = as.character(gsub(".csv","",inputname))
         inputname = as.character(gsub(".TXT","",inputname))
         inputname = as.character(gsub(".txt","",inputname))
-        
+      
         #Continue if input name is in the depthstable
         if (inputname %in% depthstableselect$UnitID){
           #Create processing folder
@@ -448,7 +457,7 @@ observeEvent(
       )
     }
     
-    unlink("processing/*",recursive = TRUE,force = TRUE)
+    # unlink("processing/*",recursive = TRUE,force = TRUE)
     
     finaldata(NULL)
   }
