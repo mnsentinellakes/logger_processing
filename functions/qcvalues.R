@@ -1,20 +1,19 @@
-#Build the config file used by ContDataQC
-observe({
-  qcconfigdata=qc_config()
-  qcconfigdata=qcconfigdata[which(qcconfigdata$AppID == input$procwaterbody),]
+updateconfigfile = function(qcconfigdata){
+
+  qcconfigdata = qcconfigdata[which(qcconfigdata$AppID == input$procwaterbody),]
   
   
-  grossfailhi=qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Hi"),]
-  grossfaillo=qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Lo"),]
-  grosssuspecthi=qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Hi"),]
-  grosssuspectlo=qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Lo"),]
-  spikehi=qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Hi"),]
-  spikelo=qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Lo"),]
-  rocsdnumber=qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.number"),]
-  rocsdperiod=qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.period"),]
-  flathi=qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Hi"),]
-  flatlo=qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Lo"),]
-  flattolerance=qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Tolerance"),]
+  grossfailhi = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Hi"),]
+  grossfaillo = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Lo"),]
+  grosssuspecthi = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Hi"),]
+  grosssuspectlo = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Lo"),]
+  spikehi = qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Hi"),]
+  spikelo = qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Lo"),]
+  rocsdnumber = qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.number"),]
+  rocsdperiod = qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.period"),]
+  flathi = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Hi"),]
+  flatlo = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Lo"),]
+  flattolerance = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Tolerance"),]
   
   rowidname = "RowID"
   
@@ -52,7 +51,7 @@ observe({
     # list all elements in environment\n
     # ls(ContData.env)  # all elements in environment\n
     # as.list(ContData.env)  # all elements in environment with assigned values\n\n",
-
+    
     
     "#--------------------------------------------------------------------\n",
     "# Delimiter in File Names (e.g., test2_AW_201301_20131231.csv)\n",
@@ -72,47 +71,47 @@ observe({
     "#QC Units\n",
     "ContData.env$myUnits.AirBP <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "AirBP")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.AirTemp <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "AirTemp")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.Chlorophylla <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Chlorophylla")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.Cond <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Cond")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.Discharge <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Discharge")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.DO <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "DO")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.WaterLevel <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterLevel")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.pH <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "pH")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.Turbidity <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Turbidity")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.WaterP <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterP")]),perl = TRUE)
-      ),"\"\n",
+    ),"\"\n",
     
     "ContData.env$myUnits.WaterTemp <- \"",gsub(
       "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterTemp")]),perl = TRUE)
-      ),"\"\n\n",
+    ),"\"\n\n",
     
     "#--------------------------------------------------------------------\n",
     # Logger Fields
@@ -621,4 +620,11 @@ observe({
   )
   
   cat(configsettingsoutput,file = paste0("config/configfile.R"))
+}
+
+#Build the config file used by ContDataQC
+observe({
+  
+  updateconfigfile(qcconfigdata = qc_config())
+  
 })
