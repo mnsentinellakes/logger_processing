@@ -119,29 +119,31 @@ output$depthoutUI = renderUI({
   unitidz = unique(unitidzdf$Z[which(unitidzdf$UnitID == input$unitidchoice)])
   zname = fieldnames()
   
-  tagList(
-    HTML(paste0("<H5><B>",zname$Z,"</B></H5>")),
-    HTML("<CENTER>"),
-    fluidRow(
-      column(
-        width = 5
-      ),
-      column(
-        width = 2,
-        tags$table(
-          tags$tr(
-            tags$td(
-              style = "border: 1px solid black; padding: 5px; padding-top: 2px; padding-bottom: 2px;",
-              HTML("<font size=5>",unitidz,"</font>")
+  if(!is.na(zname$Z)){
+    tagList(
+      HTML(paste0("<H5><B>",zname$Z,"</B></H5>")),
+      HTML("<CENTER>"),
+      fluidRow(
+        column(
+          width = 5
+        ),
+        column(
+          width = 2,
+          tags$table(
+            tags$tr(
+              tags$td(
+                style = "border: 1px solid black; padding: 5px; padding-top: 2px; padding-bottom: 2px;",
+                HTML("<font size=5>",unitidz,"</font>")
+              )
             )
           )
+        ),
+        column(
+          width = 5
         )
-      ),
-      column(
-        width = 5
       )
     )
-  )
+  }
 })
 
 output$visqcdescUI = renderUI({
