@@ -196,17 +196,23 @@ compileQCdata = function(qcinfo,depthstable){
           
           datacompile = data.frame("UnitID" = j,"DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
                                    "Data" = datafield,"Z" = depthstable$Z[which(depthstable$UnitID == j)],
-                                   "FlagGrossorig" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
-                                   "FlagSpikeorig" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
-                                   "FlagRoCorig" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
-                                   "FlagFlatorig" = readdata[,which(grepl("Flag.Flat",names(readdata)))],
+                                   "FlagGrossorig" = as.character(readdata[,which(grepl("Flag.Gross",names(readdata)))]),
+                                   "FlagSpikeorig" = as.character(readdata[,which(grepl("Flag.Spike",names(readdata)))]),
+                                   "FlagRoCorig" = as.character(readdata[,which(grepl("Flag.RoC",names(readdata)))]),
+                                   "FlagFlatorig" = as.character(readdata[,which(grepl("Flag.Flat",names(readdata)))]),
                                    "FlagVisorig" = "P","FlagGrosschng" = as.character(NA),"FlagSpikechng" = as.character(NA),
                                    "FlagRoCchng" = as.character(NA),"FlagFlatchng" = as.character(NA),"FlagVischng" = as.character(NA),
-                                   "FlagGross" = readdata[,which(grepl("Flag.Gross",names(readdata)))],
-                                   "FlagSpike" = readdata[,which(grepl("Flag.Spike",names(readdata)))],
-                                   "FlagRoC" = readdata[,which(grepl("Flag.RoC",names(readdata)))],
-                                   "FlagFlat" = readdata[,which(grepl("Flag.Flat",names(readdata)))],"FlagVis" = "P",
+                                   "FlagGross" = as.character(readdata[,which(grepl("Flag.Gross",names(readdata)))]),
+                                   "FlagSpike" = as.character(readdata[,which(grepl("Flag.Spike",names(readdata)))]),
+                                   "FlagRoC" = as.character(readdata[,which(grepl("Flag.RoC",names(readdata)))]),
+                                   "FlagFlat" = as.character(readdata[,which(grepl("Flag.Flat",names(readdata)))]),"FlagVis" = "P",
                                    stringsAsFactors = FALSE)
+          
+          if(all(datacompile$FlagGrossorig == "FALSE")){
+            datacompile$FlagGrossorig = "F"
+            datacompile$FlagGrosschng = "F"
+            datacompile$FlagGross = "F"
+          }
           
           loggertypecompile = rbind(loggertypecompile,datacompile)
         }else{
