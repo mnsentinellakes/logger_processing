@@ -463,7 +463,7 @@ observeEvent(
       )
     }
     
-    # unlink("processing/*",recursive = TRUE,force = TRUE)
+    unlink("processing/*",recursive = TRUE,force = TRUE)
     
     finaldata(NULL)
   }
