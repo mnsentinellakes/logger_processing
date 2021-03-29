@@ -230,6 +230,7 @@ observeEvent(
       if (exportsettings$IncZ == TRUE){
         fieldorder = c(fieldorder,exportsettings$Z)
       }
+      
       #Add Date and Time
       if (exportsettings$DateTimeSep == "Combined"){
         fieldorder = c(fieldorder,exportsettings$Date_Time)
@@ -272,7 +273,7 @@ observeEvent(
         }else if (exportsettings$IncZ == FALSE){
           paradata[,2] = NULL
         }
-        
+
         #Select Flag fields
         qcdata = processdata[[i]]
         qcdata = qcdata[,c(15:19)]
@@ -372,7 +373,7 @@ observeEvent(
       sumloggerfilesettings = loggerfiledefs()
       #
       origdata = VisQCdata()
-      
+    
       #Summarize Data
       sumdata = NULL
       for (i in qcloggertypes()){
@@ -382,53 +383,64 @@ observeEvent(
         origdataselect$DateTime = with_tz(origdataselect$DateTime,tzone = sumexportsettings$TZ)
         
         origz = unique(origdataselect$Z)
+
+        print(origdataselect)
         
         sumdataz = NULL
         for (j in origz){
-          
+
           origzselect = origdataselect[which(origdataselect$Z == j),]
           
           origzunitid = unique(origzselect$UnitID)
-          
+ print(1)
+ print(origzselect)
           sumdataz.xts = as.xts(as.numeric(as.numeric(origzselect$Data)),order.by = origzselect$DateTime)
-          sumdataz.mean.xts = apply.daily(sumdataz.xts,mean)
+          print(2)
+          print(sumdataz.xts)
+          sumdataz.mean.xts = apply.daily(sumdataz.xts,"mean")
+          print(3)
           sumdataz.max.xts = apply.daily(sumdataz.xts,max)
+          print(4)
           sumdataz.min.xts = apply.daily(sumdataz.xts,min)
+          print(5)
           sumdataz.sd.xts = apply.daily(sumdataz.xts,sd)
+          print(6)
           sumdataz.count.xts = apply.daily(sumdataz.xts,nrow)
+          print(7)
+          
           sumdatazmean = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.mean.xts),"z" = j,"mean" = coredata(sumdataz.mean.xts))
           sumdatazmax = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.max.xts),"z" = j,"max" = coredata(sumdataz.max.xts))
           sumdatazmin = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.min.xts),"z" = j,"min" = coredata(sumdataz.min.xts))
           sumdatazsd = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.sd.xts),"z" = j,"sd" = coredata(sumdataz.sd.xts))
           sumdatazcount = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.count.xts),"z" = j,
                                      "count" = coredata(sumdataz.count.xts))
-          
+ 
           sumdatazday = left_join(sumdatazmean,sumdatazmax,by = c("unitid","datetime","z"))
           sumdatazday = left_join(sumdatazday,sumdatazmin,by = c("unitid","datetime","z"))
           sumdatazday = left_join(sumdatazday,sumdatazsd,by = c("unitid","datetime","z"))
           sumdatazday = left_join(sumdatazday,sumdatazcount,by = c("unitid","datetime","z"))
-          
+
           sumdataz = rbind(sumdataz,sumdatazday)
         }
         sumdata[[i]] = sumdataz
       }
-      
+ 
       #Select the first data frame to begin building the final table
       sumstartfields = sumdata[[1]]
       
       #Convert datetime to date
       sumstartfields$datetime = as.Date(sumstartfields$datetime)
-      
+
       #Select the UnitId and DateTime Fields
       sumstartfields = sumstartfields[,c(1:2)]
-      
+
       
       #Rename UnitID Field
       names(sumstartfields)[1] = sumexportsettings$UnitID
       
       #Rename Date Fields
       names(sumstartfields)[2] = "Date"
-      
+  
       #Add Model Name
       if (sumexportsettings$IncModelName == TRUE){
         #input$procmodel sourced from processingUI.R
@@ -436,7 +448,6 @@ observeEvent(
         sumstartfields$summodname = summodname
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ModelName
       }
-      
       
       #Add Program Name
       if (sumexportsettings$IncProgramName == TRUE){
@@ -473,7 +484,7 @@ observeEvent(
         sumstartfields$stationid = sumstationssettings$ProgramStationID[which(sumstationssettings$StationID == input$procstation)]
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramStationID
       }
-      
+
       #Add Station Name
       if (sumexportsettings$IncStationName == TRUE){
         #input$procstations sourced from processingUI.R
@@ -506,7 +517,7 @@ observeEvent(
           sumparadata = sumparadata[,c(3:8)]
           
           sumunitidname = as.character(dplyr::select(sumexportsettings,matches(i)))
-          
+
           if (sumexportsettings$IncZ == TRUE){
             names(sumparadata)[1] = sumexportsettings$Z
             names(sumparadata)[2] = paste0(sumunitidname,"_mean")
