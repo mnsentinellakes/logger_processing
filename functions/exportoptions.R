@@ -1001,67 +1001,68 @@ observeEvent(
       
       exportfinal$TZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$tzexport
       
+      
       #Data Field Names
-      if (!is.na(loggerexportfinal$AirBP)){
+      if (!is.na(loggerexportfinal$AirBP) & loggerexportfinal$AirBP != ""){
         exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airbpexport
       }else{
         exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$AirTemp)){
+      if (!is.na(loggerexportfinal$AirTemp) & loggerexportfinal$AirTemp != ""){
         exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airtempexport
       }else{
         exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$Chlorophylla)){
+      if (!is.na(loggerexportfinal$Chlorophylla) & loggerexportfinal$Chlorophylla != ""){
         exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$chlorophyllaexport
       }else{
         exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$Cond)){
+      if (!is.na(loggerexportfinal$Cond) & loggerexportfinal$Cond != ""){
         exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$condexport
       }else{
         exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$Discharge)){
+      if (!is.na(loggerexportfinal$Discharge) & loggerexportfinal$Discharge != ""){
         exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dischargeexport
       }else{
         exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
-      if (!is.na(loggerexportfinal$DO)){
+      if (!is.na(loggerexportfinal$DO) & loggerexportfinal$DO != ""){
         exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$doexport
       }else{
         exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$pH)){
+      if (!is.na(loggerexportfinal$pH) & loggerexportfinal$pH != ""){
         exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$phexport
       }else{
         exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$Turbidity)){
+      if (!is.na(loggerexportfinal$Turbidity) & loggerexportfinal$Turbidity != ""){
         exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$turbidityexport
       }else{
         exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$WaterLevel)){
+      if (!is.na(loggerexportfinal$WaterLevel) & loggerexportfinal$WaterLevel != ""){
         exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterlevelexport
       }else{
         exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$WaterP)){
+      if (!is.na(loggerexportfinal$WaterP) & loggerexportfinal$WaterP != ""){
         exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterpexport
       }else{
         exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
       }
       
-      if (!is.na(loggerexportfinal$WaterTemp)){
+      if (!is.na(loggerexportfinal$WaterTemp) & loggerexportfinal$WaterTemp != ""){
         exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$watertempexport
       }else{
         exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
