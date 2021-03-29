@@ -125,13 +125,17 @@ deploycounter = reactive({
   deploycountdata = deploylogs()
   
   if (nrow(deployidselect) > 0){
+    
+    
     if (all(is.na(deployidselect$DeployID))){
       deploycountdata = 1
     }else{
       deployidselect = unique(deployidselect$DeployID[which(deployidselect$StationID == input$procstationname & 
                                                           deployidselect$ModelID == input$procmodel)])
-      if (length(deployidselect)>0){
-        deploycountdata = as.numeric(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)])) + 1
+      print(deployidselect)
+      if (length(deployidselect) > 0){
+        
+        deploycountdata = as.numeric(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)],na.rm = TRUE)) + 1
       }else{
         deploycountdata = 1
       }
@@ -139,6 +143,11 @@ deploycounter = reactive({
   }else{
     deploycountdata = 1
   }
+  
+  if (is.na(deploycountdata)){
+    deploycountdata = 1
+  }
+  
   return(deploycountdata)
 })
 
