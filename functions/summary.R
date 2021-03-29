@@ -147,8 +147,8 @@ output$summaryUI = renderUI({
   #Deployment number and number of loggers
   deploydata = deploylogs()
   deploydata = deploydata[which(deploydata$DeployID == deployid()),]
-  deploycount = deploydata$Deployment_Count
-  loggercount = deploydata$Logger_Count
+  deploycount = unique(deploydata$Deployment_Count)
+  loggercount = unique(deploydata$Logger_Count)
   
   tagList(
     box(
@@ -359,6 +359,9 @@ output$summaryloggerinfoUI = renderUI({
   summaryznamedata = fieldnames()
   if (nrow(summaryznamedata) > 0){
     summaryzname = summaryznamedata$Z
+    if (is.na(summaryzname)){
+      summaryzname = "Z"
+    }
   }else{
     summaryzname = "Z"
   }
