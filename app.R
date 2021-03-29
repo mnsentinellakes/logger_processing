@@ -1,6 +1,6 @@
 #Metadata-----------------------------------------------------------------------
 #Name: Logger Processing and QC App
-#Version: 0.5
+#Version: 0.75
 #Purpose: Process and QC Aquatic Loggers
 #Developed by: Tim Martin
 #Contact: tim.martin@state.mn.us
