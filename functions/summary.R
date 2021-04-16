@@ -114,25 +114,22 @@ output$summaryUI = renderUI({
   )
   
   #Get Program Name
-  programname = programs()
-  programname = programname$Program_Name[which(programname$ProgramID == input$procprogram)]
+  programname = storeprogram()
   
   #Get Waterbody Name
-  waterbodyname = wbnames()
-  waterbodyname = waterbodyname$Waterbody_Name[which(waterbodyname$AppID == input$procwaterbody)]
+  waterbodyname = storewbname()
   
   #Get Waterbody ID
-  waterbody = programwbs()
-  waterbodyid = waterbody$ProgramWaterbodyID[which(waterbody$AppID == input$procwaterbody)]
+  waterbodyid = storewbid()
   
   #Get Waterbody Type
+  waterbody = programwbs()
   waterbodytype = waterbody$WB_Type[which(waterbody$AppID == input$procwaterbody)]
   
   #Get Station Info
-  station = stations()
-  stationname = station$Station_Name[which(station$StationID == input$procstationname)]
-  stationlat = as.character(station$Lat[which(station$StationID == input$procstationname)])
-  stationlon = as.character(station$Lon[which(station$StationID == input$procstationname)])
+  stationname = storestationname()
+  stationlat = storelat()
+  stationlon = storelon()
   
   if ((length(stationlat) > 0 & length(stationlon) > 0) | !is.na(stationlat) & !is.na(stationlon)){
     loc = paste("<font size = 4><b>",stationlat,",",stationlon,"</b></font>")
@@ -141,8 +138,7 @@ output$summaryUI = renderUI({
   }
   
   #Logger Model Type
-  loggermodeltype = loggerfiledefs()
-  loggermodeltype = loggermodeltype$Logger_Model[which(loggermodeltype$ModelID == input$procmodel)]
+  loggermodeltype = storeloggermodel()
   
   #Deployment number and number of loggers
   deploydata = deploylogs()
