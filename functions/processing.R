@@ -238,8 +238,40 @@ compileQCdata = function(qcinfo,depthstable){
 #Create Reactive Value for VisQCdata step
 VisQCdata=reactiveVal()
 
+#Create Reactive to store processed Program
+storeprogram = reactiveVal()
+
+#Create Reactive to store processed waterbody name
+storewbname = reactiveVal()
+
+#Create Reactive to store processed waterbody id
+storewbid = reactiveVal()
+
+#Create Reactive to store processed Station Name
+storestationname = reactiveVal()
+
+#Create Reactive to store processed Station ID
+storestationid = reactiveVal()
+
+#Create Reactive to store processed Logger Model
+storeloggermodel = reactiveVal()
+
+#Create Reactive to store processed Latitude
+storelat = reactiveVal()
+
+#Create Reactive to store processed Longitude
+storelon = reactiveVal()
+
+#Create Reactive to store processed User Name
+storeuser = reactiveVal()
+
+#Create Reactive to store current deployment number
+storedepcount = reactiveVal()
+
 #Create Reactive to store current deployid
 deployid = reactiveVal()
+
+
 
 #Process and QC data----
 #Observes the Processing button and begins reformating and QCing the data
@@ -254,8 +286,58 @@ observeEvent(
     #Ensures that data have been uploaded
     if(length(input$dataupload) > 0){
       
-      #Update Config File
-      # updateconfigfile(qcconfigdata = qc_config())
+      #Update processing reactiveVals
+      #Program
+      storeprogram(
+        programs()$Program_Name[which(programs()$ProgramID == input$procprogram)]
+      )
+      print(storeprogram())
+      #Waterbody Name
+      storewbname(
+        wbnames()$Waterbody_Name[which(wbnames()$AppID == input$procwaterbody)]
+      )
+      print(storewbname())
+      #Waterbody ID
+      storewbid(
+        programwbs()$ProgramWaterbodyID[which(programwbs()$AppID == input$procwaterbody)]
+      )
+      print(storewbid())
+      #Station Name
+      storestationname(
+        stations()$Station_Name[which(stations()$StationID == input$procstationname)]
+      )
+      print(storestationname())
+      #Station ID
+      storestationid(
+        stations()$ProgramStationID[which(stations()$StationID == input$procstationname)]
+      )
+      print(storestationid())
+      #Logger Model
+      storeloggermodel(
+        loggerfiledefs()$Logger_Model[which(loggerfiledefs()$ModelID == input$procmodel)]
+      )
+      print(storeloggermodel())
+      #Latitude
+      storelat(
+        input$lat
+      )
+      print(storelat())
+      #Longitude
+      storelon(
+        input$lon
+      )
+      print(storelon())
+      #User
+      storeuser(
+        input$username
+      )
+      print(storeuser())
+      #Deploy Count
+      storedepcount(
+        input$deploynum
+      )
+      print(storedepcount())
+      
       ##Data QC and Processing
       #Table with information about the uploaded data
       filetable = input$dataupload
@@ -353,7 +435,7 @@ observeEvent(
           status = "success",
           title = paste("Compiling and formatting QCed data for",inputname)
         )
-        
+        print(1)
         #Run compileQCdata
         compiledata = compileQCdata(
           qcinfo = qcinfo,
@@ -375,11 +457,11 @@ observeEvent(
             status = "success",
             title = paste("Saving Metadata")
           )
-          
+          print(2)
           #Create random deployid
           deployidcreate = random_id(n = 1,bytes = 16)
           deployid(deployidcreate)
-          
+          print(3)
           ##Update tables
           #Load tables
           updateproclogs = processinglogs()
@@ -390,17 +472,18 @@ observeEvent(
           updateproclogs$DeployID[which(updateproclogs$StationID == input$procstationname & 
                                           updateproclogs$ModelID == input$procmodel & 
                                           is.na(updateproclogs$Processed))] = deployid()
-          
+          print(4)
           #Update the depths table processed date
           if (turnoffprocessupdate == FALSE){
             updateproclogs$Processed[which(updateproclogs$StationID == input$procstationname &
                                           updateproclogs$ModelID == input$procmodel & is.na(updateproclogs$Processed))] = Sys.Date()
           }
           processinglogs(updateproclogs)
-          
+          print(5)
           #Update deploy table
           deployaddrows = NULL
           for (k in names(compiledata)){
+            print("x")
             selectunit = unique(qctable$Units[which(qctable$AppID == input$procwaterbody & qctable$Logger_Type == k)])
             selectunit = selectunit[!is.na(selectunit)]
             
@@ -408,8 +491,8 @@ observeEvent(
               "DeployID" = deployidcreate,
               "ModelID" = input$procmodel,
               "Logger_Type" = k,
-              "Lat" = input$lat,
-              "Lon" = input$lon,
+              "Lat" = storelat(),
+              "Lon" = storelon(),
               "StartDateTimeRecord" = as.character(NA),
               "EndDateTimeRecord" = as.character(NA),
               "StartDateTimeValid" = as.character(NA),
@@ -417,21 +500,21 @@ observeEvent(
               "Units" = selectunit,
               "Z" = paste(sort(unique(depthsdata$Z)),collapse = ","),
               "Logger_Count" = length(datapaths),
-              "Deployment_Count" = input$deploynum,
+              "Deployment_Count" = storedepcount(),
               "ProcessedDate" = as.character(Sys.Date()),
-              "Processedby" = input$username,
+              "Processedby" = storeuser(),
               stringsAsFactors = FALSE
             )
-            
+            print("y")
             deployaddrows = rbind(deployaddrows,deployaddrow)
           }
           deployadd = rbind(deployadd,deployaddrows)
-          
+          print(6)
           deploylogs(deployadd)
           
           #Update stations table
-          stationupdate$Lat[which(stationupdate$StationID == input$procstationname)] = input$lat
-          stationupdate$Lon[which(stationupdate$StationID == input$procstationname)] = input$lon
+          stationupdate$Lat[which(stationupdate$StationID == input$procstationname)] = storelat()
+          stationupdate$Lon[which(stationupdate$StationID == input$procstationname)] = storelon()
           
           stations(stationupdate)
           
