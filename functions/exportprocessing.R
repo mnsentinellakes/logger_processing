@@ -60,7 +60,7 @@ observeEvent(
     loggerfilesettings = loggerfiledefs()
     #Export Data
     processdata = VisQCdata()
-    
+
     #Select the first data frame to begin building the final table
     startfields = processdata[[1]]
     
@@ -76,7 +76,7 @@ observeEvent(
       time = startfields[2],
       tzone = exportsettings$TZ
     )
-    
+    print(2)
     #Split or separate dates
     if (exportsettings$DateTimeSep == "Combined"){
       names(startfields)[2] = exportsettings$Date_Time
@@ -91,30 +91,32 @@ observeEvent(
     #Add Model Name
     if (exportsettings$IncModelName == TRUE){
       #input$procmodel sourced from processingUI.R
-      modname = loggerfilesettings$Logger_Model[which(loggerfilesettings$ModelID == input$procmodel)]
-      startfields$modname = modname
+      # modname = loggerfilesettings$Logger_Model[which(loggerfilesettings$ModelID == input$procmodel)]
+      startfields$modname = storeloggermodel()
       names(startfields)[ncol(startfields)] = exportsettings$ModelName
     }
     
     #Add Program Name
     if (exportsettings$IncProgramName == TRUE){
       #input$procprogram sourced from processingUI.R
-      progname = programsettings$Program_Name[which(programsettings$ProgramID == input$procprogram)]
-      startfields$progname = progname
+      # progname = programsettings$Program_Name[which(programsettings$ProgramID == input$procprogram)]
+      startfields$progname = storeprogram()
       names(startfields)[ncol(startfields)] = exportsettings$ProgramName
     }
     
     #Add WaterBody ID
     if (exportsettings$IncProgramWBID == TRUE){
       #input$procwaterbody sourced from processingUI.R
-      startfields$wbid = programwbssettings$ProgramWaterbodyID[which(programwbssettings$AppID == input$procwaterbody)]
+      # startfields$wbid = programwbssettings$ProgramWaterbodyID[which(programwbssettings$AppID == input$procwaterbody)]
+      startfields$wbid = storewbid()
       names(startfields)[ncol(startfields)] = exportsettings$ProgramWBID
     }
     
     #Add WaterBody Name
     if (exportsettings$IncWBName == TRUE){
       #input$procwaterbody sourced from processingUI.R
-      startfields$wbname = wbnamessettings$Waterbody_Name[which(wbnamessettings$AppID == input$procwaterbody)]
+      # startfields$wbname = wbnamessettings$Waterbody_Name[which(wbnamessettings$AppID == input$procwaterbody)]
+      startfields$wbname = storewbname()
       names(startfields)[ncol(startfields)] = exportsettings$WBName
     }
     
@@ -128,32 +130,46 @@ observeEvent(
     #Add Station ID
     if (exportsettings$IncProgramStationID == TRUE){
       #input$procstations sourced from processingUI.R
-      startfields$stationid = stationssettings$ProgramStationID[which(stationssettings$StationID == input$procstation)]
+      # startfields$stationid = stationssettings$ProgramStationID[which(stationssettings$StationID == input$procstationname)]
+      startfields$stationid = storestationid()
       names(startfields)[ncol(startfields)] = exportsettings$ProgramStationID
     }
     
     #Add Station Name
     if (exportsettings$IncStationName == TRUE){
       #input$procstations sourced from processingUI.R
-      startfields$stationname = stationssettings$Station_Name[which(stationssettings$StationID == input$procstationname)]
+      # startfields$stationname = stationssettings$Station_Name[which(stationssettings$StationID == input$procstationname)]
+      startfields$stationname = storestationname()
       names(startfields)[ncol(startfields)] = exportsettings$StationName
+    }
+    
+    #Add Coordinates
+    if (exportsettings$IncLoc == TRUE){
+      startfields$lat = storelat()
+      names(startfields)[ncol(startfields)] = exportsettings$Lat
+      startfields$lon = storelon()
+      names(startfields)[ncol(startfields)] = exportsettings$Lon
     }
     
     #Add Deployment Count
     if (exportsettings$IncDeploy == TRUE){
       #input$deploynum sourced from processingUI.R
-      startfields$deploy = unique(deploylogssettings$Deployment_Count[which(deploylogssettings$DeployID == deployid())])
+      # startfields$deploy = unique(deploylogssettings$Deployment_Count[which(deploylogssettings$DeployID == deployid())])
+      startfields$deploy = storedepcount()
       names(startfields)[ncol(startfields)] = exportsettings$Deployment
     }
     
     #Add User Name
     if (exportsettings$IncUser == TRUE){
       #input$username sourced from processingUI.R
-      startfields$user = unique(deploylogssettings$Processedby[which(deploylogssettings$DeployID == deployid())])
+      # startfields$user = unique(deploylogssettings$Processedby[which(deploylogssettings$DeployID == deployid())])
+      startfields$user = storeuser()
       names(startfields)[ncol(startfields)] = exportsettings$User
     }
     
+    
     if (exportsettings$FileSep == "Single"){
+    
       combinefields = startfields
       #qcloggertypes() sourced from processing.R
       for (i in qcloggertypes()){
@@ -176,7 +192,7 @@ observeEvent(
         
         if (length(qcloggertypes()) > 1){
           loggertypename = as.character(dplyr::select(exportsettings,matches(i)))
-          names(qcdata) = paste0(loggertypename,names(qcdata))
+          names(qcdata) = paste0(loggertypename,"_",names(qcdata))
         }
         
         #Combine parameter data and qc data
@@ -218,6 +234,10 @@ observeEvent(
       if (exportsettings$IncStationName == TRUE){
         fieldorder = c(fieldorder,exportsettings$StationName)
       }
+      #Location
+      if(exportsettings$IncLoc == TRUE){
+        fieldorder = c(fieldorder,exportsettings$Lat,exportsettings$Lon)
+      }
       #Deployment
       if (exportsettings$IncDeploy == TRUE){
         fieldorder = c(fieldorder,exportsettings$Deployment)
@@ -247,7 +267,7 @@ observeEvent(
         for (i in qcloggertypes()){
           loggertypename = as.character(dplyr::select(exportsettings,matches(i)))
           qcflags = c("FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")
-          qcflags = paste0(loggertypename,qcflags)
+          qcflags = paste0(loggertypename,"_",qcflags)
           fieldorder = c(fieldorder,qcflags)
         }
       }else{
@@ -258,7 +278,6 @@ observeEvent(
       
       finaldata(combinefields)
     }else if (exportsettings$FileSep == "Multiple"){
-      
       combinelist = list()
       for (i in qcloggertypes()){
         #Select data by logger type
@@ -310,6 +329,9 @@ observeEvent(
         if (exportsettings$IncStationName == TRUE){
           fieldorder = c(fieldorder,exportsettings$StationName)
         }
+        if (exportsettings$IncLoc == TRUE){
+          fieldorder = c(fieldorder,exportsettings$Lat,exportsettings$Lon)
+        }
         #Deployment
         if (exportsettings$IncDeploy == TRUE){
           fieldorder = c(fieldorder,exportsettings$Deployment)
@@ -353,7 +375,6 @@ observeEvent(
     validate(
       need(selectexportdata(),"Loading...")
     )
-    
     sumexportsettings = selectexportdata()
 
     if (sumexportsettings$IncSum == TRUE){
@@ -371,12 +392,13 @@ observeEvent(
       sumdeploylogssettings = deploylogs()
       #LoggerFiles
       sumloggerfilesettings = loggerfiledefs()
-      #
+      
       origdata = VisQCdata()
     
       #Summarize Data
       sumdata = NULL
       for (i in qcloggertypes()){
+        
         origdataselect = origdata[[i]]
         origdataselect = origdataselect[which(origdataselect$FlagVis != 'F'),]
         origdataselect = origdataselect[,1:4]
@@ -384,29 +406,23 @@ observeEvent(
         
         origz = unique(origdataselect$Z)
 
-        print(origdataselect)
-        
         sumdataz = NULL
         for (j in origz){
-
-          origzselect = origdataselect[which(origdataselect$Z == j),]
+          if (is.na(j)){
+            origzselect = origdataselect
+          }else{
+            origzselect = origdataselect[which(origdataselect$Z == j),]
+          }
           
           origzunitid = unique(origzselect$UnitID)
- print(1)
- print(origzselect)
+ 
           sumdataz.xts = as.xts(as.numeric(as.numeric(origzselect$Data)),order.by = origzselect$DateTime)
-          print(2)
-          print(sumdataz.xts)
+          
           sumdataz.mean.xts = apply.daily(sumdataz.xts,"mean")
-          print(3)
           sumdataz.max.xts = apply.daily(sumdataz.xts,max)
-          print(4)
           sumdataz.min.xts = apply.daily(sumdataz.xts,min)
-          print(5)
           sumdataz.sd.xts = apply.daily(sumdataz.xts,sd)
-          print(6)
           sumdataz.count.xts = apply.daily(sumdataz.xts,nrow)
-          print(7)
           
           sumdatazmean = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.mean.xts),"z" = j,"mean" = coredata(sumdataz.mean.xts))
           sumdatazmax = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.max.xts),"z" = j,"max" = coredata(sumdataz.max.xts))
@@ -444,78 +460,91 @@ observeEvent(
       #Add Model Name
       if (sumexportsettings$IncModelName == TRUE){
         #input$procmodel sourced from processingUI.R
-        summodname = sumloggerfilesettings$Logger_Model[which(sumloggerfilesettings$ModelID == input$procmodel)]
-        sumstartfields$summodname = summodname
+        # summodname = sumloggerfilesettings$Logger_Model[which(sumloggerfilesettings$ModelID == input$procmodel)]
+        sumstartfields$summodname = storeloggermodel()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ModelName
       }
-      
+
       #Add Program Name
       if (sumexportsettings$IncProgramName == TRUE){
         #input$procprogram sourced from processingUI.R
-        sumprogname = sumprogramsettings$Program_Name[which(sumprogramsettings$ProgramID == input$procprogram)]
-        sumstartfields$progname = sumprogname
+        # sumprogname = sumprogramsettings$Program_Name[which(sumprogramsettings$ProgramID == input$procprogram)]
+        sumstartfields$progname = storeprogram()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramName
       }
-      
+
       #Add WaterBody ID
       if (sumexportsettings$IncProgramWBID == TRUE){
         #input$procwaterbody sourced from processingUI.R
-        sumstartfields$wbid = sumprogramwbssettings$ProgramWaterbodyID[which(sumprogramwbssettings$AppID == input$procwaterbody)]
+        # sumstartfields$wbid = sumprogramwbssettings$ProgramWaterbodyID[which(sumprogramwbssettings$AppID == input$procwaterbody)]
+        sumstartfields$wbid = storewbid()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramWBID
       }
-      
+
       #Add WaterBody Name
       if (sumexportsettings$IncWBName == TRUE){
         #input$procwaterbody sourced from processingUI.R
-        sumstartfields$wbname = sumwbnamessettings$Waterbody_Name[which(sumwbnamessettings$AppID == input$procwaterbody)]
+        # sumstartfields$wbname = sumwbnamessettings$Waterbody_Name[which(sumwbnamessettings$AppID == input$procwaterbody)]
+        sumstartfields$wbname = storewbname()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$WBName
       }
-      
+
       #Add WaterBody Type
       if (sumexportsettings$IncWBType == TRUE){
         #input$procwaterbody sourced from processingUI.R
         sumstartfields$wbtype = sumwbnamessettings$programwbssettings$WB_Type[which(sumprogramwbssettings$AppID == input$procwaterbody)]
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$WBType
       }
-      
+
       #Add Station ID
       if (sumexportsettings$IncProgramStationID == TRUE){
         #input$procstations sourced from processingUI.R
-        sumstartfields$stationid = sumstationssettings$ProgramStationID[which(sumstationssettings$StationID == input$procstation)]
+        # sumstartfields$stationid = sumstationssettings$ProgramStationID[which(sumstationssettings$StationID == input$procstationname)]
+        sumstartfields$stationid = storestationid()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramStationID
       }
 
       #Add Station Name
       if (sumexportsettings$IncStationName == TRUE){
         #input$procstations sourced from processingUI.R
-        sumstartfields$stationname = sumstationssettings$Station_Name[which(sumstationssettings$StationID == input$procstationname)]
+        # sumstartfields$stationname = sumstationssettings$Station_Name[which(sumstationssettings$StationID == input$procstationname)]
+        sumstartfields$stationname = storestationname()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$StationName
       }
       
+      #Add Location
+      if (sumexportsettings$IncLoc == TRUE){
+        sumstartfields$lat = storelat()
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$Lat
+        sumstartfields$lon = storelon()
+        names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$Lon
+      }
+
       #Add Deployment Count
       if (sumexportsettings$IncDeploy == TRUE){
         #input$deploynum sourced from processingUI.R
-        sumstartfields$deploy = unique(sumdeploylogssettings$Deployment_Count[which(sumdeploylogssettings$DeployID == deployid())])
+        # sumstartfields$deploy = unique(sumdeploylogssettings$Deployment_Count[which(sumdeploylogssettings$DeployID == deployid())])
+        sumstartfields$deploy = storedepcount()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$Deployment
       }
-      
+
       #Add User Name
       if (sumexportsettings$IncUser == TRUE){
         #input$username sourced from processingUI.R
-        sumstartfields$user = unique(sumdeploylogssettings$Processedby[which(sumdeploylogssettings$DeployID == deployid())])
+        # sumstartfields$user = unique(sumdeploylogssettings$Processedby[which(sumdeploylogssettings$DeployID == deployid())])
+        sumstartfields$user = storeuser()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$User
       }
-      
+
       if (sumexportsettings$FileSep == "Single"){
-        sumcombinefields = sumstartfields
-        #qcloggertypes() sourced from processing.R
         
+        #qcloggertypes() sourced from processing.R
+        sumcombinefields = sumstartfields
         for (i in qcloggertypes()){
           #Select parameter Data and Depth Fields and rename them
           sumparadata = sumdata[[i]]
           
           sumparadata = sumparadata[,c(3:8)]
-          
           sumunitidname = as.character(dplyr::select(sumexportsettings,matches(i)))
 
           if (sumexportsettings$IncZ == TRUE){
@@ -532,6 +561,7 @@ observeEvent(
             names(sumparadata)[3] = paste0(sumunitidname,"_min")
             names(sumparadata)[4] = paste0(sumunitidname,"_sd")
             names(sumparadata)[5] = "Count"
+            
           }
           
           #Combine logger types
@@ -570,6 +600,9 @@ observeEvent(
         if (sumexportsettings$IncStationName == TRUE){
           sumfieldorder = c(sumfieldorder,sumexportsettings$StationName)
         }
+        if (summexportsettings$IncLoc == TRUE){
+          sumfieldorder = c(sumfieldorder,sumexportsettings$Lat,sumexportsettings$Lon)
+        }
         #Deployment
         if (sumexportsettings$IncDeploy == TRUE){
           sumfieldorder = c(sumfieldorder,sumexportsettings$Deployment)
@@ -596,7 +629,9 @@ observeEvent(
         sumcombinefields = sumcombinefields[,sumfieldorder]
         
         summarydata(sumcombinefields)
+        
       }else if (sumexportsettings$FileSep == "Multiple"){
+        
         sumcombinefields = sumstartfields
         
         sumcombinelist = list()
@@ -655,6 +690,10 @@ observeEvent(
           if (sumexportsettings$IncStationName == TRUE){
             sumfieldorder = c(sumfieldorder,sumexportsettings$StationName)
           }
+          #Location
+          if (sumexportsettings$IncLoc == TRUE){
+            sumfieldorder = c(sumfieldorder,sumexportsettings$Lat,sumexporsettings$Lon)
+          }
           #Deployment
           if (sumexportsettings$IncDeploy == TRUE){
             sumfieldorder = c(sumfieldorder,sumexportsettings$Deployment)
@@ -706,7 +745,7 @@ output$dlddata = downloadHandler(
     
     #Get Waterbody Name
     wbnamedld = wbnames()
-    dldname = wbnamedld$Waterbody_Name[which(wbnamedld$AppID == input$procwaterbody)]
+    dldname = storewbname()
     
     #Process Data for Single File
     if (exportdldsettings$FileSep == "Single"){
