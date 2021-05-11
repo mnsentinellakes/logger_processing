@@ -600,7 +600,7 @@ observeEvent(
         if (sumexportsettings$IncStationName == TRUE){
           sumfieldorder = c(sumfieldorder,sumexportsettings$StationName)
         }
-        if (summexportsettings$IncLoc == TRUE){
+        if (sumexportsettings$IncLoc == TRUE){
           sumfieldorder = c(sumfieldorder,sumexportsettings$Lat,sumexportsettings$Lon)
         }
         #Deployment
