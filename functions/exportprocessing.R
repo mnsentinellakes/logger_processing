@@ -25,7 +25,6 @@ deploydatesupdate = function(){
 #Select the relevant row from the export table
 observeEvent(
   input$exportprocessbttn,{
-    
     exportdata = export()
     #input$procprogram and input$procmodel are sourced from the processingUI.R file
     exportdata = exportdata[which(exportdata$ProgramID == input$procprogram & exportdata$ModelID == input$procmodel),]
@@ -42,7 +41,6 @@ observeEvent(
     validate(
       need(selectexportdata(),"Loading...")
     )
-    
     deploydatesupdate()
     #Export Data Settings
     exportsettings = selectexportdata()
@@ -69,14 +67,12 @@ observeEvent(
     
     #Rename UnitID Field
     names(startfields)[1] = exportsettings$UnitID
-    
     #Format Date Fields
     #Set TZ
     startfields[,2] = with_tz(
       time = startfields[2],
       tzone = exportsettings$TZ
     )
-    print(2)
     #Split or separate dates
     if (exportsettings$DateTimeSep == "Combined"){
       names(startfields)[2] = exportsettings$Date_Time
@@ -87,7 +83,7 @@ observeEvent(
       names(startfields)[4] = exportsettings$Time
       startfields[,2] = NULL
     }
-    
+
     #Add Model Name
     if (exportsettings$IncModelName == TRUE){
       #input$procmodel sourced from processingUI.R
@@ -167,9 +163,7 @@ observeEvent(
       names(startfields)[ncol(startfields)] = exportsettings$User
     }
     
-    
     if (exportsettings$FileSep == "Single"){
-    
       combinefields = startfields
       #qcloggertypes() sourced from processing.R
       for (i in qcloggertypes()){
@@ -185,7 +179,7 @@ observeEvent(
         }else if (exportsettings$IncZ == FALSE){
           paradata[,2] = NULL
         }
-        
+
         #Select Flag fields and rename them
         qcdata = processdata[[i]]
         qcdata = qcdata[,c(15:19)]
@@ -200,6 +194,7 @@ observeEvent(
         
         #Combine logger types
         combinefields = cbind(combinefields,loggercombine)
+        
       }
       
       #Create vector for sorting fields in the table
@@ -275,7 +270,6 @@ observeEvent(
       }
       
       combinefields = combinefields[,fieldorder]
-      
       finaldata(combinefields)
     }else if (exportsettings$FileSep == "Multiple"){
       combinelist = list()
@@ -285,7 +279,6 @@ observeEvent(
         
         #Remove extra QC Flag Fields
         paradata = paradata[,c(3,4)]
-        
         names(paradata)[1] = dplyr::select(exportsettings,matches(i))
         if (exportsettings$IncZ == TRUE){
           names(paradata)[2] = exportsettings$Z
@@ -360,7 +353,6 @@ observeEvent(
     }
 
     #Clear VisQCdata
-    
     if (exportsettings$IncSum == FALSE){
       VisQCdata(NULL)
     }
@@ -376,9 +368,7 @@ observeEvent(
       need(selectexportdata(),"Loading...")
     )
     sumexportsettings = selectexportdata()
-
     if (sumexportsettings$IncSum == TRUE){
-          
       deploydatesupdate()
       
       #Program Names
@@ -405,7 +395,7 @@ observeEvent(
         origdataselect$DateTime = with_tz(origdataselect$DateTime,tzone = sumexportsettings$TZ)
         
         origz = unique(origdataselect$Z)
-
+  
         sumdataz = NULL
         for (j in origz){
           if (is.na(j)){
@@ -413,34 +403,34 @@ observeEvent(
           }else{
             origzselect = origdataselect[which(origdataselect$Z == j),]
           }
-          
           origzunitid = unique(origzselect$UnitID)
+          for (k in origzunitid){
+            origunit = origzselect[which(origzselect$UnitID == k),]
  
-          sumdataz.xts = as.xts(as.numeric(as.numeric(origzselect$Data)),order.by = origzselect$DateTime)
-          
-          sumdataz.mean.xts = apply.daily(sumdataz.xts,"mean")
+          sumdataz.xts = as.xts(as.numeric(as.numeric(origunit$Data)),order.by = origunit$DateTime)
+          sumdataz.mean.xts = apply.daily(sumdataz.xts,mean)
           sumdataz.max.xts = apply.daily(sumdataz.xts,max)
           sumdataz.min.xts = apply.daily(sumdataz.xts,min)
           sumdataz.sd.xts = apply.daily(sumdataz.xts,sd)
           sumdataz.count.xts = apply.daily(sumdataz.xts,nrow)
           
-          sumdatazmean = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.mean.xts),"z" = j,"mean" = coredata(sumdataz.mean.xts))
-          sumdatazmax = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.max.xts),"z" = j,"max" = coredata(sumdataz.max.xts))
-          sumdatazmin = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.min.xts),"z" = j,"min" = coredata(sumdataz.min.xts))
-          sumdatazsd = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.sd.xts),"z" = j,"sd" = coredata(sumdataz.sd.xts))
-          sumdatazcount = data.frame("unitid" = origzunitid,"datetime" = index(sumdataz.count.xts),"z" = j,
+          sumdatazmean = data.frame("unitid" = k,"datetime" = index(sumdataz.mean.xts),"z" = j,"mean" = coredata(sumdataz.mean.xts))
+          sumdatazmax = data.frame("unitid" = k,"datetime" = index(sumdataz.max.xts),"z" = j,"max" = coredata(sumdataz.max.xts))
+          sumdatazmin = data.frame("unitid" = k,"datetime" = index(sumdataz.min.xts),"z" = j,"min" = coredata(sumdataz.min.xts))
+          sumdatazsd = data.frame("unitid" = k,"datetime" = index(sumdataz.sd.xts),"z" = j,"sd" = coredata(sumdataz.sd.xts))
+          sumdatazcount = data.frame("unitid" = k,"datetime" = index(sumdataz.count.xts),"z" = j,
                                      "count" = coredata(sumdataz.count.xts))
- 
           sumdatazday = left_join(sumdatazmean,sumdatazmax,by = c("unitid","datetime","z"))
           sumdatazday = left_join(sumdatazday,sumdatazmin,by = c("unitid","datetime","z"))
           sumdatazday = left_join(sumdatazday,sumdatazsd,by = c("unitid","datetime","z"))
           sumdatazday = left_join(sumdatazday,sumdatazcount,by = c("unitid","datetime","z"))
 
           sumdataz = rbind(sumdataz,sumdatazday)
+          }
         }
         sumdata[[i]] = sumdataz
       }
- 
+
       #Select the first data frame to begin building the final table
       sumstartfields = sumdata[[1]]
       
@@ -456,7 +446,7 @@ observeEvent(
       
       #Rename Date Fields
       names(sumstartfields)[2] = "Date"
-  
+
       #Add Model Name
       if (sumexportsettings$IncModelName == TRUE){
         #input$procmodel sourced from processingUI.R
@@ -537,7 +527,6 @@ observeEvent(
       }
 
       if (sumexportsettings$FileSep == "Single"){
-        
         #qcloggertypes() sourced from processing.R
         sumcombinefields = sumstartfields
         for (i in qcloggertypes()){
@@ -546,7 +535,6 @@ observeEvent(
           
           sumparadata = sumparadata[,c(3:8)]
           sumunitidname = as.character(dplyr::select(sumexportsettings,matches(i)))
-
           if (sumexportsettings$IncZ == TRUE){
             names(sumparadata)[1] = sumexportsettings$Z
             names(sumparadata)[2] = paste0(sumunitidname,"_mean")
@@ -627,13 +615,11 @@ observeEvent(
         }
 
         sumcombinefields = sumcombinefields[,sumfieldorder]
-        
         summarydata(sumcombinefields)
         
       }else if (sumexportsettings$FileSep == "Multiple"){
         
         sumcombinefields = sumstartfields
-        
         sumcombinelist = list()
         sumcombinedata = NULL
         for (i in qcloggertypes()){
