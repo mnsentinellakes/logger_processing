@@ -132,7 +132,7 @@ deploycounter = reactive({
     }else{
       deployidselect = unique(deployidselect$DeployID[which(deployidselect$StationID == input$procstationname & 
                                                           deployidselect$ModelID == input$procmodel)])
-      print(deployidselect)
+      
       if (length(deployidselect) > 0){
         
         deploycountdata = as.numeric(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)],na.rm = TRUE)) + 1
