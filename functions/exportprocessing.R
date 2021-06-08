@@ -337,6 +337,12 @@ observeEvent(
         if (exportsettings$IncZ == TRUE){
           fieldorder = c(fieldorder,exportsettings$Z)
         }
+        #Add Date and Time
+        if (exportsettings$DateTimeSep == "Combined"){
+          fieldorder = c(fieldorder,exportsettings$Date_Time)
+        }else{
+          fieldorder = c(fieldorder,exportsettings$Date,exportsettings$Time)
+        }
         #Add Parameters
         datafieldname = as.character(dplyr::select(exportsettings,matches(i)))
         fieldorder = c(fieldorder,datafieldname)
