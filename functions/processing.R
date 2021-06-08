@@ -25,10 +25,19 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
       encoding = "UTF-8"
     )
     
-    if (loggerfields$DataStartRow-loggerfields$FieldNamesRow != 1){
-      endrow = loggerfields$DataStartRow - 2
-      delrow = seq(1,endrow)
-      datafile = datafile[-delrow,]
+    if (ncol(datafile) > 1){
+      if (loggerfields$DataStartRow-loggerfields$FieldNamesRow != 1){
+        endrow = loggerfields$DataStartRow - 2
+        delrow = seq(1,endrow)
+        datafile = datafile[-delrow,]
+      }
+    }else{
+      sendSweetAlert(
+        session = session,
+        title = "Row Number Error",
+        text = "Please ensure the Field Names Row and the Data Start Rows are correct in the Logger File Definitions section.",
+        type = "error"
+      )
     }
     return(datafile)
   }
@@ -39,10 +48,9 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   #Select which fields should be included
   loggerfields = loggerfields[which(loggerfields$ModelID == loggermodel),]
   timezone = loggerfields$TZ
-  
+  print(loggerfields)
   #Select datetime fields
   datetimefields = Filter(function(x)!all(is.na(x)),loggerfields[,2:4])
-  
   datetimefieldnames = data.frame("qcfield"=names(datetimefields),"datafield"=unname(unlist(datetimefields[1,])),stringsAsFactors = FALSE)
   
   #Select data fields
@@ -67,7 +75,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   )
   
   #Throw error if DateTime doesnt match
-  
+
   #Standardize field names
   datetimefieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$qcfield),perl = TRUE))
   datetimefieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$datafield),perl = TRUE))
@@ -75,14 +83,14 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   datafieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$datafield),perl = TRUE))
   names(datafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(datafile)),perl = TRUE))
   
-  
-  
   #Rebuild dataset
   for (i in 1:nrow(datafieldnames)){
+    builddata = data.frame("RowID" = seq(1:nrow(datafile)))
     
-    builddata=data.frame("RowID" = seq(1:nrow(datafile)))
     
     builddatacolumn = data.frame(datafile[which(names(datafile) == datafieldnames$datafield[i])])
+    
+    if (nrow(builddatacolumn) > 0){
     names(builddatacolumn) = datafieldnames$qcfield[i]
 
     builddata = cbind(builddata,builddatacolumn)
@@ -95,7 +103,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
       builddatecolumn = paste0(datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Date"])]," ",
                                datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Time"])])
     }
-    
+
     names(builddatecolumn) = "DateTime"
     builddata = cbind(builddata,builddatecolumn)
     
@@ -120,6 +128,14 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     dir.create(foldername,showWarnings = FALSE)
     write.csv(builddata,paste0(foldername,"/",siteid,"_",qctypename,"_",startdate,"_",enddate,".csv"),row.names = FALSE,
               fileEncoding = "ISO-8859-1")
+    }else{
+      sendSweetAlert(
+        session = session,
+        title = "Logger yypes not in file",
+        text = "Please ensure the correct logger model is selected",
+        type = "error"
+      )
+    }
   }
   
   #Compile QC metadata
@@ -291,52 +307,51 @@ observeEvent(
       storeprogram(
         programs()$Program_Name[which(programs()$ProgramID == input$procprogram)]
       )
-      print(storeprogram())
+      
       #Waterbody Name
       storewbname(
         wbnames()$Waterbody_Name[which(wbnames()$AppID == input$procwaterbody)]
       )
-      print(storewbname())
+      
       #Waterbody ID
       storewbid(
         programwbs()$ProgramWaterbodyID[which(programwbs()$AppID == input$procwaterbody)]
       )
-      print(storewbid())
+      
       #Station Name
       storestationname(
         stations()$Station_Name[which(stations()$StationID == input$procstationname)]
       )
-      print(storestationname())
+      
       #Station ID
       storestationid(
         stations()$ProgramStationID[which(stations()$StationID == input$procstationname)]
       )
-      print(storestationid())
+      
       #Logger Model
       storeloggermodel(
         loggerfiledefs()$Logger_Model[which(loggerfiledefs()$ModelID == input$procmodel)]
       )
-      print(storeloggermodel())
+      
       #Latitude
       storelat(
         input$lat
       )
-      print(storelat())
+      
       #Longitude
       storelon(
         input$lon
       )
-      print(storelon())
+      
       #User
       storeuser(
         input$username
       )
-      print(storeuser())
+      
       #Deploy Count
       storedepcount(
         input$deploynum
       )
-      print(storedepcount())
       
       ##Data QC and Processing
       #Table with information about the uploaded data
@@ -364,6 +379,7 @@ observeEvent(
       progvaltotal = 75 / (2 * length(datapaths))
       progval = 5
       #Iterates through the uploaded files, reformats them and runs QC
+      
       for (j in 1:length(datapaths)){
         #Format input csv name
         inputname = as.character(filetable$name[j])
@@ -435,7 +451,7 @@ observeEvent(
           status = "success",
           title = paste("Compiling and formatting QCed data for",inputname)
         )
-        print(1)
+        
         #Run compileQCdata
         compiledata = compileQCdata(
           qcinfo = qcinfo,
@@ -457,11 +473,11 @@ observeEvent(
             status = "success",
             title = paste("Saving Metadata")
           )
-          print(2)
+          
           #Create random deployid
           deployidcreate = random_id(n = 1,bytes = 16)
           deployid(deployidcreate)
-          print(3)
+          
           ##Update tables
           #Load tables
           updateproclogs = processinglogs()
@@ -472,18 +488,18 @@ observeEvent(
           updateproclogs$DeployID[which(updateproclogs$StationID == input$procstationname & 
                                           updateproclogs$ModelID == input$procmodel & 
                                           is.na(updateproclogs$Processed))] = deployid()
-          print(4)
+          
           #Update the depths table processed date
           if (turnoffprocessupdate == FALSE){
             updateproclogs$Processed[which(updateproclogs$StationID == input$procstationname &
                                           updateproclogs$ModelID == input$procmodel & is.na(updateproclogs$Processed))] = Sys.Date()
           }
           processinglogs(updateproclogs)
-          print(5)
+          
           #Update deploy table
           deployaddrows = NULL
           for (k in names(compiledata)){
-            print("x")
+            
             selectunit = unique(qctable$Units[which(qctable$AppID == input$procwaterbody & qctable$Logger_Type == k)])
             selectunit = selectunit[!is.na(selectunit)]
             
@@ -505,11 +521,11 @@ observeEvent(
               "Processedby" = storeuser(),
               stringsAsFactors = FALSE
             )
-            print("y")
+            
             deployaddrows = rbind(deployaddrows,deployaddrow)
           }
           deployadd = rbind(deployadd,deployaddrows)
-          print(6)
+
           deploylogs(deployadd)
           
           #Update stations table
