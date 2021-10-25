@@ -5,6 +5,8 @@
 #Developed by: Tim Martin
 #Contact: tim.martin@state.mn.us
 
+
+
 library(shiny)
 library(shinydashboard)
 # library(shinydashboardPlus)
@@ -23,6 +25,7 @@ library(DT)
 library(ids)
 library(lubridate)
 library(zip)
+library(stringi)
 source("functions/dashboard.R")
 options(scipen = 999)
 baseconfigversion = 0.5
