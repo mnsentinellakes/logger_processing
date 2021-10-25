@@ -48,7 +48,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   #Select which fields should be included
   loggerfields = loggerfields[which(loggerfields$ModelID == loggermodel),]
   timezone = loggerfields$TZ
-  print(loggerfields)
+  
   #Select datetime fields
   datetimefields = Filter(function(x)!all(is.na(x)),loggerfields[,2:4])
   datetimefieldnames = data.frame("qcfield"=names(datetimefields),"datafield"=unname(unlist(datetimefields[1,])),stringsAsFactors = FALSE)
@@ -249,6 +249,7 @@ compileQCdata = function(qcinfo,depthstable){
   
   # save(datalist,file = "C:/Projects/Shiny_App_Development/Logger_Processing/Test/datalisttest.RDATA")
   return(finaloutput)
+  gc()
 }
 
 #Create Reactive Value for VisQCdata step
