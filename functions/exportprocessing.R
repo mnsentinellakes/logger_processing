@@ -70,9 +70,10 @@ observeEvent(
     #Format Date Fields
     #Set TZ
     startfields[,2] = with_tz(
-      time = startfields[2],
+      time = startfields[,2],
       tzone = exportsettings$TZ
     )
+    print(paste("y",startfields[1,2]))
     #Split or separate dates
     if (exportsettings$DateTimeSep == "Combined"){
       names(startfields)[2] = exportsettings$Date_Time
@@ -399,7 +400,6 @@ observeEvent(
         origdataselect = origdataselect[which(origdataselect$FlagVis != 'F'),]
         origdataselect = origdataselect[,1:4]
         origdataselect$DateTime = with_tz(origdataselect$DateTime,tzone = sumexportsettings$TZ)
-        
         origz = unique(origdataselect$Z)
   
         sumdataz = NULL
