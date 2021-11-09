@@ -81,6 +81,7 @@ output$finaltable = renderDT(
   ),
   rownames = FALSE,
   extensions = 'Responsive',{
+    
     if (!is.null(finaldata())){
       finaldatatable = finaldata()
       
