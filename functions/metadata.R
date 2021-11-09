@@ -2,13 +2,13 @@
 buildmeta = function(programid,appid,stationid,deployid,modelid,programs,programwbs,wbnames,stations,logfiledefs,deploylogs,qcconfig,export){
   
   #Program Name
-  progname = programs$Program_Name[which(programs$ProgramID == programid)]
+  progname = storeprogram()
   
   #WaterbodyID
-  wbid = programwbs$ProgramWaterbodyID[which(programwbs$AppID == appid)]
+  wbid = storewbid()
   
   #Waterbody Name
-  wbname = wbnames$Waterbody_Name[which(wbnames$AppID == appid)]
+  wbname = storewbname()
   
   #Waterbody Type
   wbtype = programwbs$WB_Type[which(programwbs$AppID == appid)]
@@ -17,18 +17,18 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
   if (is.na(stations$ProgramStationID[which(stations$StationID == stationid)])){
     statid = NA
   }else{
-    statid = stations$ProgramStationID[which(stations$StationID == stationid)]
+    statid = storestationid()
   }
   
   #Station Name
   if (is.na(stations$Station_Name[which(stations$StationID == stationid)])){
     statname = NA
   }else{
-    statname = stations$Station_Name[which(stations$StationID == stationid)]
+    statname = storestationname()
   }
   
   #Model Name
-  modname = logfiledefs$Logger_Model[which(logfiledefs$ModelID == modelid)]
+  modname = storeloggermodel()
   
   #Logger Types
   logtypes = paste(unique(deploylogs$Logger_Type[which(deploylogs$DeployID == deployid)]),collapse = ",")
@@ -63,7 +63,7 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
   }
   
   #Deployment Count
-  deploycount = unique(deploylogs$Logger_Count[which(deploylogs$DeployID == deployid)])
+  deploycount = storedepcount()
   
   #Process Date
   procdate = unique(deploylogs$ProcessedDate[which(deploylogs$DeployID == deployid)])
@@ -72,7 +72,7 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
   if (unique(deploylogs$Processedby[which(deploylogs$DeployID == deployid)]) == ""){
     user = NA
   }else{
-    user = unique(deploylogs$Processedby[which(deploylogs$DeployID == deployid)])
+    user = storeuser()
   }
   
   metadataframe = data.frame(
