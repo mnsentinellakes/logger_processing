@@ -14,6 +14,7 @@ library(devtools)
 library(ContDataQC)
 library(shinyjs)
 library(shinyWidgets)
+library(shinyvalidate)
 library(dplyr)
 library(ggplot2)
 library(plotly)
@@ -28,7 +29,7 @@ library(zip)
 library(stringi)
 source("functions/dashboard.R")
 options(scipen = 999)
-baseconfigversion = 0.5
+baseconfigversion = 0.9
 # function definitions are located in the dashboard.R file
 ui <- dashboardPage(
     header = dashboardHeader(
@@ -51,6 +52,9 @@ server <- function(input,output,session) {
     #Code for about page
     source("functions/about.R",local = TRUE)$value
     
+    #code for validation of inputs
+    source("functions/validation.R", local = TRUE)$value
+    
     #Code for loading baseconfig data, holding all metadata and configuration data
     source("functions/baseconfigload.R",local = TRUE)$value
     
@@ -58,6 +62,7 @@ server <- function(input,output,session) {
     source("functions/qcconfig.R",local = TRUE)$value
     
     #Code for qc values update
+    
     source("functions/qcvalues.R",local = TRUE)$value
     
     #Code for program management
