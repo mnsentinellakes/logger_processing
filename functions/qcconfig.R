@@ -370,15 +370,13 @@ observe({
   
   qclevels = qc_config()
   qclevels = qclevels[which(qclevels$AppID == input$selectedwb & qclevels$Logger_Type == input$loggerconfigselect),]
-  
-  if (any(is.na(unique(qclevels$Level)))){
-    levelcounter(1)
-  }else{
-    if (input$addlevel == 0 & input$removelevel == 0){
+  print(qclevels)
+
       lvlcount = max(unique(qclevels$Level))
+      print(lvlcount)
       levelcounter(lvlcount)
-    }
-  }
+  
+  print(levelcounter)
 })
 
 observeEvent(
@@ -447,6 +445,9 @@ observeEvent(
       qcconfigadd = rbind(qcconfigadd,qcconfiglevel4)
     }
     row.names(qcconfigadd) = NULL
+    
+    print(qcconfigadd)
+    
     qc_config(qcconfigadd)
     updatebaseconfig()
   }
@@ -489,6 +490,8 @@ observeEvent(
     
     row.names(qcconfigremove) = NULL
     
+    print(qcconfigremove)
+    
     qc_config(qcconfigremove)
     updatebaseconfig()
   }
@@ -516,6 +519,7 @@ output$qcleveleditorUI = renderUI({
   levelsqc = levelsqc[which(levelsqc$AppID == input$selectedwb & levelsqc$Logger_Type == input$loggerconfigselect),]
   
   tagList(
+    tags$br(),
     fluidRow(
       column(
         width = 2,
@@ -532,6 +536,7 @@ output$qcleveleditorUI = renderUI({
         width = 4
       )
     ),
+    tags$hr(),
     fluidRow(
       column(
         width = 2
