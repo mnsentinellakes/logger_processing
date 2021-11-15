@@ -370,13 +370,9 @@ observe({
   
   qclevels = qc_config()
   qclevels = qclevels[which(qclevels$AppID == input$selectedwb & qclevels$Logger_Type == input$loggerconfigselect),]
-  print(qclevels)
-
-      lvlcount = max(unique(qclevels$Level))
-      print(lvlcount)
-      levelcounter(lvlcount)
   
-  print(levelcounter)
+  lvlcount = max(unique(qclevels$Level))
+  levelcounter(lvlcount)
 })
 
 observeEvent(
@@ -446,8 +442,6 @@ observeEvent(
     }
     row.names(qcconfigadd) = NULL
     
-    print(qcconfigadd)
-    
     qc_config(qcconfigadd)
     updatebaseconfig()
   }
@@ -489,8 +483,6 @@ observeEvent(
     qcconfigremove = qcconfigremove[-rmrows,]
     
     row.names(qcconfigremove) = NULL
-    
-    print(qcconfigremove)
     
     qc_config(qcconfigremove)
     updatebaseconfig()
