@@ -131,7 +131,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     }else{
       sendSweetAlert(
         session = session,
-        title = "Logger yypes not in file",
+        title = "Logger types not in file",
         text = "Please ensure the correct logger model is selected",
         type = "error"
       )
@@ -153,9 +153,13 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
       rangelow = unique(selectqcconfig$Z_1[which(selectqcconfig$Logger_Type == i & selectqcconfig$Level == j)])
       rangehigh = unique(selectqcconfig$Z_2[which(selectqcconfig$Logger_Type == i & selectqcconfig$Level == j)])
       
-      snlevelsrow = data.frame("sn" = depthstable$UnitID[which(as.numeric(depthstable$Z) >= rangelow & as.numeric(depthstable$Z) < rangehigh)],"logger_type" = i,"level" = j)
-      snlevels = rbind(snlevels,snlevelsrow)
-      
+      snselect = depthstable$UnitID[which(as.numeric(depthstable$Z) >= rangelow & as.numeric(depthstable$Z) < rangehigh)]
+      if (length(snselect) > 0){
+        
+        snlevelsrow = data.frame("sn" = snselect,"logger_type" = i,"level" = j)
+        print(snlevelsrow)
+        snlevels = rbind(snlevels,snlevelsrow)
+      }
     }
   }
   
