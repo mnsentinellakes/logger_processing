@@ -43,7 +43,6 @@ output$pwlmUI = renderUI({
 #Create a vector of AppIDS that are in the selected Program
 procprogramappids = reactive({
   programwbschoice = programwbs()
-  print(input$procprogram)
   programwbschoice = programwbschoice$AppID[which(programwbschoice$ProgramID == input$procprogram)]
   return(programwbschoice)
 })
@@ -124,18 +123,21 @@ deploycounter = reactive({
   deployidselect = processinglogs()
   deploycountdata = deploylogs()
   
+  #Ensure there are processinglogs data
   if (nrow(deployidselect) > 0){
-    
-    
+    #Check if all DeployIDs are NA or not
     if (all(is.na(deployidselect$DeployID))){
       deploycountdata = 1
+    # If DeployID contains non-NA values
     }else{
       deployidselect = unique(deployidselect$DeployID[which(deployidselect$StationID == input$procstationname & 
                                                           deployidselect$ModelID == input$procmodel)])
-      
       if (length(deployidselect) > 0){
-        
+        if (any(!is.na(deployidselect))){
         deploycountdata = as.numeric(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)],na.rm = TRUE)) + 1
+        }else{
+          deploycountdata = 1
+        }
       }else{
         deploycountdata = 1
       }
@@ -144,9 +146,9 @@ deploycounter = reactive({
     deploycountdata = 1
   }
   
-  if (is.na(deploycountdata)){
-    deploycountdata = 1
-  }
+  # if (is.na(deploycountdata)){
+  #   deploycountdata = 1
+  # }
   
   return(deploycountdata)
 })
@@ -154,7 +156,6 @@ deploycounter = reactive({
 output$procmetadataUI = renderUI({
   coords = coordselect()
   deploynumber = deploycounter()
-  
   tagList(
     fluidRow(
       column(
