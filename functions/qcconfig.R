@@ -81,7 +81,14 @@ output$loggerconfigselectUI = renderUI({
     ),
     column(
       width = 2,
-      tags$b("Units")
+      tags$table(
+        tags$tr(
+          tags$td(
+            style = "vertical-align:center; padding-top:6px;",
+            HTML("<font size=3><b>Units</font></b>")
+          )
+        )
+      )
     ),
     column(
       width = 4,
@@ -90,6 +97,7 @@ output$loggerconfigselectUI = renderUI({
   )
 })
 
+#Data Frame of valid units for each parameter
 loggerunits = data.frame(
   "Logger_Type" = c("AirBP","AirBP","AirBP","AirBP","AirBP","AirBP","WaterP","WaterP","WaterP","WaterP","WaterP","WaterP","AirTemp",
                     "AirTemp","WaterTemp","WaterTemp","Chlorophylla","Chlorophylla","Chlorophylla","DO","DO","DO","Discharge","Discharge",
@@ -99,7 +107,7 @@ loggerunits = data.frame(
   stringsAsFactors = FALSE
 )
 
-
+#function to convert between units
 loggerunitsconversion = function(qcvalue,Logger_Type,startunit,endunit){
   outputvalue = NA
   if (Logger_Type == "AirBP" | Logger_Type == "WaterP"){
@@ -310,7 +318,7 @@ loggerunitsconversion = function(qcvalue,Logger_Type,startunit,endunit){
 output$loggerunitselectUI = renderUI({
   logunitselection = loggerunits$Unit[which(loggerunits$Logger_Type == input$loggerconfigselect)]
   
-  qcvalues=wbqcvalues()
+  qcvalues = wbqcvalues()
   qcunit = unique(qcvalues$Units[which(qcvalues$QC_Metric == "Gross.Fail.Hi" & qcvalues$Logger_Type == input$loggerconfigselect)])
   
   pickerInput(
@@ -320,6 +328,757 @@ output$loggerunitselectUI = renderUI({
     selected = qcunit
   )
 })
+
+#Number of QC levels
+output$loggerlevelsUI = renderUI({
+  fluidRow(
+    column(
+      width = 6,
+      actionBttn(
+        inputId = "addlevel",
+        label = "Add Level",
+        style = "fill",
+        color = "success",
+        size = "md",
+        icon = icon("plus")
+      )
+    ),
+    column(
+      width = 6,
+    actionBttn(
+      inputId = "removelevel",
+      label = "Remove Level",
+      style = "fill",
+      color = "danger",
+      size = "md",
+      icon = icon("minus")
+    )
+    )
+  )
+})
+
+
+#QC Level Counter
+levelcounter = reactiveVal()
+observe({
+  
+  validate(
+    need(qc_config(),"Loading..."),
+    need(input$selectedwb,"Loading..."),
+    need(input$loggerconfigselect,"Loading...")
+  )
+  
+  qclevels = qc_config()
+  qclevels = qclevels[which(qclevels$AppID == input$selectedwb & qclevels$Logger_Type == input$loggerconfigselect),]
+  
+  lvlcount = max(unique(qclevels$Level))
+  levelcounter(lvlcount)
+})
+
+observeEvent(
+  input$addlevel,
+  {
+    if (levelcounter() + 1 != 6){
+      lvlup = levelcounter() + 1
+      levelcounter(lvlup)
+      
+      return(levelcounter)
+    }
+  }
+)
+
+observeEvent(
+  input$removelevel,
+  {
+    
+    if (levelcounter() - 1 != 0){
+      lvldwn = levelcounter() - 1
+    
+      levelcounter(lvldwn)
+    }
+  }
+)
+
+#Add rows to qc_config
+observeEvent(
+  input$addlevel,
+  {
+    validate(
+      need(input$selectedwb,"Loading..."),
+      need(input$loggerconfigselect,"Loading..."),
+      need(levelcounter(),"Loading...")
+    )
+    
+    qcconfigadd = qc_config()
+    
+    qcconfigaddnew = qcconfigadd[which(qcconfigadd$AppID == input$selectedwb & qcconfigadd$Logger_Type == input$loggerconfigselect),]
+    
+    if (levelcounter() == 2){
+      qcconfiglevel1 = qcconfigaddnew[which(qcconfigaddnew$Level == 1),]
+      qcconfiglevel1$Level = 2
+      
+      qcconfigadd = rbind(qcconfigadd,qcconfiglevel1)
+    }
+    
+    if (levelcounter() == 3){
+      qcconfiglevel2 = qcconfigaddnew[which(qcconfigaddnew$Level == 2),]
+      qcconfiglevel2$Level = 3
+      
+      qcconfigadd = rbind(qcconfigadd,qcconfiglevel2)
+    }
+    
+    if (levelcounter() == 4){
+      qcconfiglevel3 = qcconfigaddnew[which(qcconfigaddnew$Level == 3),]
+      qcconfiglevel3$Level = 4
+      
+      qcconfigadd = rbind(qcconfigadd,qcconfiglevel3)
+    }
+    
+    if (levelcounter() == 5){
+      qcconfiglevel4 = qcconfigaddnew[which(qcconfigaddnew$Level == 4),]
+      qcconfiglevel4$Level = 5
+      
+      qcconfigadd = rbind(qcconfigadd,qcconfiglevel4)
+    }
+    row.names(qcconfigadd) = NULL
+    
+    qc_config(qcconfigadd)
+    updatebaseconfig()
+  }
+)
+
+#Remove rows from qc_config
+observeEvent(
+  input$removelevel,
+  {
+    qcconfigremove = qc_config()
+    
+    row.names(qcconfigremove) = NULL
+    
+    rmrows = NULL
+    
+    # if (levelcounter() == 5){
+    #   rmrows = row.names(qcconfigremove[which(qcconfigremove$AppID == input$selectedwb & qcconfigremove$Logger_Type == input$loggerconfigselect & qcconfigremove$Level < 5),])
+    # }
+    
+    if (levelcounter() == 4){
+      rmrows = c(row.names(qcconfigremove[which(qcconfigremove$AppID == input$selectedwb & qcconfigremove$Logger_Type == input$loggerconfigselect & qcconfigremove$Level == 5),]),rmrows)
+      
+    }
+    
+    if (levelcounter() == 3){
+      rmrows = c(row.names(qcconfigremove[which(qcconfigremove$AppID == input$selectedwb & qcconfigremove$Logger_Type == input$loggerconfigselect & qcconfigremove$Level >= 4),]),rmrows)
+    }
+    
+    
+    if (levelcounter() == 2){
+      rmrows = c(row.names(qcconfigremove[which(qcconfigremove$AppID == input$selectedwb & qcconfigremove$Logger_Type == input$loggerconfigselect & qcconfigremove$Level >= 3),]),rmrows)
+    }
+    
+    if (levelcounter() == 1){
+      rmrows = c(row.names(qcconfigremove[which(qcconfigremove$AppID == input$selectedwb & qcconfigremove$Logger_Type == input$loggerconfigselect & qcconfigremove$Level >= 2),]),rmrows)
+    }
+    rmrows = sort(as.numeric(rmrows))
+    
+    qcconfigremove = qcconfigremove[-rmrows,]
+    
+    row.names(qcconfigremove) = NULL
+    
+    qc_config(qcconfigremove)
+    updatebaseconfig()
+  }
+)
+
+#Function to determine the color of the level select buttons
+levelselectbttnclr = function(level){
+  if (levelselect() == level){
+    return("success")
+  }else{
+    return("warning")
+  }
+  
+}
+
+#UI for editing QC Levels, includes level 1 low UI
+output$qcleveleditorUI = renderUI({
+  
+  validate(
+    need(input$selectedwb,"Loading"),
+    need(input$loggerconfigselect,"Loading..."),
+    need(!is.null(levelcounter()),"Loading...")
+  )
+  levelsqc = qc_config()
+  levelsqc = levelsqc[which(levelsqc$AppID == input$selectedwb & levelsqc$Logger_Type == input$loggerconfigselect),]
+  
+  tagList(
+    tags$br(),
+    fluidRow(
+      column(
+        width = 2,
+        style = "vertical-align:center; padding-top:6px;",
+        HTML("<font size=5>Level</font>")
+        
+      ),
+      column(
+        width = 6,
+        style = "vertical-align:center; text-align:center; padding-top:6px;",
+        HTML("<font size=5>Range</font>")
+      ),
+      column(
+        width = 4
+      )
+    ),
+    tags$hr(),
+    fluidRow(
+      column(
+        width = 2
+      ),
+      column(
+        width = 3,
+        style = "vertical-align:center; text-align:center; padding-top:6px;",
+        HTML("<font size=4><b>Low</b></font>")
+      ),
+      column(
+        width = 3,
+        style = "vertical-align:center; text-align:center; padding-top:6px;",
+        HTML("<font size=4><b>High</b></font>")
+      ),
+      column(
+        width = 4
+      )
+    ),
+    fluidRow(
+      column(
+        width = 2,
+        style = "vertical-align:center; text-align:center; padding-top:6px;",
+        HTML("<font size=4><b>1</b></font>")
+      ),
+      column(
+        width = 3,
+        isolate(
+          numericInput(
+            inputId = "lowlevel1",
+            label = NULL,
+            value = unique(levelsqc$Z_1[which(levelsqc$Level == 1)]),
+            step = 0.01
+          )
+        )
+      ),
+      column(
+        width = 3,
+        uiOutput("leveleditor1highUI")
+      ),
+      column(
+        width = 4,
+        actionBttn(
+          inputId = "selectlvl1",
+          label = "Select",
+          style = "fill",
+          color = levelselectbttnclr(1)
+        )
+      )
+    ),
+    uiOutput("leveleditor2UI"),
+    uiOutput("leveleditor3UI"),
+    uiOutput("leveleditor4UI"),
+    uiOutput("leveleditor5UI")
+  )
+})
+
+#Function for updating qc_config() based on inputs
+updatelvlranges = function(level,rangeside,rangeinput){
+  lvlrngqcconfig = qc_config()
+  if (rangeside == "High"){
+    lvlrngqcconfig$Z_2[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)] = rangeinput
+  }else if (rangeside == "Low"){
+    lvlrngqcconfig$Z_1[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)] = rangeinput
+  }
+  qc_config(lvlrngqcconfig)
+  updatebaseconfig()
+}
+
+#Update Low Level 1 in qc_config()
+observeEvent(
+  input$lowlevel1,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$lowlevel1,"Loading")
+    )
+    updatelvlranges(
+      level = 1,
+      rangeside = "Low",
+      rangeinput = input$lowlevel1
+    )
+  }
+)
+
+#Edit level 1 high UI
+output$leveleditor1highUI = renderUI({
+  validate(
+    need(qc_config(),"Loading...")
+  )
+  levelsqc = qc_config()
+  levelsqc = levelsqc[which(levelsqc$AppID == input$selectedwb & levelsqc$Logger_Type == input$loggerconfigselect),]
+  
+  isolate(
+    numericInput(
+      inputId = "highlevel1",
+      label = NULL,
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 1)]),
+      step = 0.01
+    )
+  )
+})
+
+#Update High Level 1 in qc_config()
+observeEvent(
+  input$highlevel1,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$highlevel1,"Loading")
+    )
+    updatelvlranges(
+      level = 1,
+      rangeside = "High",
+      rangeinput = input$highlevel1
+    )
+  }
+)
+
+#Edit level 2 low UI
+output$leveleditor2UI = renderUI({
+  levels2qc = qc_config()
+  levels2qc = levels2qc[which(levels2qc$AppID == input$selectedwb & levels2qc$Logger_Type == input$loggerconfigselect),]
+  
+  if (levelcounter() > 1){
+    fluidRow(
+      column(
+        width = 2,
+        style = "vertical-align:center; text-align:center; padding-top:6px;",
+        HTML("<font size=4><b>2</b></font>")
+      ),
+      column(
+        width = 3,
+        isolate(
+          numericInput(
+            inputId = "lowlevel2",
+            label = NULL,
+            value = unique(levels2qc$Z_1[which(levels2qc$Level == 2)]),
+            step = 0.01
+          )
+        )
+      ),
+      column(
+        width = 3,
+        uiOutput("leveleditor2highUI")
+
+      ),
+      column(
+        width = 4,
+        actionBttn(
+          inputId = "selectlvl2",
+          label = "Select",
+          style = "fill",
+          color = levelselectbttnclr(2)
+        )
+      )
+    )
+  }
+})
+
+#Update Low Level 2 in qc_config()
+observeEvent(
+  input$lowlevel2,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$lowlevel2,"Loading")
+    )
+    updatelvlranges(
+      level = 2,
+      rangeside = "Low",
+      rangeinput = input$lowlevel2
+    )
+  }
+)
+
+#Edit level 2 high UI
+output$leveleditor2highUI = renderUI({
+  validate(
+    need(qc_config(),"Loading...")
+  )
+  levelsqc = qc_config()
+  levelsqc = levelsqc[which(levelsqc$AppID == input$selectedwb & levelsqc$Logger_Type == input$loggerconfigselect),]
+  
+  isolate(
+    numericInput(
+      inputId = "highlevel2",
+      label = NULL,
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 2)]),
+      step = 0.01
+    )
+  )
+})
+
+#Update High Level 2 in qc_config()
+observeEvent(
+  input$highlevel2,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$highlevel2,"Loading")
+    )
+    updatelvlranges(
+      level = 2,
+      rangeside = "High",
+      rangeinput = input$highlevel2
+    )
+  }
+)
+
+#Edit level 3 low UI
+output$leveleditor3UI = renderUI({
+  levels3qc = qc_config()
+  levels3qc = levels3qc[which(levels3qc$AppID == input$selectedwb & levels3qc$Logger_Type == input$loggerconfigselect),]
+  
+  if (levelcounter() > 2){
+    fluidRow(
+      column(
+        width = 2,
+        style = "vertical-align:center; text-align:center; padding-top:6px;",
+        HTML("<font size=4><b>3</b></font>")
+      ),
+      column(
+        width = 3,
+        isolate(
+          numericInput(
+            inputId = "lowlevel3",
+            label = NULL,
+            value = unique(levels3qc$Z_1[which(levels3qc$Level == 3)]),
+            step = 0.01
+          )
+        )
+      ),
+      column(
+        width = 3,
+        uiOutput("leveleditor3highUI")
+      ),
+      column(
+        width = 4,
+        actionBttn(
+          inputId = "selectlvl3",
+          label = "Select",
+          style = "fill",
+          color = levelselectbttnclr(3)
+        )
+      )
+    )
+  }
+})
+
+#Update Low Level 3 in qc_config()
+observeEvent(
+  input$lowlevel3,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$lowlevel3,"Loading")
+    )
+    updatelvlranges(
+      level = 3,
+      rangeside = "Low",
+      rangeinput = input$lowlevel3
+    )
+  }
+)
+
+#Edit level 3 high UI
+output$leveleditor3highUI = renderUI({
+  validate(
+    need(qc_config(),"Loading...")
+  )
+  levelsqc = qc_config()
+  levelsqc = levelsqc[which(levelsqc$AppID == input$selectedwb & levelsqc$Logger_Type == input$loggerconfigselect),]
+  
+  isolate(
+    numericInput(
+      inputId = "highlevel3",
+      label = NULL,
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 3)]),
+      step = 0.01
+    )
+  )
+})
+
+#Update High Level 3 in qc_config()
+observeEvent(
+  input$highlevel3,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$highlevel3,"Loading")
+    )
+    updatelvlranges(
+      level = 3,
+      rangeside = "High",
+      rangeinput = input$highlevel3
+    )
+  }
+)
+
+#Edit level 4 low UI
+output$leveleditor4UI = renderUI({
+  levels4qc = qc_config()
+  levels4qc = levels4qc[which(levels4qc$AppID == input$selectedwb & levels4qc$Logger_Type == input$loggerconfigselect),]
+  
+  if (levelcounter() > 3){
+    fluidRow(
+      column(
+        width = 2,
+        style = "vertical-align:center; text-align:center; padding-top:6px;",
+        HTML("<font size=4><b>4</b></font>")
+      ),
+      column(
+        width = 3,
+        isolate(
+          numericInput(
+            inputId = "lowlevel4",
+            label = NULL,
+            value = unique(levels4qc$Z_1[which(levels4qc$Level == 4)]),
+            step = 0.01
+          )
+        )
+      ),
+      column(
+        width = 3,
+        uiOutput("leveleditor4highUI")
+      ),
+      column(
+        width = 4,        
+        actionBttn(
+          inputId = "selectlvl4",
+          label = "Select",
+          style = "fill",
+          color = levelselectbttnclr(4)
+        )
+      )
+    )
+  }
+})
+
+#Update Low Level 4 in qc_config()
+observeEvent(
+  input$lowlevel4,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$lowlevel4,"Loading")
+    )
+    updatelvlranges(
+      level = 4,
+      rangeside = "Low",
+      rangeinput = input$lowlevel4
+    )
+  }
+)
+
+#Edit level 4 high UI
+output$leveleditor4highUI = renderUI({
+  validate(
+    need(qc_config(),"Loading...")
+  )
+  levelsqc = qc_config()
+  levelsqc = levelsqc[which(levelsqc$AppID == input$selectedwb & levelsqc$Logger_Type == input$loggerconfigselect),]
+  
+  isolate(
+    numericInput(
+      inputId = "highlevel4",
+      label = NULL,
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 4)]),
+      step = 0.01
+    )
+  )
+})
+
+#Update High Level 4 in qc_config()
+observeEvent(
+  input$highlevel4,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$highlevel4,"Loading")
+    )
+    updatelvlranges(
+      level = 4,
+      rangeside = "High",
+      rangeinput = input$highlevel4
+    )
+  }
+)
+
+#Edit level 5 low UI
+output$leveleditor5UI = renderUI({
+  levels5qc = qc_config()
+  levels5qc = levels5qc[which(levels5qc$AppID == input$selectedwb & levels5qc$Logger_Type == input$loggerconfigselect),]
+  
+  if (levelcounter() > 4){
+    fluidRow(
+      column(
+        width = 2,
+        style = "vertical-align:center; text-align:center; padding-top:6px;",
+        HTML("<font size=4><b>5</b></font>")
+      ),
+
+      column(
+        width = 3,
+        isolate(
+          numericInput(
+            inputId = "lowlevel5",
+            label = NULL,
+            value = unique(levels5qc$Z_1[which(levels5qc$Level == 5)]),
+            step = 0.01
+          )
+        )
+      ),
+      column(
+        width = 3,
+        uiOutput("leveleditor5highUI")
+      ),
+      column(
+        width = 4,
+        actionBttn(
+          inputId = "selectlvl5",
+          label = "Select",
+          style = "fill",
+          color = levelselectbttnclr(5)
+        )
+      )
+    )
+  }
+})
+
+#Update Low Level 5 in qc_config()
+observeEvent(
+  input$lowlevel5,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$lowlevel5,"Loading")
+    )
+    updatelvlranges(
+      level = 5,
+      rangeside = "Low",
+      rangeinput = input$lowlevel5
+    )
+  }
+)
+
+#Edit level 5 high UI
+output$leveleditor5highUI = renderUI({
+  validate(
+    need(qc_config(),"Loading...")
+  )
+  levelsqc = qc_config()
+  levelsqc = levelsqc[which(levelsqc$AppID == input$selectedwb & levelsqc$Logger_Type == input$loggerconfigselect),]
+  
+  isolate(
+    numericInput(
+      inputId = "highlevel5",
+      label = NULL,
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 5)]),
+      step = 0.01
+    )
+  )
+})
+
+#Update High Level 5 in qc_config()
+observeEvent(
+  input$highlevel5,
+  {
+    validate(
+      need(input$selectedwb,"Loading"),
+      need(input$loggerconfigselect,"Loading"),
+      need(input$highlevel5,"Loading")
+    )
+    updatelvlranges(
+      level = 5,
+      rangeside = "High",
+      rangeinput = input$highlevel5
+    )
+  }
+)
+
+#Reactive Value to determine which level QC settings are displayed in the central box
+levelselect = reactiveVal(1)
+
+#Select Level 1
+observeEvent(
+  input$selectlvl1,
+  {
+    if (levelcounter() >= 1){
+      levelselect(1)
+    }
+  }
+)
+
+#Select Level 2
+observeEvent(
+  input$selectlvl2,
+  {
+    if (levelcounter() >= 2){
+      levelselect(2)
+    }else{
+      levelselect(1)
+    }
+  }
+)
+
+#Select Level 3
+observeEvent(
+  input$selectlvl3,
+  {
+    if (levelcounter() >= 3){
+      levelselect(3)
+    }else{
+      levelselect(2)
+    }
+  }
+)
+
+#Select Level 4
+observeEvent(
+  input$selectlvl4,
+  {
+    if (levelcounter() >= 4){
+      levelselect(4)
+    }else{
+      levelselect(3)
+    }
+  }
+)
+
+#Select Level 5
+observeEvent(
+  input$selectlvl5,
+  {
+    if (levelcounter() == 5){
+      levelselect(5)
+    }else{
+      levelselect(4)
+    }
+  }
+)
 
 #RenderUI with QC settings
 output$configUI = renderUI({
@@ -401,8 +1160,12 @@ output$configUI = renderUI({
 
 #Select values for AppID
 wbqcvalues = reactive({
+  validate(
+    need(input$selectedwb,"Loading")
+  )
   qcvaluesselect = qc_config()
-  qcvaluesselect = qcvaluesselect[which(qcvaluesselect$AppID == input$selectedwb),]
+  qcvaluesselect = qcvaluesselect[which(qcvaluesselect$AppID == input$selectedwb & qcvaluesselect$Level == levelselect()),]
+  # qcvaluesselect = qcvaluesselect[which(qcvaluesselect$AppID == input$selectedwb),]
   return(qcvaluesselect)
 })
 
@@ -2418,267 +3181,267 @@ observeEvent(
     if (input$loggerconfigselect == "AirBP"){
       logger = "AirBP"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$airbpgrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$airbpgrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$airbpgrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$airbpgrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$airbpgrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$airbpgrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$airbpgrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo & updateqcconfig$Level == levelselect()")] = input$airbpgrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$airbpspikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$airbpspikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$airbpspikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$airbpspikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$airbprocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$airbprocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$airbprocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$airbprocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$airbpflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$airbpflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$airbpflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$airbpflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$airbpflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$airbpflattol
     }else if (input$loggerconfigselect == "AirTemp"){
       logger = "AirTemp"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$airtempgrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$airtempgrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$airtempgrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$airtempgrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$airtempgrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$airtempgrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$airtempgrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$airtempgrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$airtempspikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$airtempspikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$airtempspikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$airtempspikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$airtemprocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$airtemprocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$airtemprocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$airtemprocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$airtempflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$airtempflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$airtempflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$airtempflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$airtempflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$airtempflattol
     }else if (input$loggerconfigselect == "Chlorophylla"){
       logger = "Chlorophylla"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$chlorophyllagrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$chlorophyllagrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$chlorophyllagrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$chlorophyllagrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$chlorophyllagrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$chlorophyllagrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$chlorophyllagrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$chlorophyllagrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$chlorophyllaspikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$chlorophyllaspikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$chlorophyllaspikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$chlorophyllaspikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$chlorophyllarocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$chlorophyllarocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$chlorophyllarocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$chlorophyllarocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$chlorophyllaflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$chlorophyllaflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$chlorophyllaflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$chlorophyllaflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$chlorophyllaflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$chlorophyllaflattol
     }else if (input$loggerconfigselect == "Cond"){
       logger = "Cond"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$condgrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$condgrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$condgrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$condgrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$condgrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$condgrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$condgrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$condgrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$condspikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$condspikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$condspikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$condspikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$condrocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$condrocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$condrocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$condrocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$condflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$condflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$condflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$condflatlow
       #Flat.Tolerance
       updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$condflattol
     }else if (input$loggerconfigselect == "Discharge"){
       logger = "Discharge"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$dischargegrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$dischargegrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$dischargegrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$dischargegrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$dischargegrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$dischargegrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$dischargegrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$dischargegrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$dischargespikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$dischargespikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$dischargespikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$dischargespikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$dischargerocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$dischargerocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$dischargerocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$dischargerocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$dischargeflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$dischargeflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$dischargeflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$dischargeflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$dischargeflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$dischargeflattol
     }else if (input$loggerconfigselect == "DO"){
       logger = "DO"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$dogrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$dogrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$dogrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$dogrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$dogrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$dogrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$dogrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$dogrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$dospikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$dospikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$dospikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$dospikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$dorocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$dorocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$dorocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$dorocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$doflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$doflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$doflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$doflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$doflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$doflattol
     }else if (input$loggerconfigselect == "pH"){
       logger = "pH"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$phgrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$phgrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$phgrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$phgrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$phgrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$phgrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$phgrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$phgrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$phspikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$phspikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$phspikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$phspikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$phrocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$phrocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$phrocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$phrocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$phflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$phflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$phflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$phflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$phflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$phflattol
     }else if (input$loggerconfigselect == "Turbidity"){
       logger = "Turbidity"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$turbiditygrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$turbiditygrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$turbiditygrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$turbiditygrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$turbiditygrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$turbiditygrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$turbiditygrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$turbiditygrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$turbidityspikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$turbidityspikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$turbidityspikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$turbidityspikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$turbidityrocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$turbidityrocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$turbidityrocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$turbidityrocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$turbidityflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$turbidityflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$turbidityflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$turbidityflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$turbidityflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$turbidityflattol
     }else if (input$loggerconfigselect == "WaterLevel"){
       logger = "WaterLevel"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$waterlevelgrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$waterlevelgrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$waterlevelgrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$waterlevelgrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$waterlevelgrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$waterlevelgrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$waterlevelgrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$waterlevelgrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$waterlevelspikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$waterlevelspikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$waterlevelspikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$waterlevelspikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$waterlevelrocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$waterlevelrocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$waterlevelrocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$waterlevelrocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$waterlevelflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$waterlevelflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$waterlevelflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$waterlevelflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$waterlevelflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$waterlevelflattol
     }else if (input$loggerconfigselect == "WaterP"){
       logger = "WaterP"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$waterpgrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$waterpgrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$waterpgrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$waterpgrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$waterpgrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$waterpgrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$waterpgrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$waterpgrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$waterpspikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$waterpspikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$waterpspikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$waterpspikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$waterprocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$waterprocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$waterprocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$waterprocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$waterpflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$waterpflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$waterpflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$waterpflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$waterpflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$waterpflattol
     }else if (input$loggerconfigselect == "WaterTemp"){
       logger = "WaterTemp"
       #Gross.Fail.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi")] = input$watertempgrossmaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Hi" & updateqcconfig$Level == levelselect())] = input$watertempgrossmaxfail
       #Gross.Fail.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo")] = input$watertempgrossminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Fail.Lo" & updateqcconfig$Level == levelselect())] = input$watertempgrossminfail
       #Gross.Suspect.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi")] = input$watertempgrossmaxsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Hi" & updateqcconfig$Level == levelselect())] = input$watertempgrossmaxsusp
       #Gross.Suspect.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo")] = input$watertempgrossminsusp
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Gross.Suspect.Lo" & updateqcconfig$Level == levelselect())] = input$watertempgrossminsusp
       #Spike.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi")] = input$watertempspikemaxfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Hi" & updateqcconfig$Level == levelselect())] = input$watertempspikemaxfail
       #Spike.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo")] = input$watertempspikeminfail
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Spike.Lo" & updateqcconfig$Level == levelselect())] = input$watertempspikeminfail
       #RoC.SD.number
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number")] = input$watertemprocsd
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.number" & updateqcconfig$Level == levelselect())] = input$watertemprocsd
       #RoC.SD.period
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period")] = input$watertemprocperiod
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "RoC.SD.period" & updateqcconfig$Level == levelselect())] = input$watertemprocperiod
       #Flat.Hi
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi")] = input$watertempflathi
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Hi" & updateqcconfig$Level == levelselect())] = input$watertempflathi
       #Flat.Lo
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo")] = input$watertempflatlow
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Lo" & updateqcconfig$Level == levelselect())] = input$watertempflatlow
       #Flat.Tolerance
-      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance")] = input$watertempflattol
+      updateqcconfig$Value[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & updateqcconfig$QC_Metric == "Flat.Tolerance" & updateqcconfig$Level == levelselect())] = input$watertempflattol
     }
     updateqcconfig$Units[which(updateqcconfig$AppID == waterbody & updateqcconfig$Logger_Type == logger & !is.na(updateqcconfig$Units))] = input$loggerunitselect
     
@@ -2714,277 +3477,277 @@ observeEvent(
       logger = "AirBP"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "AirTemp"){
       logger = "AirTemp"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "Chlorophylla"){
       logger = "Chlorophylla"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "Cond"){
       logger = "Cond"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "Discharge"){
       logger = "Discharge"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "DO"){
       logger = "DO"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "pH"){
       logger = "pH"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "Turbidity"){
       logger = "Turbidity"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "WaterLevel"){
       logger = "WaterLevel"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "WaterP"){
       logger = "WaterP"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }else if (input$loggerconfigselect == "WaterTemp"){
       logger = "WaterTemp"
       loggervalues = defaultvalues[which(defaultvalues$Logger_Type == logger),]
       #Gross.Fail.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Hi")]
       #Gross.Fail.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Fail.Lo")]
       #Gross.Suspect.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Suspect.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Hi")]
       #Gross.Suspect.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Gross.Fail.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Gross.Suspect.Lo")]
       #Spike.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Hi")]
       #Spike.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Spike.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Spike.Lo")]
       #RoC.SD.number
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.number" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.number")]
       #RoC.SD.period
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period")] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "RoC.SD.period" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "RoC.SD.period")]
       #Flat.Hi
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Hi" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Hi")]
       #Flat.Lo
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Lo" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Lo")]
       #Flat.Tolerance
-      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance")] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
+      restoredefaultsqc$Value[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & restoredefaultsqc$QC_Metric == "Flat.Tolerance" & restoredefaultsqc$Level == levelselect())] = loggervalues$Value[which(loggervalues$QC_Metric == "Flat.Tolerance")]
     }
     restoredefaultsqc$Units[which(restoredefaultsqc$AppID == waterbody & restoredefaultsqc$Logger_Type == logger & !is.na(restoredefaultsqc$Units))] = selectunit
     
