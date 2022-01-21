@@ -1,19 +1,95 @@
-updateconfigfile = function(qcconfigdata){
+updateconfigfile = function(qcconfigdata,level,loggertype){
 
   qcconfigdata = qcconfigdata[which(qcconfigdata$AppID == input$procwaterbody),]
   
+  #airbp data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "AirBP" & qcconfigdata$Level == level),]) > 0){
+    airbp = qcconfigdata[which(qcconfigdata$Logger_Type == "AirBP" & qcconfigdata$Level == level),]
+  }else{
+    airbp = qcconfigdata[which(qcconfigdata$Logger_Type == "AirBP" & qcconfigdata$Level == 1),]
+  }
+  #airtemp data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "AirTemp" & qcconfigdata$Level == level),]) > 0){
+    airtemp = qcconfigdata[which(qcconfigdata$Logger_Type == "AirTemp" & qcconfigdata$Level == level),]
+  }else{
+    airtemp = qcconfigdata[which(qcconfigdata$Logger_Type == "AirTemp" & qcconfigdata$Level == 1),]
+  }
+  #chlorophylla data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "Chlorophylla" & qcconfigdata$Level == level),]) > 0){
+    chlorophylla = qcconfigdata[which(qcconfigdata$Logger_Type == "Chlorophylla" & qcconfigdata$Level == level),]
+  }else{
+    chlorophylla = qcconfigdata[which(qcconfigdata$Logger_Type == "Chlorophylla" & qcconfigdata$Level == 1),]
+  }
+  #cond data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "Cond" & qcconfigdata$Level == level),]) > 0){
+    cond = qcconfigdata[which(qcconfigdata$Logger_Type == "Cond" & qcconfigdata$Level == level),]
+  }else{
+    cond = qcconfigdata[which(qcconfigdata$Logger_Type == "Cond" & qcconfigdata$Level == 1),]
+  }
+  #discharge data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "Discharge" & qcconfigdata$Level == level),]) > 0){
+    discharge = qcconfigdata[which(qcconfigdata$Logger_Type == "Discharge" & qcconfigdata$Level == level),]
+  }else{
+    discharge = qcconfigdata[which(qcconfigdata$Logger_Type == "Discharge" & qcconfigdata$Level == 1),]
+  }
+  #do data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "DO" & qcconfigdata$Level == level),]) > 0){
+    do = qcconfigdata[which(qcconfigdata$Logger_Type == "DO" & qcconfigdata$Level == level),]
+  }else{
+    do = qcconfigdata[which(qcconfigdata$Logger_Type == "DO" & qcconfigdata$Level == 1),]
+  }
+  #waterlevel data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "WaterLevel" & qcconfigdata$Level == level),]) > 0){
+    waterlevel = qcconfigdata[which(qcconfigdata$Logger_Type == "WaterLevel" & qcconfigdata$Level == level),]
+  }else{
+    waterlevel = qcconfigdata[which(qcconfigdata$Logger_Type == "WaterLevel" & qcconfigdata$Level == 1),]
+  }
+  #ph data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "pH" & qcconfigdata$Level == level),]) > 0){
+    ph = qcconfigdata[which(qcconfigdata$Logger_Type == "pH" & qcconfigdata$Level == level),]
+  }else{
+    ph = qcconfigdata[which(qcconfigdata$Logger_Type == "pH" & qcconfigdata$Level == 1),]
+  }
+  #turbidity data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "Turbidity" & qcconfigdata$Level == level),]) > 0){
+    turbidity = qcconfigdata[which(qcconfigdata$Logger_Type == "Turbidity" & qcconfigdata$Level == level),]
+  }else{
+    turbidity = qcconfigdata[which(qcconfigdata$Logger_Type == "Turbidity" & qcconfigdata$Level == 1),]
+  }
+  #waterp data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "WaterP" & qcconfigdata$Level == level),]) > 0){
+    waterp = qcconfigdata[which(qcconfigdata$Logger_Type == "WaterP" & qcconfigdata$Level == level),]
+  }else{
+    waterp = qcconfigdata[which(qcconfigdata$Logger_Type == "WaterP" & qcconfigdata$Level == 1),]
+  }
+  #watertemp data
+  if (nrow(qcconfigdata[which(qcconfigdata$Logger_Type == "WaterTemp" & qcconfigdata$Level == level),]) > 0){
+    watertemp = qcconfigdata[which(qcconfigdata$Logger_Type == "WaterTemp" & qcconfigdata$Level == level),]
+  }else{
+    watertemp = qcconfigdata[which(qcconfigdata$Logger_Type == "WaterTemp" & qcconfigdata$Level == 1),]
+  }
   
-  grossfailhi = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Hi"),]
-  grossfaillo = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Lo"),]
-  grosssuspecthi = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Hi"),]
-  grosssuspectlo = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Lo"),]
-  spikehi = qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Hi"),]
-  spikelo = qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Lo"),]
-  rocsdnumber = qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.number"),]
-  rocsdperiod = qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.period"),]
-  flathi = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Hi"),]
-  flatlo = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Lo"),]
-  flattolerance = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Tolerance"),]
+  
+  
+  
+  
+  
+  
+  
+  # grossfailhi = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Hi"),]
+  # 
+  # 
+  # 
+  # grossfaillo = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Lo"),]
+  # grosssuspecthi = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Hi"),]
+  # grosssuspectlo = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Lo"),]
+  # spikehi = qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Hi"),]
+  # spikelo = qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Lo"),]
+  # rocsdnumber = qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.number"),]
+  # rocsdperiod = qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.period"),]
+  # flathi = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Hi"),]
+  # flatlo = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Lo"),]
+  # flattolerance = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Tolerance"),]
   
   rowidname = "RowID"
   
@@ -70,47 +146,47 @@ updateconfigfile = function(qcconfigdata){
     #QC Units
     "#QC Units\n",
     "ContData.env$myUnits.AirBP <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "AirBP")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(airbp$Unit[which(airbp$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.AirTemp <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "AirTemp")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(airtemp$Unit[which(airtemp$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.Chlorophylla <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Chlorophylla")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(chlorophylla$Unit[which(chlorophylla$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.Cond <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Cond")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(cond$Unit[which(cond$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.Discharge <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Discharge")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(discharge$Unit[which(discharge$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.DO <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "DO")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(do$Unit[which(do$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.WaterLevel <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterLevel")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(waterlevel$Unit[which(waterlevel$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.pH <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "pH")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(ph$Unit[which(ph$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.Turbidity <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Turbidity")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(turbidity$Unit[which(turbidity$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.WaterP <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterP")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(waterp$Unit[which(waterp$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     
     "ContData.env$myUnits.WaterTemp <- \"",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterTemp")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(watertemp$Unit[which(watertemp$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n\n",
     
     "#--------------------------------------------------------------------\n",
@@ -125,37 +201,37 @@ updateconfigfile = function(qcconfigdata){
     # Parameters as appear in logger files
     "# Parameters as appear in logger files\n",
     "ContData.env$myName.AirBP <- \"AirBP",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "AirBP")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(airbp$Unit[which(airbp$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.AirTemp <- \"AirTemp",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "AirTemp")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(airtemp$Unit[which(airtemp$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.Chlorophylla <- \"Chlorophylla",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Chlorophylla")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(chlorophylla$Unit[which(chlorophylla$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.Cond <- \"Cond",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Cond")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(cond$Unit[which(cond$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.Discharge <- \"Discharge",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Discharge")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(discharge$Unit[which(discharge$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.DO <- \"DO",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "DO")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(do$Unit[which(do$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.WaterLevel <- \"WaterLevel",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterLevel")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(waterlevel$Unit[which(waterlevel$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.pH <- \"pH",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "pH")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(ph$Unit[which(ph$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.Turbidity <- \"Turbidity",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "Turbidity")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(turbidity$Unit[which(turbidity$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.WaterP <- \"WaterP",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterP")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(waterp$Unit[which(waterp$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n",
     "ContData.env$myName.WaterTemp <- \"WaterTemp",gsub(
-      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterTemp")]),perl = TRUE)
+      "Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(watertemp$Unit[which(watertemp$QC_Metric == "Gross.Fail.Hi")]),perl = TRUE)
     ),"\"\n\n",
     
     "#--------------------------------------------------------------------\n",
@@ -163,18 +239,18 @@ updateconfigfile = function(qcconfigdata){
     "#Plot Labels\n",
     "ContData.env$myLab.Date <- \"Date\"\n",
     "ContData.env$myLab.DateTime <- \"Date\"\n",
-    "ContData.env$myLab.AirBP <- \"",paste0("Barometric Pressure, Air (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "AirBP")],")"),"\"\n",
-    "ContData.env$myLab.AirTemp <- \"",paste0("Temperature, Air (deg ",grossfailhi$Unit[which(grossfailhi$Logger_Type == "AirTemp")],")"),"\"\n",
-    "ContData.env$myLab.Chlorophylla <- \"",paste0("Chlorophyll a (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "Chlorophylla")],")"),"\"\n",
-    "ContData.env$myLab.Cond <- \"",paste0("Conductivity (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "Cond")],")"),"\"\n",
-    "ContData.env$myLab.Discharge <- \"",paste0("Discharge (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "Discharge")],")"),"\"\n",
-    "ContData.env$myLab.DO <- \"",paste0("Dissolved Oxygen (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "DO")],")"),"\"\n",
-    "ContData.env$myLab.WaterLevel <- \"",paste0("Gage Height (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterLevel")],")"),"\"\n",
-    "ContData.env$myLab.pH <- \"",paste0("pH (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "pH")],")"),"\"\n",
-    "ContData.env$myLab.Turbidity <- \"",paste0("Turbidity (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "Turbidity")],")"),"\"\n",
-    "ContData.env$myLab.WaterP <- \"",paste0("Pressure, Water (",grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterP")],")"),"\"\n",
-    "ContData.env$myLab.WaterTemp <- \"",paste0("Temperature, Water (deg ",grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterTemp")],")"),"\"\n",
-    "ContData.env$myLab.Temp.BOTH <- \"",paste0("Temperature (deg ",grossfailhi$Unit[which(grossfailhi$Logger_Type == "WaterTemp")],")"),"\"\n\n",
+    "ContData.env$myLab.AirBP <- \"",paste0("Barometric Pressure, Air (",airbp$Unit[which(airbp$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.AirTemp <- \"",paste0("Temperature, Air (deg ",airtemp$Unit[which(airtemp$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.Chlorophylla <- \"",paste0("Chlorophyll a (",chlorophylla$Unit[which(chlorophylla$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.Cond <- \"",paste0("Conductivity (",cond$Unit[which(cond$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.Discharge <- \"",paste0("Discharge (",discharge$Unit[which(discharge$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.DO <- \"",paste0("Dissolved Oxygen (",do$Unit[which(do$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.WaterLevel <- \"",paste0("Gage Height (",waterlevel$Unit[which(waterlevel$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.pH <- \"",paste0("pH (",ph$Unit[which(ph$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.Turbidity <- \"",paste0("Turbidity (",turbidity$Unit[which(turbidity$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.WaterP <- \"",paste0("Pressure, Water (",waterp$Unit[which(waterp$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.WaterTemp <- \"",paste0("Temperature, Water (deg ",watertemp$Unit[which(watertemp$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n",
+    "ContData.env$myLab.Temp.BOTH <- \"",paste0("Temperature (deg ",watertemp$Unit[which(watertemp$QC_Metric == "Gross.Fail.Hi")],")"),"\"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #Discrete Measurements
@@ -346,167 +422,167 @@ updateconfigfile = function(qcconfigdata){
     "#--------------------------------------------------------------------\n",
     #Gross Fail Hi
     "#Gross Fail Hi\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.AirBP <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.AirTemp <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.Chlorophylla <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.Cond <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.Discharge <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.DO <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.WaterLevel <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.pH <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.Turbidity <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.WaterP <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Hi.WaterTemp <- ",grossfailhi$Value[which(grossfailhi$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.Cond <- ",cond$Value[which(cond$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.DO <- ",do$Value[which(do$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.pH <- ",ph$Value[which(ph$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "Gross.Fail.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Hi.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "Gross.Fail.Hi")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #Gross Fail Lo
     "#Gross Fail Lo\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.AirBP <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.AirTemp <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.Chlorophylla <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.Cond <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.Discharge <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.DO <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.WaterLevel <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.pH <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.Turbidity <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.WaterP <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.Gross.Fail.Lo.WaterTemp <- ",grossfaillo$Value[which(grossfaillo$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.Cond <- ",cond$Value[which(cond$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.DO <- ",do$Value[which(do$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.pH <- ",ph$Value[which(ph$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "Gross.Fail.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Fail.Lo.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "Gross.Fail.Lo")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #Gross Suspect Hi
     "#Gross Suspect Hi\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.AirBP <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.AirTemp <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.Chlorophylla <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.Cond <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.Discharge <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.DO <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.WaterLevel <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.pH <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.Turbidity <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.WaterP <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Hi.WaterTemp <- ",grosssuspecthi$Value[which(grosssuspecthi$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.Cond <- ",cond$Value[which(cond$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.DO <- ",do$Value[which(do$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.pH <- ",ph$Value[which(ph$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "Gross.Suspect.Hi")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Hi.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "Gross.Suspect.Hi")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #Gross Suspect Lo
     "#Gross Suspect Lo\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.AirBP <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.AirTemp <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.Chlorophylla <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.Cond <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.Discharge <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.DO <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.WaterLevel <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.pH <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.Turbidity <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.WaterP <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.Gross.Suspect.Lo.WaterTemp <- ",grosssuspectlo$Value[which(grosssuspectlo$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.Cond <- ",cond$Value[which(cond$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.DO <- ",do$Value[which(do$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.pH <- ",ph$Value[which(ph$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "Gross.Suspect.Lo")],"\n",
+    "ContData.env$myThresh.Gross.Suspect.Lo.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "Gross.Suspect.Lo")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #Spike Hi
     "#Spike Hi\n",
-    "ContData.env$myThresh.Spike.Hi.AirBP <- ",spikehi$Value[which(spikehi$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.Spike.Hi.AirTemp <- ",spikehi$Value[which(spikehi$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.Spike.Hi.Chlorophylla <- ",spikehi$Value[which(spikehi$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.Spike.Hi.Cond <- ",spikehi$Value[which(spikehi$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.Spike.Hi.Discharge <- ",spikehi$Value[which(spikehi$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.Spike.Hi.DO <- ",spikehi$Value[which(spikehi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Spike.Hi.WaterLevel <- ",spikehi$Value[which(spikehi$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.Spike.Hi.pH <- ",spikehi$Value[which(spikehi$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.Spike.Hi.Turbidity <- ",spikehi$Value[which(spikehi$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.Spike.Hi.WaterP <- ",spikehi$Value[which(spikehi$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.Spike.Hi.WaterTemp <- ",spikehi$Value[which(spikehi$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.Spike.Hi.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.Cond <- ",cond$Value[which(cond$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.DO <- ",do$Value[which(do$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.pH <- ",ph$Value[which(ph$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "Spike.Hi")],"\n",
+    "ContData.env$myThresh.Spike.Hi.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "Spike.Hi")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #Spike Lo
     "#Spike Lo\n",
-    "ContData.env$myThresh.Spike.Lo.AirBP <- ",spikelo$Value[which(spikelo$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.Spike.Lo.AirTemp <- ",spikelo$Value[which(spikelo$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.Spike.Lo.Chlorophylla <- ",spikelo$Value[which(spikelo$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.Spike.Lo.Cond <- ",spikelo$Value[which(spikelo$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.Spike.Lo.Discharge <- ",spikelo$Value[which(spikelo$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.Spike.Lo.DO <- ",spikelo$Value[which(spikelo$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Spike.Lo.WaterLevel <- ",spikelo$Value[which(spikelo$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.Spike.Lo.pH <- ",spikelo$Value[which(spikelo$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.Spike.Lo.Turbidity <- ",spikelo$Value[which(spikelo$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.Spike.Lo.WaterP <- ",spikelo$Value[which(spikelo$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.Spike.Lo.WaterTemp <- ",spikelo$Value[which(spikelo$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.Spike.Lo.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.Cond <- ",cond$Value[which(cond$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.DO <- ",do$Value[which(do$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.pH <- ",ph$Value[which(ph$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "Spike.Lo")],"\n",
+    "ContData.env$myThresh.Spike.Lo.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "Spike.Lo")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #RoC SD number
     "#RoC SD number\n",
-    "ContData.env$myThresh.RoC.SD.number.AirBP <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.AirTemp <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.Chlorophylla <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.Cond <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.Discharge <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.DO <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.WaterLevel <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.pH <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.Turbidity <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.WaterP <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.RoC.SD.number.WaterTemp <- ",rocsdnumber$Value[which(rocsdnumber$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.RoC.SD.number.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.Cond <- ",cond$Value[which(cond$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.DO <- ",do$Value[which(do$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.pH <- ",ph$Value[which(ph$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "RoC.SD.number")],"\n",
+    "ContData.env$myThresh.RoC.SD.number.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "RoC.SD.number")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #RoC SD period
     "#RoC SD period\n",
-    "ContData.env$myThresh.RoC.SD.period.AirBP <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.AirTemp <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.Chlorophylla <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.Cond <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.Discharge <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.DO <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.WaterLevel <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.pH <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.Turbidity <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.WaterP <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.RoC.SD.period.WaterTemp <- ",rocsdperiod$Value[which(rocsdperiod$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.RoC.SD.period.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.Cond <- ",cond$Value[which(cond$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.DO <- ",do$Value[which(do$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.pH <- ",ph$Value[which(ph$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "RoC.SD.period")],"\n",
+    "ContData.env$myThresh.RoC.SD.period.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "RoC.SD.period")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #Flat Hi
     "#Flat Hi\n",
-    "ContData.env$myThresh.Flat.Hi.AirBP <- ",flathi$Value[which(flathi$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.Flat.Hi.AirTemp <- ",flathi$Value[which(flathi$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.Flat.Hi.Chlorophylla <- ",flathi$Value[which(flathi$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.Flat.Hi.Cond <- ",flathi$Value[which(flathi$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.Flat.Hi.Discharge <- ",flathi$Value[which(flathi$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.Flat.Hi.DO <- ",flathi$Value[which(flathi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Flat.Hi.WaterLevel <- ",flathi$Value[which(flathi$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.Flat.Hi.pH <- ",flathi$Value[which(flathi$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.Flat.Hi.Turbidity <- ",flathi$Value[which(flathi$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.Flat.Hi.WaterP <- ",flathi$Value[which(flathi$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.Flat.Hi.WaterTemp <- ",flathi$Value[which(flathi$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.Flat.Hi.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.Cond <- ",cond$Value[which(cond$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.DO <- ",do$Value[which(do$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.pH <- ",ph$Value[which(ph$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "Flat.Hi")],"\n",
+    "ContData.env$myThresh.Flat.Hi.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "Flat.Hi")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #Flat Lo
     "#Flat Lo\n",
-    "ContData.env$myThresh.Flat.Lo.AirBP <- ",flatlo$Value[which(flathi$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.Flat.Lo.AirTemp <- ",flatlo$Value[which(flathi$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.Flat.Lo.Chlorophylla <- ",flatlo$Value[which(flathi$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.Flat.Lo.Cond <- ",flatlo$Value[which(flathi$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.Flat.Lo.Discharge <- ",flatlo$Value[which(flathi$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.Flat.Lo.DO <- ",flatlo$Value[which(flathi$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Flat.Lo.WaterLevel <- ",flatlo$Value[which(flathi$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.Flat.Lo.pH <- ",flatlo$Value[which(flathi$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.Flat.Lo.Turbidity <- ",flatlo$Value[which(flathi$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.Flat.Lo.WaterP <- ",flatlo$Value[which(flathi$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.Flat.Lo.WaterTemp <- ",flatlo$Value[which(flathi$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.Flat.Lo.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.Cond <- ",cond$Value[which(cond$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.DO <- ",do$Value[which(do$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.pH <- ",ph$Value[which(ph$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "Flat.Lo")],"\n",
+    "ContData.env$myThresh.Flat.Lo.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "Flat.Lo")],"\n\n",
     
     "#--------------------------------------------------------------------\n",
     #Flat Tolerance
     "#Flat Tolerance\n",
-    "ContData.env$myThresh.Flat.Tolerance.AirBP <- ",flattolerance$Value[which(flattolerance$Logger_Type == "AirBP")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.AirTemp <- ",flattolerance$Value[which(flattolerance$Logger_Type == "AirTemp")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.Chlorophylla <- ",flattolerance$Value[which(flattolerance$Logger_Type == "Chlorophylla")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.Cond <- ",flattolerance$Value[which(flattolerance$Logger_Type == "Cond")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.Discharge <- ",flattolerance$Value[which(flattolerance$Logger_Type == "Discharge")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.DO <- ",flattolerance$Value[which(flattolerance$Logger_Type == "DO")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.WaterLevel <- ",flattolerance$Value[which(flattolerance$Logger_Type == "WaterLevel")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.pH <- ",flattolerance$Value[which(flattolerance$Logger_Type == "pH")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.Turbidity <- ",flattolerance$Value[which(flattolerance$Logger_Type == "Turbidity")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.WaterP <- ",flattolerance$Value[which(flattolerance$Logger_Type == "WaterP")],"\n",
-    "ContData.env$myThresh.Flat.Tolerance.WaterTemp <- ",flattolerance$Value[which(flattolerance$Logger_Type == "WaterTemp")],"\n\n",
+    "ContData.env$myThresh.Flat.Tolerance.AirBP <- ",airbp$Value[which(airbp$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.AirTemp <- ",airtemp$Value[which(airtemp$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.Chlorophylla <- ",chlorophylla$Value[which(chlorophylla$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.Cond <- ",cond$Value[which(cond$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.Discharge <- ",discharge$Value[which(discharge$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.DO <- ",do$Value[which(do$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.WaterLevel <- ",waterlevel$Value[which(waterlevel$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.pH <- ",ph$Value[which(ph$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.Turbidity <- ",turbidity$Value[which(turbidity$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.WaterP <- ",waterp$Value[which(waterp$QC_Metric == "Flat.Tolerance")],"\n",
+    "ContData.env$myThresh.Flat.Tolerance.WaterTemp <- ",watertemp$Value[which(watertemp$QC_Metric == "Flat.Tolerance")],"\n\n",
     
     "ContData.env$myThresh.Flat.MaxComp    <- max(
       ContData.env$myThresh.Flat.Hi.WaterTemp, 
@@ -623,8 +699,8 @@ updateconfigfile = function(qcconfigdata){
 }
 
 #Build the config file used by ContDataQC
-observe({
-  
-  updateconfigfile(qcconfigdata = qc_config())
-  
-})
+# observe({
+#   
+#   updateconfigfile(qcconfigdata = qc_config())
+#   
+# })
