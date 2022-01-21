@@ -39,7 +39,7 @@ output$loadconfigfileUI = renderUI({
 
 #All code used to update potential changes to tables in baseconfig
 updatebaseconfigversion = function(baseconfigdata){
-  
+  baseconfigdata = baseconfig
   #Add a version object
   if("version" %notin% names(baseconfigdata)){
     baseconfigdata = c(baseconfigdata,"version" = 0.5)
@@ -57,6 +57,13 @@ updatebaseconfigversion = function(baseconfigdata){
     
     baseconfigdata$qc_config$Logger_Type[which(baseconfigdata$qc_config$Logger_Type == "GageHeight")] = "WaterLevel"
   }
+  
+  if (baseconfigdata$version < 0.9){
+    baseconfigdata$qc_config$Level = 1
+    baseconfigdata$qc_config$Depth_1 = NA
+    baseconfigdata$qc_config$Depth_2 = NA
+  }
+  
   
   return(baseconfigdata)
 }
@@ -510,6 +517,7 @@ observeEvent(
       
       programwbsrvrow = data.frame("ProgramID" = input$waterbodyprogramselect,"ProgramWaterbodyID" = input$addwaterbodiesid,"AppID" = newappid,
                                    "WB_Type" = input$addwaterbodiestype)
+      
       wbnamesrvrow = data.frame("AppID" = newappid,"Waterbody_Name" = input$addwaterbodiesname)
       
       programwbsrv = rbind(programwbsrv,programwbsrvrow)
