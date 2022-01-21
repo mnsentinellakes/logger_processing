@@ -127,6 +127,15 @@ tabItems(
           solidHeader = TRUE,
           width = NULL,
           uiOutput("loggerconfigselectUI")
+        ),
+        box(
+          title = "QC Rules",
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
+          uiOutput("loggerlevelsUI"),
+          uiOutput("qcleveleditorUI")
+          
         )
       ),
       column(
