@@ -7,7 +7,7 @@ turnoffprocessupdate = FALSE
 #model - selected model
 #loggerdefs - logger file definition table
 
-formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qcunits){
+formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qcconfig,depthstable){
   
   #Function for reading data
   readloggerdata = function(loggerfile,loggerfields){
@@ -43,7 +43,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   }
   
   #Filter qc_config field by waterbody
-  qcunits = qcunits[which(qcunits$AppID == waterbody),]
+  qcconfig = qcconfig[which(qcconfig$AppID == waterbody),]
   
   #Select which fields should be included
   loggerfields = loggerfields[which(loggerfields$ModelID == loggermodel),]
@@ -62,7 +62,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   #Add units to to datafields table
   datafieldnames$Units = NA
   for (i in 1:nrow(datafieldnames)){
-    datafieldnames[i,3] = qcunits$Units[which(qcunits$Logger_Type == datafieldnames[i,1] & qcunits$QC_Metric == "Gross.Fail.Hi")]
+    datafieldnames[i,3] = unique(qcconfig$Units[which(qcconfig$Logger_Type == datafieldnames[i,1] & qcconfig$QC_Metric == "Gross.Fail.Hi")])
   }
   datafieldnames$type = datafieldnames$qcfield
   datafieldnames$qcfield = paste0(datafieldnames$qcfield,datafieldnames$Units)
@@ -131,25 +131,51 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     }else{
       sendSweetAlert(
         session = session,
-        title = "Logger yypes not in file",
+        title = "Logger types not in file",
         text = "Please ensure the correct logger model is selected",
         type = "error"
       )
     }
   }
   
+  #Build Levels table
+  
+  # Select depthstable by station select
+  # depthstable = depthstable[which(depthstable$StationID == stationselect & is.na(depthstable$Processed)),]
+  #Select qcconfig according to logger types
+  selectqcconfig = qcconfig[which(qcconfig$Logger_Type %in% qctypes),]
+  
+  snlevels = NULL
+  for (i in qctypes){
+    levelnum = unique(selectqcconfig$Level[which(selectqcconfig$Logger_Type == i)])
+    for (j in levelnum){
+      
+      rangelow = unique(selectqcconfig$Z_1[which(selectqcconfig$Logger_Type == i & selectqcconfig$Level == j)])
+      rangehigh = unique(selectqcconfig$Z_2[which(selectqcconfig$Logger_Type == i & selectqcconfig$Level == j)])
+      
+      snselect = depthstable$UnitID[which(as.numeric(depthstable$Z) >= rangelow & as.numeric(depthstable$Z) < rangehigh)]
+      if (length(snselect) > 0){
+        
+        snlevelsrow = data.frame("sn" = snselect,"logger_type" = i,"level" = j)
+        print(snlevelsrow)
+        snlevels = rbind(snlevels,snlevelsrow)
+      }
+    }
+  }
+  
   #Compile QC metadata
   qcinfo = list("qcnames" = qctypes,"startdate" = as.character(max(as.Date(builddata$DateTime))),
-                "enddate" = as.character(min(as.Date(builddata$DateTime))),"fieldnames" = datafieldnames)
+                "enddate" = as.character(min(as.Date(builddata$DateTime))),"fieldnames" = datafieldnames,"snlevels" = snlevels)
 }
 
 #Run QC Processes on data
 #Siteid == Serial_Number
-QCProcess = function(qcinfo,siteid){
+QCProcess = function(qcinfo,siteid,qcconfig){
   
   loggertypes = qcinfo$qcnames
   
   if (!is.na(qcinfo$startdate) & !is.na(qcinfo$enddate)){
+    
     for (i in loggertypes){
       dir.create(paste0("processing/",i,"/QC"),showWarnings = FALSE)
       
@@ -159,6 +185,18 @@ QCProcess = function(qcinfo,siteid){
       }else{
         contdataqctype = "Water"
       }
+      
+      
+      qclevels = qcinfo$snlevels
+      print(qclevels)
+      qclevels = unique(qclevels$level[which(qclevels$logger_type == i & qclevels$sn == siteid)])
+      print(qclevels)
+      
+      updateconfigfile(
+        qcconfigdata = qcconfig,
+        level = qclevels,
+        loggertype = i
+      )
       
       ContDataQC::ContDataQC(
         fun.myData.Operation = "QCRaw",
@@ -348,12 +386,10 @@ observeEvent(
       storeuser(
         input$username
       )
-      
       #Deploy Count
       storedepcount(
         input$deploynum
       )
-      
       ##Data QC and Processing
       #Table with information about the uploaded data
       filetable = input$dataupload
@@ -363,7 +399,7 @@ observeEvent(
       #Logger lookup table for associating loggers to depths
       depthstable = processinglogs()
       
-      #Selects lookup table rows for selected lake and that have not been processed
+      #Selects lookup table rows for selected lake that have not been processed
       depthstableselect = depthstable[which(depthstable$StationID == input$procstationname & depthstable$ModelID == input$procmodel & 
                                             is.na(depthstable$Processed)),]
       
@@ -410,7 +446,8 @@ observeEvent(
             waterbody = input$procwaterbody,
             loggermodel = input$procmodel,
             loggerfields = loggerfiledefs(),
-            qcunits = qc_config()
+            qcconfig = qc_config(),
+            depthstable = depthstableselect
           )
           
           #Update Progress Bar
@@ -426,7 +463,8 @@ observeEvent(
           #Run QCProcess
           QCProcess(
             qcinfo = qcinfo,
-            siteid = inputname
+            siteid = inputname,
+            qcconfig = qc_config()
           )
           stopqc = FALSE
           
