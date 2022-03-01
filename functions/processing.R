@@ -222,7 +222,7 @@ QCProcess = function(qcinfo,siteid,qcconfig){
 }
 
 #import QC data and apply depths
-compileQCdata = function(qcinfo,depthstable){
+compileQCdata = function(qcinfo,depthstable,exporttable){
   loggertypes = qcinfo$qcnames
   
   datafields = qcinfo$fieldnames
@@ -266,6 +266,10 @@ compileQCdata = function(qcinfo,depthstable){
             datacompile$FlagGrossorig = "F"
             datacompile$FlagGrosschng = "F"
             datacompile$FlagGross = "F"
+          }
+          
+          if (exporttable$IncNotes == TRUE){
+            datacompile$Notes = ""
           }
           
           loggertypecompile = rbind(loggertypecompile,datacompile)
@@ -402,6 +406,9 @@ observeEvent(
       #Selects lookup table rows for selected lake that have not been processed
       depthstableselect = depthstable[which(depthstable$StationID == input$procstationname & depthstable$ModelID == input$procmodel & 
                                             is.na(depthstable$Processed)),]
+      #Export settings
+      exportsettings = export()
+      exportsettings = exportsettings[which(exportsettings$ProgramID == input$procprogram & exportsettings$ModelID == input$procmodel),]
       
       #Progress Update 1
       updateProgressBar(
@@ -494,7 +501,8 @@ observeEvent(
         #Run compileQCdata
         compiledata = compileQCdata(
           qcinfo = qcinfo,
-          depthstable = depthstableselect
+          depthstable = depthstableselect,
+          exporttable = exportsettings
         )
         
         if(compiledata[[2]] == FALSE){
