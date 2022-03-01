@@ -1,0 +1,1426 @@
+---
+title: "Processing and QC Report"
+params:
+  inputdata: null
+  metadata: null
+  qcsettings: null
+  export: null
+  stations: null
+  app_version: null
+  
+output: 
+  html_document:
+    toc: true
+  
+---
+```{r setup,include=FALSE,echo=FALSE,eval=TRUE}
+knitr::opts_chunk$set(echo = FALSE)
+dat = params$inputdata
+
+meta = params$metadata
+
+export = params$export
+
+stations = params$stations
+
+thresh = params$qcsettings
+
+```
+
+```{r setup test,include=FALSE,echo=FALSE,eval=FALSE}
+# dat = read.csv("C:\\Projects\\Datasets\\Water_Temperature\\Demo\\Testing\\with_meta\\Shaokotan.csv",stringsAsFactors = FALSE)
+
+wt = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\Greenwood_WaterTemp.csv",stringsAsFactors = FALSE)
+wt$Serial_Number = as.character(wt$Serial_Number)
+wt$Date_Time = as.POSIXct(wt$Date_Time,tz = "UTC")
+do = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\Greenwood_DO.csv",stringsAsFactors = FALSE)
+do$Serial_Number = as.character(do$Serial_Number)
+do$Date_Time = as.POSIXct(do$Date_Time,tz = "UTC")
+
+# dat = list("WaterTemp" = wt,"DO" = do)
+dat = wt
+meta = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\metadata.csv",stringsAsFactors = FALSE)
+meta$Logger_Types = "WaterTemp"
+
+
+export = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\export.csv",stringsAsFactors = FALSE)
+export$DO = NA
+
+load("C:/Projects/Shiny_App_Development/Logger_Processing/config/baseconfig.RData")
+thresh = baseconfig$qc_config
+thresh = thresh[which(thresh$AppID == 1111111111111111 & thresh$Logger_Type %in% c("WaterTemp","DO")),]
+```
+
+```{r packages, include = FALSE,echo = FALSE}
+library(flextable)
+library(ggplot2)
+library(dplyr)
+library(officer)
+library(lubridate)
+
+
+```
+
+```{r parameter list,include=FALSE}
+paralist = unlist(strsplit(meta$Logger_Types,","))
+
+parachunkdisp = c(rep(TRUE,length(paralist)),rep(FALSE,(11-length(paralist))))
+
+if (export$FileSep == "Multiple"){
+  dfdisp = parachunkdisp
+}else{
+  dfdisp = c(TRUE,rep(FALSE,10))
+}
+
+```
+
+```{r flextable settings,include = FALSE,echo = FALSE}
+title_theme = function(x){
+  x = border_remove(x) %>%
+    #Fonts
+    align(align = "center",part = "all") %>%
+    font(fontname = "Calibri",part = "all") %>%
+    fontsize(size = 12,part = "header") %>%
+    bold(bold = TRUE,part = "body") %>%
+    fontsize(size = 14,part = "body") %>%
+    #Font Colors
+    color(color = "white",part = "header") %>%
+    color(color = "grey10",part = "body") %>%
+    #Background Colors
+    bg(bg = "#003865",part = "header") %>%
+    # bg(bg = "#78BE21",part = "body") %>%
+    #Borders
+    #Header
+    #Outer
+    border_outer(
+      part = "header",
+      border = fp_border(
+        color = "grey10",
+        width = 1.5
+      )
+    ) %>%
+    #Inner
+    border_inner(
+      part = "header",
+      border = fp_border(
+        color = "grey10",
+        width = 1.5
+      )
+    ) %>%
+    fix_border_issues() %>%
+    #Body
+    border_outer(
+      part = "body",
+      border = fp_border(
+        color = "grey15",
+        width = 1.5
+      )
+    ) %>%
+    #Outer
+    border_inner(
+      part = "body",
+      border = fp_border(
+        color = "grey15",
+        width = 1
+      )
+    )
+
+   
+}
+
+report_theme = function(x,alignment = "center"){
+  x = border_remove(x) %>%
+    #Fonts
+    align(align = alignment,part = "all") %>%
+    font(fontname = "Calibri",part = "all") %>%
+    fontsize(size = 12,part = "header") %>%
+    bold(bold = TRUE,part = "header") %>%
+    fontsize(size = 12,part = "body") %>%
+    #Font Colors
+    color(color = "white",part = "header") %>%
+    color(color = "grey10",part = "body") %>%
+    #Background Colors
+    bg(bg = "#003865",part = "header") %>%
+    # bg(bg = "#78BE21",part = "body") %>%
+    #Borders
+    #Header
+    #Outer
+    border_outer(
+      part = "header",
+      border = fp_border(
+        color = "grey10",
+        width = 1.5
+      )
+    ) %>%
+    #Inner
+    border_inner(
+      part = "header",
+      border = fp_border(
+        color = "grey10",
+        width = 1.5
+      )
+    ) %>%
+    fix_border_issues() %>%
+    #Body
+    border_outer(
+      part = "body",
+      border = fp_border(
+        color = "grey15",
+        width = 1.5
+      )
+    ) %>%
+    #Outer
+    border_inner(
+      part = "body",
+      border = fp_border(
+        color = "grey15",
+        width = 1
+      )
+    )
+}
+
+
+```
+
+```{r names, include = TRUE,echo = FALSE,results='asis',ft.align = 'left'}
+
+#Create table for first line
+namesinfo = tibble(
+  
+  "Waterbody" = meta$Waterbody_Name,
+  "Waterbody ID" = as.character(meta$WaterbodyID),
+  "Waterbody Type" = meta$Waterbody_Type,
+  "Station" = meta$Station_Name,
+  "Station ID" = meta$StationID,
+  "Deployment" = meta$Deployment,
+  "Latitude" = stations$Lat,
+  "Longitude" = stations$Lon,
+  "Program" = meta$Program
+)
+
+namestable = flextable(head(namesinfo)) %>%
+  border_remove() %>%
+  autofit() %>%
+  title_theme()
+
+flextable_to_rmd(namestable)
+```
+### Dates and Times
+```{r dates, include = TRUE,echo = FALSE,results='asis',ft.align = 'left'}
+datesinfo = tibble(
+  "Start Recording Date/Time" = meta$Recording_Start,
+  "End Recording Date/Time" = meta$Recording_End,
+  "Start Valid Date/Time" = meta$Valid_Start,
+  "End Valid Date/Time" = meta$Valid_End,
+  "Time Zone" = meta$Time_Zone
+)
+borderhead = fp_border(color = "grey10", style = "solid", width = 1)
+borderbody = fp_border(color = "grey25", style = "solid", width = 1)
+
+datestable = flextable(head(datesinfo)) %>%
+  border_remove() %>%
+  autofit() %>%
+  report_theme()
+
+flextable_to_rmd(datestable)
+
+```
+#### Record Count by Month
+```{r month records, include = TRUE,echo = FALSE,results='asis',ft.align = 'left'}
+#Determine if dat is a list
+
+if (is.data.frame(dat)){
+  monthdat = dat
+}else{
+  monthdat = dat[[1]]
+}
+
+# if (is.list(dat)){
+#   monthdat = dat[[1]]
+# }else{
+#   monthdat = dat
+# }
+
+if (export$DateTimeSep == "Combined"){
+  yrname = export$Date_Time
+}else{
+  yrname = export$Date
+}
+
+
+#Get the years in the data
+monthyears = unique(year(monthdat[,yrname]))
+#Create a vector of sequentially duplicate years
+monthyearsdup = unlist(lapply(monthyears,function(x)c(x,x)))
+
+#Named vector of months with numeric equivalent
+monthvec = c("Jan" = 1,"Feb" = 2,"Mar" = 3,"Apr" = 4,"May" = 5,"Jun" = 6,"Jul" = 7,"Aug" = 8,"Sep" = 9,"Oct" = 10,"Nov" = 11,"Dec" = 12)
+
+#Create tibble with the duplicated years
+monthresults = tibble(
+  "Year" = monthyearsdup
+)
+
+#Create empty tibble with a row count equal to the length of monthyearsdup
+monthsums = tibble(.rows = length(monthyearsdup))
+
+#Calculate Valid and (Total) monthly data counts and create tibble
+monthtotals = as_tibble(
+  sapply(
+    monthvec,
+    function(x){
+      # x = monthvec[6]
+      monthcalc = unlist(
+        lapply(
+          monthyears,
+          function(y){
+            c(
+              nrow(monthdat[which(year(monthdat$Date_Time) == y & month(monthdat$Date_Time) == x & monthdat$FlagVis != 'F'),]),
+              nrow(monthdat[which(year(monthdat$Date_Time) == y & month(monthdat$Date_Time) == x),])
+            )
+          }
+        )
+      )
+      
+      monthtib = tibble(
+        "month" = monthcalc
+      )
+      colnames(monthtib) = names(x)
+      monthsums = cbind(monthsums,monthtib)
+    }
+  )
+)
+
+#Fix monthtotals column names
+colnames(monthtotals) = gsub(".monthtib","",colnames(monthtotals))
+#cbind monthresults and monthtotals
+monthresults = cbind(monthresults,monthtotals)
+#Calculate the sums for each row
+monthresults$Total = rowSums(monthresults[,-1])
+#Calculate the column sums for each row, based upon whether it is the total or valid data
+monthresults = rbind(
+  monthresults,
+  tibble(
+    "Year" = c("Totals","Totals"),
+    "Jan" = c(
+      sum(monthresults$Jan[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Jan[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Feb" = c(
+      sum(monthresults$Feb[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Feb[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Mar" = c(
+      sum(monthresults$Mar[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Mar[seq(from = 2, to = nrow(monthresults),by = 2)])
+      ),
+    "Apr" = c(
+      sum(monthresults$Apr[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Apr[seq(from = 2, to = nrow(monthresults),by = 2)]) 
+    ),
+    "May" = c(
+      sum(monthresults$May[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$May[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Jun" = c(
+      sum(monthresults$Jun[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Jun[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Jul" = c(
+      sum(monthresults$Jul[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Jul[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Aug" = c(
+      sum(monthresults$Aug[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Aug[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Sep" = c(
+      sum(monthresults$Sep[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Sep[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Oct" = c(
+      sum(monthresults$Oct[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Oct[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Nov" = c(
+      sum(monthresults$Nov[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Nov[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Dec" = c(
+      sum(monthresults$Dec[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Dec[seq(from = 2, to = nrow(monthresults),by = 2)])
+    ),
+    "Total" = c(
+      sum(monthresults$Total[seq(from = 1, to = nrow(monthresults),by = 2)]),
+      sum(monthresults$Total[seq(from = 2, to = nrow(monthresults),by = 2)])
+    )
+  )
+)
+
+#Convert all columns to character
+monthresults[,-1] = apply(monthresults[,-1],2,function(x)as.character(x))
+
+#format table to include parantheses every 2nd line
+for (i in 1:nrow(monthresults)){
+  monthresults[i,-1] = as.character(format(as.numeric(monthresults[i,-1]),big.mark = ","))
+  if(i %% 2 == 0){
+    monthresults[i,-1] = paste0("(",monthresults[i,-1],")")
+  }
+  monthresults[i,-1] = gsub(" ","",monthresults[i,-1])
+}
+
+#Build flextable
+monthtable = flextable(monthresults) %>%
+  border_remove() %>%
+  merge_v(j = "Year") %>%
+  autofit() %>%
+  report_theme()
+
+flextable_to_rmd(monthtable)
+
+#Build example flextable
+monthexample = tibble(
+  c("5,629","(5,638)"),
+  c("Sum of all valid data points - passed visual inspection","Sum of all data points")
+)
+
+monthexampletable = flextable(monthexample) %>%
+  border_remove() %>%
+  delete_part(part = "header") %>%
+  autofit() %>%
+  report_theme(alignment = "left")
+  
+flextable_to_rmd(monthexampletable)
+```
+
+
+:::: {style="display: flex;"}
+::: {}
+### Logger Model
+```{r model, include = TRUE,echo = FALSE,results='asis',ft.align = 'center'}
+modelinfo = tibble(
+  "Logger Model" = meta$Model_Name,
+  "Parameters" = unlist(strsplit(meta$Logger_Types, split=",")),
+  "Units" = unlist(strsplit(meta$Units, split=",")),
+)
+
+modeltable = flextable(modelinfo) %>%
+  border_remove() %>%
+  merge_v(j = "Logger Model") %>%
+  autofit() %>%
+  report_theme()
+
+flextable_to_rmd(modeltable)
+
+```
+
+:::
+::: {}
+\ &nbsp;&nbsp;
+:::
+::: {}
+### Logger Units
+```{r logger units, include = TRUE,echo = FALSE,results='asis',ft.align = 'center'}
+if(class(dat) == "list"){
+  selectdat = dat[[1]]
+}else{
+  selectdat = dat
+}
+
+unitidfield = export$UnitID
+zfield = export$Z
+
+if (!is.na(zfield)){
+  loggerunits = tibble(
+    "UnitID" = as.character(unique(selectdat[,which(names(selectdat) == unitidfield)])),
+    "Z" = unique(selectdat[,which(names(selectdat) == zfield)])
+  )
+  
+  loggerunits = loggerunits[order(as.numeric(loggerunits$Z)),]
+  names(loggerunits) = c(unitidfield,zfield)
+}else{
+  loggerunits = tibble(
+    "UnitID" = unique(selectdat[,which(names(selectdat) == unitidfield)])
+  )
+  names(loggerunits) = unitidfield
+}
+
+loggerunitstable = flextable(head(loggerunits)) %>%
+  border_remove() %>%
+  autofit() %>% 
+  report_theme()
+
+flextable_to_rmd(loggerunitstable)
+```
+:::
+::::
+
+```{r data fields function, include=TRUE, echo=FALSE}
+datafieldsdisplay = function(dat,paranum){
+  if(export$FileSep == "Multiple" & !is.data.frame(dat)){
+    
+    dataparameters = names(dat)
+    if (length(dataparameters) >= paranum){
+      # i = 2
+      datatype = dat[[paranum]]
+      
+      datacolsresults = tibble(
+        "Field" = names(datatype),
+        "Class" = as.character(sapply(datatype,class))
+      )
+      
+      datacolsresults$Class[which(datacolsresults$Class == 'c("POSIXct", "POSIXt")')] = "POSIXct, POSIXt"
+      
+      
+      borderhead = fp_border(color = "grey10", style = "solid", width = 1.5)
+      borderheadinner = fp_border(color = "grey10", style = "solid", width = 1)
+      borderbody = fp_border(color = "grey25", style = "solid", width = 1)
+      
+      
+      datacolstable =  flextable(datacolsresults) %>%
+        border_remove() %>%
+        add_header_row(values = dataparameters,colwidths = rep(2,length(listnames))) %>%
+        set_header_labels(values = headernames) %>%
+        autofit() %>% 
+        report_theme()
+      
+    }
+  }else{
+    selectdat = dat
+    
+    datacolsresults = tibble(
+      "Field" = names(dat),
+      "Class" = as.character(sapply(dat,class))
+    )
+    
+    datacolsresults$Class[which(datacolsresults$Class == 'c("POSIXct", "POSIXt")')] = "POSIXct, POSIXt"
+    
+    datacolstable = flextable(datacolsresults) %>%
+    border_remove() %>%
+    autofit() %>% 
+    report_theme()
+}
+
+flextable_to_rmd(datacolstable)
+  
+  
+}
+
+
+```
+
+### Data Fields
+:::: {style="display: flex;"}
+::: {}
+```{r data fields 1, include = dfdisp[1],eval=dfdisp[1],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 1
+)
+
+```
+```{r data fields 4, include = dfdisp[4],eval=dfdisp[4],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 4
+)
+
+```
+```{r data fields 7, include = dfdisp[7],eval=dfdisp[7],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 7
+)
+
+```
+```{r data fields 10, include = dfdisp[10],eval=dfdisp[10],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 10
+)
+
+```
+:::
+::: {}
+\ &nbsp;&nbsp;
+:::
+::: {}
+```{r data fields 2, include = dfdisp[2],eval=dfdisp[2],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 2
+)
+
+```
+```{r data fields 5, include = dfdisp[5],eval=dfdisp[5],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 5
+)
+
+```
+```{r data fields 8, include = dfdisp[8],eval=dfdisp[8],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 8
+)
+
+```
+```{r data fields 11, include = dfdisp[11],eval=dfdisp[11],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 11
+)
+
+```
+:::
+::: {}
+\ &nbsp;&nbsp;
+:::
+::: {}
+```{r data fields 3, include = parachunkdisp[3],eval=parachunkdisp[3],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 3
+)
+
+```
+```{r data fields 6, include = parachunkdisp[6],eval=parachunkdisp[6],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 6
+)
+
+```
+```{r data fields 9, include = parachunkdisp[9],eval=parachunkdisp[9],echo = FALSE,results='asis',ft.align = 'left'}
+datafieldsdisplay(
+  dat = dat,
+  paranum = 9
+)
+
+```
+:::
+::::
+
+
+
+```{r qc results function, include = FALSE,echo=FALSE}
+qcresultsdisplay = function(dat,paranum,export){
+  
+  #If the data is a list containing tables for multiple parameters
+  if (!is.data.frame(dat)){
+    #Get the names of the data parameters in the list
+    dataparameters = names(dat)
+    
+    #If the number of data parameters in the data is greater than or equal to the selected
+    if (length(dataparameters) >= paranum){
+      
+      #Select the parameter name based upon paranum
+      paramname = dataparameters[paranum]
+      
+      #Select the parameter data
+      dataparam = dat[[paramname]]
+      
+      #Build the tibble for all units for the parameter
+      paramresults = tibble(
+        "All Data" = c("Gross","Spike","Rate of Change","Flat","Visual"),
+        "Pass" = c(
+          length(dataparam$FlagGross[which(dataparam$FlagGross == 'P')]),
+          length(dataparam$FlagSpike[which(dataparam$FlagSpike == 'P')]),
+          length(dataparam$FlagRoC[which(dataparam$FlagRoC == 'P')]),
+          length(dataparam$FlagFlat[which(dataparam$FlagFlat == 'P')]),
+          length(dataparam$FlagVis[which(dataparam$FlagVis == 'P')])
+        ),
+        "Suspect" = c(
+          length(dataparam$FlagGross[which(dataparam$FlagGross == 'S')]),
+          length(dataparam$FlagSpike[which(dataparam$FlagSpike == 'S')]),
+          length(dataparam$FlagRoC[which(dataparam$FlagRoC == 'S')]),
+          length(dataparam$FlagFlat[which(dataparam$FlagFlat == 'S')]),
+          length(dataparam$FlagVis[which(dataparam$FlagVis == 'S')])
+        ),
+        "Fail" = c(
+          length(dataparam$FlagGross[which(dataparam$FlagGross == 'F')]),
+          length(dataparam$FlagSpike[which(dataparam$FlagSpike == 'F')]),
+          length(dataparam$FlagRoC[which(dataparam$FlagRoC == 'F')]),
+          length(dataparam$FlagFlat[which(dataparam$FlagFlat == 'F')]),
+          length(dataparam$FlagVis[which(dataparam$FlagVis == 'F')])
+        ),
+        "No Data" = c(
+          length(dataparam$FlagGross[which(dataparam$FlagGross == 'X')]),
+          length(dataparam$FlagSpike[which(dataparam$FlagSpike == 'X')]),
+          length(dataparam$FlagRoC[which(dataparam$FlagRoC == 'X')]),
+          length(dataparam$FlagFlat[which(dataparam$FlagFlat == 'X')]),
+          length(dataparam$FlagVis[which(dataparam$FlagVis == 'X')])
+        )
+      )
+      
+      #Build all data flextable
+      alldatatable = flextable(paramresults) %>%
+        border_remove() %>%
+        add_header_row(values = paramname,colwidths = 5) %>%
+        autofit() %>% 
+        report_theme()
+      
+      flextable_to_rmd(alldatatable)
+      
+      #Get a vector of the unique logger units
+      logunits = unique(dataparam[,1])
+      if (length(logunits) > 1){
+        for (j in logunits){
+          
+          #Select data for the particular unit
+          unitdata = dataparam[which(dataparam[,1] == j),]
+          
+          #Build tibble for unit flextable
+          unitresults = tibble(
+            "Unit Data" = c("Gross","Spike","Rate of Change","Flat","Visual"),
+            "Pass" = c(
+              length(unitdata$FlagGross[which(unitdata$FlagGross == 'P')]),
+              length(unitdata$FlagSpike[which(unitdata$FlagSpike == 'P')]),
+              length(unitdata$FlagRoC[which(unitdata$FlagRoC == 'P')]),
+              length(unitdata$FlagFlat[which(unitdata$FlagFlat == 'P')]),
+              length(unitdata$FlagVis[which(unitdata$FlagVis == 'P')])
+            ),
+            "Suspect" = c(
+              length(unitdata$FlagGross[which(unitdata$FlagGross == 'S')]),
+              length(unitdata$FlagSpike[which(unitdata$FlagSpike == 'S')]),
+              length(unitdata$FlagRoC[which(unitdata$FlagRoC == 'S')]),
+              length(unitdata$FlagFlat[which(unitdata$FlagFlat == 'S')]),
+              length(unitdata$FlagVis[which(unitdata$FlagVis == 'S')])
+            ),
+            "Fail" = c(
+              length(unitdata$FlagGross[which(unitdata$FlagGross == 'F')]),
+              length(unitdata$FlagSpike[which(unitdata$FlagSpike == 'F')]),
+              length(unitdata$FlagRoC[which(unitdata$FlagRoC == 'F')]),
+              length(unitdata$FlagFlat[which(unitdata$FlagFlat == 'F')]),
+              length(unitdata$FlagVis[which(unitdata$FlagVis == 'F')])
+            ),
+            "No Data" = c(
+              length(unitdata$FlagGross[which(unitdata$FlagGross == 'X')]),
+              length(unitdata$FlagSpike[which(unitdata$FlagSpike == 'X')]),
+              length(unitdata$FlagRoC[which(unitdata$FlagRoC == 'X')]),
+              length(unitdata$FlagFlat[which(unitdata$FlagFlat == 'X')]),
+              length(unitdata$FlagVis[which(unitdata$FlagVis == 'X')])
+            )
+          )
+          
+          #Change the Name of the first column to the unit name
+          names(unitresults)[1] = j
+          
+          #Build the flextable for the unit data
+          unittable = flextable(unitresults) %>%
+            border_remove() %>%
+            add_header_row(values = paramname,colwidths = 5) %>%
+            autofit()%>% 
+            report_theme()
+          
+          flextable_to_rmd(unittable)
+        }
+      }
+    }
+    #Else the data contains a single table
+  }else{
+    #Get the names of the data parameters in the list
+    dataparameters =  colnames(export[,c(37:47)] %>% select_if(~ !any(is.na(.))))
+    
+    #If the number of data parameters in the data is greater than or equal to the selected
+    if (length(dataparameters) >= paranum){
+      
+      #If the number of data parameters in the data is greater than or equal to the selected
+      if (length(dataparameters) > 1){
+        dataparam = dataparameters[paranum]
+
+          # Build the tibble for all units for the parameter
+          paramresults = tibble(
+            "All Data" = c("Gross","Spike","Rate of Change","Flat","Visual"),
+            "Pass" = c(
+              nrow(dat[which(dat[paste0(dataparam,"_FlagGross")] == 'P'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagSpike")] == 'P'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagRoC")] == 'P'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagFlat")] == 'P'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagVis")] == 'P'),])
+            ),
+            "Suspect" = c(
+              nrow(dat[which(dat[paste0(dataparam,"_FlagGross")] == 'S'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagSpike")] == 'S'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagRoC")] == 'S'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagFlat")] == 'S'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagVis")] == 'S'),])
+            ),
+            "Fail" = c(
+              nrow(dat[which(dat[paste0(dataparam,"_FlagGross")] == 'F'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagSpike")] == 'F'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagRoC")] == 'F'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagFlat")] == 'F'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagVis")] == 'F'),])
+            ),
+            "No Data" = c(
+              nrow(dat[which(dat[paste0(dataparam,"_FlagGross")] == 'X'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagSpike")] == 'X'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagRoC")] == 'X'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagFlat")] == 'X'),]),
+              nrow(dat[which(dat[paste0(dataparam,"_FlagVis")] == 'X'),])
+            )
+          )
+          
+          
+          #Build all data flextable
+          alldatatable = flextable(paramresults) %>%
+            border_remove() %>%
+            add_header_row(values = dataparam,colwidths = 5) %>%
+            autofit() %>%
+            report_theme()
+
+          flextable_to_rmd(alldatatable)
+
+          #Get a vector of the unique logger units
+          logunits = unique(dat[,1])
+          if (length(logunits) > 1){
+            for (j in logunits){
+              #Select data for the particular unit
+              unitdata = dat[which(dat[,1] == j),]
+
+              #Build tibble for unit flextable
+              unitresults = tibble(
+                "Unit Data" = c("Gross","Spike","Rate of Change","Flat","Visual"),
+                "Pass" = c(
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagGross")] == 'P'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagSpike")] == 'P'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagRoC")] == 'P'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagFlat")] == 'P'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagVis")] == 'P'),])
+                ),
+                "Suspect" = c(
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagGross")] == 'S'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagSpike")] == 'S'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagRoC")] == 'S'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagFlat")] == 'S'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagVis")] == 'S'),])
+                ),
+                "Fail" = c(
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagGross")] == 'F'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagSpike")] == 'F'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagRoC")] == 'F'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagFlat")] == 'F'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagVis")] == 'F'),])
+                ),
+                "No Data" = c(
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagGross")] == 'X'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagSpike")] == 'X'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagRoC")] == 'X'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagFlat")] == 'X'),]),
+                  nrow(unitdata[which(unitdata[paste0(dataparam,"_FlagVis")] == 'X'),])
+                )
+              )
+
+              #Change the Name of the first column to the unit name
+              names(unitresults)[1] = j
+
+              #Build the flextable for the unit data
+              unittable = flextable(unitresults) %>%
+                border_remove() %>%
+                add_header_row(values = dataparam,colwidths = 5) %>%
+                autofit() %>%
+                report_theme()
+
+              flextable_to_rmd(unittable)
+            }
+          }
+      }else{
+        #Build tibble for data with single parameter
+        results = tibble(
+          "All Data" = c("Gross","Spike","Rate of Change","Flat","Visual"),
+          "Pass" = c(
+            length(dat$FlagGross[which(dat$FlagGross == 'P')]),
+            length(dat$FlagSpike[which(dat$FlagSpike == 'P')]),
+            length(dat$FlagRoC[which(dat$FlagRoC == 'P')]),
+            length(dat$FlagFlat[which(dat$FlagFlat == 'P')]),
+            length(dat$FlagVis[which(dat$FlagVis == 'P')])
+          ),
+          "Suspect" = c(
+            length(dat$FlagGross[which(dat$FlagGross == 'S')]),
+            length(dat$FlagSpike[which(dat$FlagSpike == 'S')]),
+            length(dat$FlagRoC[which(dat$FlagRoC == 'S')]),
+            length(dat$FlagFlat[which(dat$FlagFlat == 'S')]),
+            length(dat$FlagVis[which(dat$FlagVis == 'S')])
+          ),
+          "Fail" = c(
+            length(dat$FlagGross[which(dat$FlagGross == 'F')]),
+            length(dat$FlagSpike[which(dat$FlagSpike == 'F')]),
+            length(dat$FlagRoC[which(dat$FlagRoC == 'F')]),
+            length(dat$FlagFlat[which(dat$FlagFlat == 'F')]),
+            length(dat$FlagVis[which(dat$FlagVis == 'F')])
+          ),
+          "No Data" = c(
+            length(dat$FlagGross[which(dat$FlagGross == 'X')]),
+            length(dat$FlagSpike[which(dat$FlagSpike == 'X')]),
+            length(dat$FlagRoC[which(dat$FlagRoC == 'X')]),
+            length(dat$FlagFlat[which(dat$FlagFlat == 'X')]),
+            length(dat$FlagVis[which(dat$FlagVis == 'X')])
+          )
+        )
+        
+        #Build all data flextable
+        alldatatable = flextable(results) %>%
+          border_remove() %>%
+          # add_header_row(values = ,colwidths = 5) %>%
+          autofit() %>% 
+          report_theme()
+        
+        flextable_to_rmd(alldatatable)
+        
+        #Get a vector of the unique logger units
+        logunits = unique(dat[,1])
+        
+        #If there is more than one logger unit
+        if (length(logunits) > 1){
+          for (j in logunits){
+            #Select data for the particular unit
+            unitdata = dat[which(dat[,1] == j),]
+            
+            #Build tibble for unit flextable
+            unitresults = tibble(
+              "Unit Data" = c("Gross","Spike","Rate of Change","Flat","Visual"),
+              "Pass" = c(
+                length(unitdata$FlagGross[which(unitdata$FlagGross == 'P')]),
+                length(unitdata$FlagSpike[which(unitdata$FlagSpike == 'P')]),
+                length(unitdata$FlagRoC[which(unitdata$FlagRoC == 'P')]),
+                length(unitdata$FlagFlat[which(unitdata$FlagFlat == 'P')]),
+                length(unitdata$FlagVis[which(unitdata$FlagVis == 'P')])
+              ),
+              "Suspect" = c(
+                length(unitdata$FlagGross[which(unitdata$FlagGross == 'S')]),
+                length(unitdata$FlagSpike[which(unitdata$FlagSpike == 'S')]),
+                length(unitdata$FlagRoC[which(unitdata$FlagRoC == 'S')]),
+                length(unitdata$FlagFlat[which(unitdata$FlagFlat == 'S')]),
+                length(unitdata$FlagVis[which(unitdata$FlagVis == 'S')])
+              ),
+              "Fail" = c(
+                length(unitdata$FlagGross[which(unitdata$FlagGross == 'F')]),
+                length(unitdata$FlagSpike[which(unitdata$FlagSpike == 'F')]),
+                length(unitdata$FlagRoC[which(unitdata$FlagRoC == 'F')]),
+                length(unitdata$FlagFlat[which(unitdata$FlagFlat == 'F')]),
+                length(unitdata$FlagVis[which(unitdata$FlagVis == 'F')])
+              ),
+              "No Data" = c(
+                length(unitdata$FlagGross[which(unitdata$FlagGross == 'X')]),
+                length(unitdata$FlagSpike[which(unitdata$FlagSpike == 'X')]),
+                length(unitdata$FlagRoC[which(unitdata$FlagRoC == 'X')]),
+                length(unitdata$FlagFlat[which(unitdata$FlagFlat == 'X')]),
+                length(unitdata$FlagVis[which(unitdata$FlagVis == 'X')])
+              )
+            )
+            
+            #Change the Name of the first column to the unit name
+            names(unitresults)[1] = j
+            
+            #Build the flextable for the unit data
+            unittable = flextable(unitresults) %>%
+              border_remove() %>%
+              # add_header_row(values = i,colwidths = 5) %>%
+              autofit() %>% 
+              report_theme()
+            
+            flextable_to_rmd(unittable)
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+
+### QC Results
+:::: {style="display: flex;"}
+:::{}
+```{r qc results 1, include = parachunkdisp[1],eval=parachunkdisp[1],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 1,
+  export = export
+)
+
+```
+```{r qc results 3, include = parachunkdisp[3],eval=parachunkdisp[3],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 3,
+  export = export
+)
+
+```
+```{r qc results 5, include = parachunkdisp[5],eval=parachunkdisp[5],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 5,
+  export = export
+)
+
+```
+```{r qc results 7, include = parachunkdisp[7],eval=parachunkdisp[7],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 7,
+  export = export
+)
+
+```
+```{r qc results 9, include = parachunkdisp[9],eval=parachunkdisp[9],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 9,
+  export = export
+)
+
+```
+```{r qc results 11, include = parachunkdisp[11],eval=parachunkdisp[11],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 11,
+  export = export
+)
+
+```
+:::
+:::{}
+\ &nbsp;&nbsp;
+:::
+:::{}
+```{r qc results 2, include = parachunkdisp[2],eval=parachunkdisp[2],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 2,
+  export = export
+)
+
+```
+```{r qc results 4, include = parachunkdisp[4],eval=parachunkdisp[4],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 4,
+  export = export
+)
+
+```
+```{r qc results 6, include = parachunkdisp[6],eval=parachunkdisp[6],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 6,
+  export = export
+)
+
+```
+```{r qc results 8, include = parachunkdisp[8],eval=parachunkdisp[8],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 8,
+  export = export
+)
+
+```
+```{r qc results 10, include = parachunkdisp[10],eval=parachunkdisp[10],echo = FALSE,results='asis'}
+qcresultsdisplay(
+  dat = dat,
+  paranum = 10,
+  export = export
+)
+
+```
+:::
+::::
+
+
+### QC Flag Plots
+```{r data plots, include = TRUE,echo=FALSE,results='as.is',ft.align = 'left',out.width="100%",out.height="75%",eval=TRUE}
+
+#Define Theme
+
+report_gg_theme = theme(
+  panel.border = element_rect(color = "grey10",size = 1,fill = NA),
+  panel.grid.major = element_line(color = "grey25",size = 0.25),
+  panel.grid.minor = element_blank(),
+  panel.background = element_rect(color = "transparent",fill = "transparent"),
+  plot.title = element_text(size = 12,color = "grey25"),
+  axis.text = element_text(size = 8,colour = "grey25"),
+  axis.title = element_text(size = 10,color = "grey25"),
+  legend.position = "bottom",
+  legend.key = element_blank(),
+  legend.background = element_blank(),
+  panel.ontop = TRUE
+)
+
+#If there is more than one parameter in list form
+if (!is.data.frame(dat)){
+  
+  #Get the name of the parameters from the named list
+  dataparameters = names(dat)
+  for (i in dataparameters){
+    #Select the data for the parameter
+    paramselect = dat[[i]]
+
+    #Get the field name for the parameter and symbolize it for use in ggplot
+    paramname = sym(export[,i])
+
+    #Determine if the Date and Time fields are combined or separate and combine as needed
+    if (export$DateTimeSep == "Combined"){
+      dtname = sym(export$Date_Time)
+    }else{
+      paramselect$Date_Time = as.POSIXct(paste(paramselect[export$Date],paramselect[export$Time]),format = "%Y-%m-%d %H:%M:%S",tz = export$TZ)
+
+      dtname = sym(Date_Time)
+    }
+
+    #Get the name of the unit id field
+    logmodname = sym(export$UnitID)
+
+    #loop through QC Flags
+    for (j in c("FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")){
+
+      #Select only the data that did not pass the selected QC check
+      if (nrow(paramselect[which(paramselect[,j] != 'P'),]) > 0){
+        flaggeddata = paramselect[which(paramselect[,j] != 'P'),]
+        
+        f = geom_point(
+          data = flaggeddata,
+          aes(
+            x = !!dtname,
+            y = !!paramname,
+            color = !!sym(j)
+          ),
+          show.legend = TRUE
+        ) 
+        s = scale_color_manual(
+            values = c(
+              "F" = "red",
+              "S" = "orange",
+              "X" = "black")
+          )
+        l = labs(color = "Flags")
+      }else{
+        f = NULL
+        s = NULL
+        l = NULL
+      }
+
+      #Plot data
+      p = ggplot() +
+        geom_line(
+          data = paramselect,
+          aes(
+            x = !!dtname,
+            y = !!paramname,
+            group = !!logmodname
+          ),
+          color = "grey"
+        ) +
+        f + 
+        s +
+        l +
+        ggtitle(j) +
+        # scale_fill_gradient(low = "#008EAA",high = "#003865") +
+        report_gg_theme
+
+      print(p)
+    }
+  }
+  #If the data is not a list
+}else{
+    #Loop through the parameters
+    for (i in paralist){
+      #Get the field name of the parameter from the export table
+      
+      paramselect = dat
+
+      paramname = sym(export[,i])
+
+      #Determine if the Date and Time fields are combined or separate and combine as needed
+      if (export$DateTimeSep == "Combined"){
+        dtname = sym(export$Date_Time)
+      }else{
+        paramselect$Date_Time = as.POSIXct(paste(paramselect[export$Date],paramselect[export$Time]),format = "%Y-%m-%d %H:%M:%S",tz = export$TZ)
+
+        dtname = sym(Date_Time)
+      }
+
+      #Loop through the QC Flags
+
+      for (j in c("FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")){
+
+        if (length(paralist) > 1){
+          j = paste0(i,"_",j)
+        }
+        if (nrow(paramselect[which(paramselect[,j] != 'P'),]) > 0){
+          flaggeddata = paramselect[which(paramselect[,j] != 'P'),]
+          
+          f = geom_point(
+            data = flaggeddata,
+            aes(
+              x = !!dtname,
+              y = !!paramname,
+            color = !!sym(j)
+            ),
+            show.legend = TRUE
+          ) 
+        s = scale_color_manual(
+            values = c(
+              "F" = "red",
+              "S" = "orange",
+              "X" = "slategray3")
+          )
+        l = labs(color = "Flags")
+        }else{
+          f = NULL
+          s = NULL
+          l = NULL
+        }
+        
+        if (length(paramselect[,1]) > 1){
+          #Get the name of the unit id field
+          logmodname = sym(export$UnitID)
+          #Plot the data
+          p = ggplot(
+            data = paramselect
+          ) +
+            geom_line(
+              aes(
+                x = !!dtname,
+                y = !!paramname,
+                group = !!logmodname
+              ),
+              color = "grey"
+            ) +
+            f + 
+            s +
+            l +
+            ggtitle(j) +
+            # scale_fill_gradient(low = "#008EAA",high = "#003865") +
+            report_gg_theme
+          
+          print(p)
+        }else{
+          p = ggplot(
+            data = paramselect
+          ) +
+            geom_line(
+              aes(
+                x = !!dtname,
+                y = !!paramname
+              ),
+              color = "grey"
+            ) +
+            f + 
+            s +
+            l +
+            ggtitle(j) +
+            # scale_fill_gradient(low = "#008EAA",high = "#003865") +
+            report_gg_theme
+          
+          print(p)
+        }
+      }
+    }
+}
+
+```
+
+### Appendix
+```{r qc thresholds functions, include = TRUE,echo=FALSE,results='as.is',ft.align = 'left'}
+qcthresholddisp = function(qcthresholds,paranum){
+  # paranum = 1
+  dataparameters = unique(qcthresholds$Logger_Type)
+  
+  if (length(dataparameters) >= paranum){
+    qcthresholds = qcthresholds[which(qcthresholds$Logger_Type == dataparameters[paranum]),]
+    
+    if (length(unique(qcthresholds$Level)) > 1){
+      qcthreshresults = NULL
+      for (i in unique(qcthresholds$Level)){
+        # i = unique(qcthresholds$Level)[1]
+        
+        if (!is.na(unique(qcthresholds$Z_1))){
+          lvl = paste0("Level: ",i,"\n(",unique(qcthresholds$Z_1[which(qcthresholds$Level == i)])," - ",unique(qcthresholds$Z_1[which(qcthresholds$Level == i)]),")")
+        }else{
+          lvl = paste0("Level: ",i)
+        }
+        
+        qcthreshresultsrow = tibble(
+          "Level" = lvl,
+          "Metric" = c("Gross","Gross","Gross","Gross","Spike","Spike","Rate of Change","Rate of Change","Flat","Flat","Flat"),
+          "Threshold" = c("Max Fail","Min Fail","Max Suspect","Min Suspect","Max","Min","SD Number","SD Period","Max","Min","Tolerance"),
+          "Value" = unlist(sapply(1:11,function(x){qcthresholds$Value[which(qcthresholds$Level == i)][x]})),
+          "Units" = unlist(sapply(1:11,function(x){qcthresholds$Units[which(qcthresholds$Level == i)][x]}))
+        )
+        
+        qcthreshresults = rbind(qcthreshresults,qcthreshresultsrow)
+      }
+      
+      parametername = dataparameters[paranum]
+      names(qcthreshresults)[1] = parametername
+      
+      qcthreshtable = flextable(qcthreshresults) %>%
+        border_remove() %>%
+        merge_v(j = parametername) %>%
+        merge_v(j = "Metric") %>%
+        autofit() %>% 
+        report_theme()
+      
+      flextable_to_rmd(qcthreshtable)
+      
+      
+    }else{
+      
+      qcthreshresults = tibble(
+        "Metric" = c("Gross","Gross","Gross","Gross","Spike","Spike","Rate of Change","Rate of Change","Flat","Flat","Flat"),
+        "Threshold" = c("Max Fail","Min Fail","Max Suspect","Min Suspect","Max","Min","SD Number","SD Period","Max","Min","Tolerance"),
+        "Value" = qcthresholds$Value,
+        "Units" = qcthresholds$Units
+      )
+      
+      qcthreshtable = flextable(qcthreshresults) %>%
+        border_remove() %>%
+        add_header_row(values = dataparameters[paranum],colwidths = 4) %>%
+        merge_v(j = "Metric") %>%
+        autofit() %>% 
+        report_theme()
+      
+      flextable_to_rmd(qcthreshtable)
+      
+    }
+  }
+}
+```
+
+#### QC Thresholds
+:::: {style="display: flex;"}
+::: {}
+```{r qc threshholds 1, include = parachunkdisp[1],eval=parachunkdisp[1],echo = FALSE,results='asis',ft.align = 'left'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 1
+)
+```
+```{r qc threshholds 3, include = parachunkdisp[3],eval=parachunkdisp[3],echo = FALSE,results='asis',ft.align = 'left'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 3
+)
+```
+```{r qc threshholds 5, include = parachunkdisp[5],eval=parachunkdisp[5],echo = FALSE,results='asis',ft.align = 'left'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 5
+)
+```
+```{r qc threshholds 7, include = parachunkdisp[7],eval=parachunkdisp[7],echo = FALSE,results='asis',ft.align = 'left'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 7
+)
+```
+```{r qc threshholds 9, include = parachunkdisp[9],eval=parachunkdisp[9],echo = FALSE,results='asis',ft.align = 'left'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 9
+)
+```
+```{r qc threshholds 11, include = parachunkdisp[11],eval=parachunkdisp[11],echo = FALSE,results='asis',ft.align = 'left'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 11
+)
+```
+:::
+::: {}
+\ &nbsp;&nbsp;
+:::
+::: {}
+```{r qc threshholds 2, include = parachunkdisp[2],eval=parachunkdisp[2],echo = FALSE,results='asis',ft.align = 'right'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 2
+)
+```
+```{r qc threshholds 4, include = parachunkdisp[4],eval=parachunkdisp[4],echo = FALSE,results='asis',ft.align = 'right'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 4
+)
+```
+```{r qc threshholds 6, include = parachunkdisp[6],eval=parachunkdisp[6],echo = FALSE,results='asis',ft.align = 'right'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 6
+)
+```
+```{r qc threshholds 8, include = parachunkdisp[8],eval=parachunkdisp[8],echo = FALSE,results='asis',ft.align = 'right'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 8
+)
+```
+```{r qc threshholds 10, include = parachunkdisp[10],eval=parachunkdisp[10],echo = FALSE,results='asis',ft.align = 'right'}
+qcthresholddisp(
+  qcthresholds = thresh,
+  paranum = 10
+)
+```
+:::
+:::: 
+
+#### QC Test Definitions
+```{r qc test defs, include = TRUE,echo = FALSE,results='asis',ft.align = 'left'}
+
+qctestdef = tibble(
+  "Test" = c(
+    "Gross Range Test",
+    "Spike Test",
+    "Rate of Change Test",
+    "Flat Line Test",
+    "Visual Test"
+  ),
+  "Column Name" = c(
+    "FlagGross",
+    "FlagSpike",
+    "FlagRoC",
+    "FlagFlat",
+    "FlagVis"
+  ),
+  "Definition" = c(
+    "Test if data point exceeds sensor or user defined min/max. The values are user defined based on parameter of being measured and measuring instrument.",
+    "Test if data point exceeds a user defined threshold relative to the previous data point. The user defined values are based on the parameter being measured.",
+    "Test if a data point exceeds a number of standard deviations from the previous data points over a user defined time period.",
+    "Test if a data point is within a user defined threshold from previous data points over a user defined range. The threshold is user defined and based on the measured parameter and sensitivity of the measuring instrument.",
+    "Manual \"eye\" test to flag data errors that are not visually consistent with rest of the data."
+    
+  )
+)
+
+qctesttable = flextable(qctestdef) %>%
+  border_remove() %>%
+  delete_part(part = "header") %>%
+  autofit() %>% 
+  report_theme()
+
+flextable_to_rmd(qctesttable)
+```
+#### QC Flag Definitions
+```{r flag defs,include = TRUE,echo = FALSE,results='asis',ft.align = 'left'}
+
+qcflagdef = tibble(
+  "Flag" = c("P","S","F","X"),
+  "Definition" = c("Pass","Suspect","Fail","No Data or Not Applicable (NA)")
+)
+
+qcflagtable = flextable(qcflagdef) %>%
+  border_remove() %>%
+  delete_part(part = "header") %>%
+  autofit() %>% 
+  report_theme()
+
+flextable_to_rmd(qcflagtable)
+
+```
+<font size = 2>
+Processed By: `r if(!is.na(meta$Processed_By)){meta$Processed_By}else{Sys.info()[["user"]]}` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Processing Date: `r Sys.Date()` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; App Version: `r params$app_version`
+</font>
