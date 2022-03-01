@@ -1,15 +1,15 @@
 #Metadata-----------------------------------------------------------------------
 #Name: Logger Processing and QC App
-#Version: 0.75
+#Version: 1.0
 #Purpose: Process and QC Aquatic Loggers
 #Developed by: Tim Martin
 #Contact: tim.martin@state.mn.us
 
+rm(list = ls())
 
 
 library(shiny)
 library(shinydashboard)
-# library(shinydashboardPlus)
 library(devtools)
 library(ContDataQC)
 library(shinyjs)
@@ -27,9 +27,10 @@ library(ids)
 library(lubridate)
 library(zip)
 library(stringi)
+
 source("functions/dashboard.R")
-options(scipen = 999)
-baseconfigversion = 0.9
+options(scipen = 999,shiny.fullstacktrace = TRUE,shiny.error = "browser")
+baseconfigversion = as.character("1.0")
 # function definitions are located in the dashboard.R file
 ui <- dashboardPage(
     header = dashboardHeader(
@@ -41,14 +42,21 @@ ui <- dashboardPage(
         logprocsidebar("leftsidebarmenu")
     ),
     body = dashboardBody(
-        #Defined in the maintable.R file
-        source("functions/maintabs.R",local = TRUE)$value
+      #External Javascript
+      tags$head(
+        #Get Screen Dimensions
+        tags$script(src = "screen_dim.txt")
+      ),
+      #Code for maintab
+      source("functions/maintabs.R",local = TRUE)$value  
     )
 )
 
 # Define server logic 
 server <- function(input,output,session) {
-    
+  
+  
+  
     #Code for about page
     source("functions/about.R",local = TRUE)$value
     

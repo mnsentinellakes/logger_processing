@@ -64,6 +64,10 @@ updatebaseconfigversion = function(baseconfigdata){
     baseconfigdata$qc_config$Depth_2 = NA
   }
   
+  if(baseconfigdata$version < 1.0){
+    baseconfigdata$export$IncNotes = FALSE
+  }
+  
   
   return(baseconfigdata)
 }
