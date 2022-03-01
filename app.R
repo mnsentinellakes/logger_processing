@@ -29,7 +29,7 @@ library(zip)
 library(stringi)
 
 source("functions/dashboard.R")
-options(scipen = 999,shiny.fullstacktrace = TRUE,shiny.error = "browser")
+options(scipen = 999,shiny.fullstacktrace = TRUE)
 baseconfigversion = as.character("1.0")
 # function definitions are located in the dashboard.R file
 ui <- dashboardPage(
