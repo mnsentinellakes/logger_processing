@@ -14,14 +14,14 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
   wbtype = programwbs$WB_Type[which(programwbs$AppID == appid)]
   
   #StationID
-  if (is.na(stations$ProgramStationID[which(stations$StationID == stationid)])){
+  if (is.na(stations$ProgramStationID[which(stations$StationID == stationid)]) | nchar(stations$ProgramStationID[which(stations$StationID == stationid)]) == 0){
     statid = NA
   }else{
     statid = storestationid()
   }
   
   #Station Name
-  if (is.na(stations$Station_Name[which(stations$StationID == stationid)])){
+  if (is.na(stations$Station_Name[which(stations$StationID == stationid)]) | nchar(stations$Station_Name[which(stations$StationID == stationid)]) == 0){
     statname = NA
   }else{
     statname = storestationname()
@@ -96,7 +96,7 @@ buildmeta = function(programid,appid,stationid,deployid,modelid,programs,program
     "Date_Processed" = procdate,
     "Processed_By" = user
   )
-  write.csv(metadataframe,"temp/metadata.csv",row.names = FALSE)
+  return(metadataframe)
 }
 
 #Compile QC Settings for export
@@ -135,5 +135,5 @@ getqcsettings = function(appid,stationid,deployid,deploylogs,qcconfig,programwbs
     selectqcdata$StationName = selectstationname
   }
   
-  write.csv(selectqcdata,"temp/qcsettings.csv",row.names = FALSE)
+  return(selectqcdata)
 }
