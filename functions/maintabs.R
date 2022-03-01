@@ -1,6 +1,7 @@
 #Setup and Processing Tab----
+
 #Interface for setting up the data for processing and processing
-tabItems(
+  tabItems(
   #About Tab----
   tabItem(
     tabName = "abouttab",
@@ -325,8 +326,9 @@ tabItems(
           status = "primary",
           width = NULL,
           #output for Visual QC plotly graph
-          plotlyOutput("VisQCplot",height = 800)
-        )
+          uiOutput("VisQCplotUI")
+        ),
+        uiOutput("notesentryUI")
       )
     )
   ),
@@ -341,3 +343,4 @@ tabItems(
     uiOutput("exportUI")
   )
 )
+# })
