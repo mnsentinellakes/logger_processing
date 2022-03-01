@@ -7,23 +7,7 @@ output$exportUI = renderUI({
         solidHeader = TRUE,
         width = NULL,
         status = "primary",
-        fluidRow(
-          column(
-            width = 6,
-            tags$br(),
-            actionBttn(
-              inputId = "exportprocessbttn",
-              label = "Process Data for Export",
-              style = "fill",
-              color = "success",
-              size = "lg"
-            )
-          ),
-          column(
-            width = 6,
-            uiOutput("exportviewUI")
-          )
-        ),
+        uiOutput("exportprocesstoolsUI"),
         tags$br(),
         box(
           title = "Data Preview",
@@ -34,12 +18,7 @@ output$exportUI = renderUI({
           DTOutput("finaltable")
         ),
         tags$br(),
-        downloadBttn(
-          outputId = "dlddata",
-          label = "Download Data",
-          style = "material-flat",
-          size = "lg"
-        )
+        uiOutput("dlddataUI")
       )
     ),
     column(
@@ -54,6 +33,69 @@ output$exportUI = renderUI({
     )
   )
 })
+
+output$exportprocesstoolsUI = renderUI({
+  fluidRow(
+    column(
+      width = 4,
+      tags$br(),
+      uiOutput("exportprocessbuttonUI")
+    ),
+    column(
+      width = 5,
+      progressBar(
+        "exportprogress",
+        value = 0,
+        display_pct = TRUE,
+        status = "success",
+        title = "Begin Processing"
+      )
+    ),
+    column(
+      width = 3,
+      uiOutput("exportviewUI")
+    )
+  )
+})
+
+output$exportprocessbuttonUI = renderUI({
+  if (!is.null(VisQCdata())){
+    actionBttn(
+      inputId = "exportprocessbttn",
+      label = "Process Data for Export",
+      style = "fill",
+      color = "success",
+      size = "lg"
+    )
+  }
+})
+
+output$dlddataUI = renderUI({
+  if (!is.null(finaldata())){
+    fluidRow(
+      column(
+        width = 4,
+        downloadBttn(
+          outputId = "dlddata",
+          label = "Download Data",
+          style = "material-flat",
+          size = "lg"
+        )
+      ),
+      column(
+        width = 6,
+        progressBar(
+          "dldprogress",
+          value = 0,
+          display_pct = TRUE,
+          status = "success",
+          title = ""
+        )
+      )
+    )
+  }
+})
+
 
 #Options for selecting the logger type if data are processed into separate files
 output$exportviewUI = renderUI({
