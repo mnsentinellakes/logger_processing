@@ -32,18 +32,147 @@ observeEvent(
   }
 )
 
-finaldata = reactiveVal()
+updateexportprogress = function(sumprog,metaprog,repprog,progsection,allparams = NULL,selectedparam = NULL){
+  # allparams = c("DO","WaterTemp")
+  # selectedparam  = allparams[1]
+  if (!is.null(sumprog) & !is.null(metaprog) & !is.null(repprog)){
+    
+    if (sumprog == TRUE & metaprog == TRUE & repprog == TRUE){
+      procitems = message(paste0("---All exports"))
+      dpv = 30
+      spv = 15
+      mpv = 10
+      rpv = 45
+    }else if (sumprog == TRUE & metaprog == TRUE & repprog == FALSE){
+      procitems = message(paste0("---No Report"))
+      dpv = 65
+      spv = 20
+      mpv = 15
+      rpv = 0
+    }else if (sumprog == TRUE & metaprog == FALSE & repprog == TRUE){
+      procitems = message(paste0("---No Metadata"))
+      dpv = 35
+      spv = 15
+      mpv = 0
+      rpv = 50
+    }else if (sumprog == TRUE & metaprog == FALSE & repprog == FALSE){
+      procitems = message(paste0("---No Metadata and Report"))
+      dpv = 80
+      spv = 20
+      mpv = 0
+      rpv = 0
+    }else if (sumprog == FALSE & metaprog == TRUE & repprog == TRUE){
+      procitems = message(paste0("---No Summary"))
+      dpv = 35
+      spv = 0
+      mpv = 15
+      rpv = 50
+    }else if (sumprog == FALSE & metaprog == TRUE & repprog == FALSE){
+      procitems = message(paste0("---No Summary and Report"))
+      dpv = 75
+      spv = 0
+      mpv = 25
+      rpv = 0
+    }else if (sumprog == FALSE & metaprog == FALSE & repprog == TRUE){
+      procitems = message(paste0("---No Summary and Metadata"))
+      dpv = 40
+      spv = 0
+      mpv = 0
+      rpv = 60
+    }else if (sumprog == FALSE & metaprog == FALSE & repprog == FALSE){
+      procitems = message(paste0("---Data Only"))
+      dpv = 100
+      spv = 0
+      mpv = 0
+      rpv = 0
+    }
+    
+    if (progsection == "Data1"){
+      pv = dpv * 0.1
+      txt = "Beginning data processing"
+    }else if (progsection == "Data2"){
+      pv = dpv * 0.2
+      txt = "Processing dates and times"
+    }else if (progsection == "Data3"){
+      dpvi = (dpv - (dpv * 0.2)) / length(allparams)
+      pv = (dpv * 0.2) + (dpvi * match(selectedparam,allparams))
+      txt = paste("Processing ",selectedparam," data")
+    }else if (progsection == "Data4"){
+      pv = dpv
+      txt = "Data processing complete"
+    }else if (progsection %in% c("Sum1","Sum2","Sum3")){
+      if (progsection == "Sum1"){
+        pv = dpv + (spv *0.1)
+        txt = "Beginning data summary"
+      }else if (progsection == "Sum2"){
+        spvi = (spv - (spv * 0.2)) / length(allparams)
+        pv = dpv + ((spv * 0.2) + (spvi * match(selectedparam,allparams)))
+        txt = paste("Summarizing ",selectedparam," data")
+      }else if (progsection == "Sum3"){
+        pv = dpv + spv
+        txt = "Data summarization complete"
+      }
+    }else if (progsection %in% c("Meta1","Meta2")){
+      if (progsection == "Meta1"){
+        pv = dpv + spv + (mpv * 0.5)
+        txt = "Beginning metadata compilation"
+      }else if (progsection == "Meta2"){
+        pv = dpv + spv + mpv
+        txt = "Metadata compilation complete"
+      }
+    }else if (progsection %in% c("Report1","Report2","Report3","Report4")){
+      if (progsection == "Report1"){
+        pv = dpv + spv + mpv + (rpv * 0.1)
+        txt = "Beginning building report"
+      }else if (progsection == "Report2"){
+        pv = dpv + spv + mpv + (rpv * 0.2)
+        txt = "Defining report parameters"
+      }else if (progsection == "Report3"){
+        pv = dpv + spv + mpv + (rpv * 0.3)
+        txt = "Compiling report (This may take a minute)"
+      }else if (progsection == "Report4"){
+        pv = dpv + spv + mpv + rpv
+        txt = "Report completed"
+      }
+    }
+    message(progsection)
+    message(paste0("-",pv))
+    message(paste0("--",txt))
+    procitems
+    
+    updateProgressBar(
+      id = "exportprogress",
+      session = session,
+      value = pv,
+      status = "success",
+      title = txt
+    )
+  }
+}
+
 
 #Process data for export
+finaldata = reactiveVal()
+finaldatacomplete = reactiveVal(FALSE)
 observeEvent(
   input$exportprocessbttn,
   ignoreNULL = FALSE,{
+    
     validate(
       need(selectexportdata(),"Loading...")
     )
+    message("finaldataprocessing")
     deploydatesupdate()
     #Export Data Settings
     exportsettings = selectexportdata()
+    print("Data 1")
+    updateexportprogress(
+      sumprog = exportsettings$IncSum,
+      metaprog = exportsettings$IncMeta,
+      repprog = exportsettings$IncRep,
+      progsection = "Data1"
+    )
+    
     #Program Names
     programsettings = programs()
     #Waterbodies
@@ -64,6 +193,13 @@ observeEvent(
     
     #Select the UnitId and DateTime Fields
     startfields = startfields[,c(1:2)]
+    print("Data 2")
+    updateexportprogress(
+      sumprog = exportsettings$IncSum,
+      metaprog = exportsettings$IncMeta,
+      repprog = exportsettings$IncRep,
+      progsection = "Data2"
+    )
     
     #Rename UnitID Field
     names(startfields)[1] = exportsettings$UnitID
@@ -73,7 +209,7 @@ observeEvent(
       time = startfields[,2],
       tzone = exportsettings$TZ
     )
-    print(paste("y",startfields[1,2]))
+    
     #Split or separate dates
     if (exportsettings$DateTimeSep == "Combined"){
       names(startfields)[2] = exportsettings$Date_Time
@@ -168,6 +304,17 @@ observeEvent(
       combinefields = startfields
       #qcloggertypes() sourced from processing.R
       for (i in qcloggertypes()){
+        print("Data 3 Single")
+        
+        updateexportprogress(
+          sumprog = exportsettings$IncSum,
+          metaprog = exportsettings$IncMeta,
+          repprog = exportsettings$IncRep,
+          progsection = "Data3",
+          allparams = qcloggertypes(),
+          selectedparam = i
+        )
+        
         #Select parameter Data and Depth Fields and rename them
         paradata = processdata[[i]]
         paradata = paradata[,c(3,4)]
@@ -183,11 +330,16 @@ observeEvent(
 
         #Select Flag fields and rename them
         qcdata = processdata[[i]]
-        qcdata = qcdata[,c(15:19)]
+        
+        if (exportsettings$IncNotes == TRUE){
+          qcdata = qcdata[,c(15:20)]
+        }else{
+          qcdata = qcdata[,c(15:19)]
+        }
         
         if (length(qcloggertypes()) > 1){
-          loggertypename = as.character(dplyr::select(exportsettings,matches(i)))
-          names(qcdata) = paste0(loggertypename,"_",names(qcdata))
+          # loggertypename = as.character(dplyr::select(exportsettings,matches(i)))
+          names(qcdata) = paste0(i,"_",names(qcdata))
         }
         
         #Combine parameter data and qc data
@@ -261,13 +413,22 @@ observeEvent(
       #Add QC
       if (length(qcloggertypes()) > 1){
         for (i in qcloggertypes()){
-          loggertypename = as.character(dplyr::select(exportsettings,matches(i)))
-          qcflags = c("FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")
-          qcflags = paste0(loggertypename,"_",qcflags)
+          # loggertypename = as.character(dplyr::select(exportsettings,matches(i)))
+          
+          if (exportsettings$IncNotes == TRUE){
+            qcflags = c("FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis","Notes")
+          }else{
+            qcflags = c("FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")
+          }
+          qcflags = paste0(i,"_",qcflags)
           fieldorder = c(fieldorder,qcflags)
         }
       }else{
-        fieldorder = c(fieldorder,"FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")
+        if (exportsettings$IncNotes == TRUE){
+          fieldorder = c(fieldorder,"FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis","Notes")
+        }else{
+          fieldorder = c(fieldorder,"FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")
+        }
       }
       
       combinefields = combinefields[,fieldorder]
@@ -275,6 +436,16 @@ observeEvent(
     }else if (exportsettings$FileSep == "Multiple"){
       combinelist = list()
       for (i in qcloggertypes()){
+        print("Data 3 Multiple")
+        updateexportprogress(
+          sumprog = exportsettings$IncSum,
+          metaprog = exportsettings$IncMeta,
+          repprog = exportsettings$IncRep,
+          progsection = "Data3",
+          allparams = qcloggertypes(),
+          selectedparam = i
+        )
+        
         #Select data by logger type
         paradata = processdata[[i]]
         
@@ -289,7 +460,13 @@ observeEvent(
 
         #Select Flag fields
         qcdata = processdata[[i]]
-        qcdata = qcdata[,c(15:19)]
+        
+        if (exportsettings$IncNotes == TRUE) {
+          qcdata = qcdata[,c(15:20)]
+        }else{
+          qcdata = qcdata[,c(15:19)]
+        }
+        
         paradata = cbind(startfields,paradata)
         combinedata = cbind(paradata,qcdata)
         
@@ -349,16 +526,29 @@ observeEvent(
         fieldorder = c(fieldorder,datafieldname)
         
         #Add QC
-        fieldorder = c(fieldorder,"FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")
-        
+        if (exportsettings$IncNotes == TRUE){
+          fieldorder = c(fieldorder,"FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis","Notes")
+        }else{
+          fieldorder = c(fieldorder,"FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")
+        }
         combinedata = combinedata[,fieldorder]
         
         combinelist[[i]] = combinedata
         
       }
       finaldata(combinelist)
+      
     }
-
+    finaldatacomplete(TRUE)
+    
+    print("Data 4")
+    updateexportprogress(
+      sumprog = exportsettings$IncSum,
+      metaprog = exportsettings$IncMeta,
+      repprog = exportsettings$IncRep,
+      progsection = "Data4"
+    )
+    
     #Clear VisQCdata
     if (exportsettings$IncSum == FALSE){
       VisQCdata(NULL)
@@ -366,16 +556,27 @@ observeEvent(
   }
 )
 
+#Compile Daily Summary Data
 summarydata = reactiveVal()
-
+summarydatacomplete = reactiveVal(FALSE)
 observeEvent(
   input$exportprocessbttn,
   ignoreNULL = FALSE,{
     validate(
+      need(finaldatacomplete() == TRUE,"Loading..."),
       need(selectexportdata(),"Loading...")
     )
+    message("summarydataprocessing")
     sumexportsettings = selectexportdata()
     if (sumexportsettings$IncSum == TRUE){
+      print("Sum 1")
+      updateexportprogress(
+        sumprog = sumexportsettings$IncSum,
+        metaprog = sumexportsettings$IncMeta,
+        repprog = sumexportsettings$IncRep,
+        progsection = "Sum1"
+      )
+      
       deploydatesupdate()
       
       #Program Names
@@ -395,6 +596,16 @@ observeEvent(
       #Summarize Data
       sumdata = NULL
       for (i in qcloggertypes()){
+        print("Sum 2")
+        
+        updateexportprogress(
+          sumprog = sumexportsettings$IncSum,
+          metaprog = sumexportsettings$IncMeta,
+          repprog = sumexportsettings$IncRep,
+          progsection = "Sum2",
+          allparams = qcloggertypes(),
+          selectedparam = i
+        )
         
         origdataselect = origdata[[i]]
         origdataselect = origdataselect[which(origdataselect$FlagVis != 'F'),]
@@ -711,10 +922,169 @@ observeEvent(
         }
         summarydata(sumcombinelist)
       }
+      
+      print("Sum 3")
+      updateexportprogress(
+        sumprog = sumexportsettings$IncSum,
+        metaprog = sumexportsettings$IncMeta,
+        repprog = sumexportsettings$IncRep,
+        progsection = "Sum3"
+      )
       VisQCdata(NULL)
+    }
+    summarydatacomplete(TRUE)
+  }
+)
+
+#Compile Metadata
+metadatafinal = reactiveVal()
+metadatafinalcomplete = reactiveVal(FALSE)
+qcsettingsfinal = reactiveVal()
+observeEvent(
+  input$exportprocessbttn,
+  ignoreNULL = FALSE,{
+    
+    validate(
+      need(input$procprogram,"Loading..."),
+      need(input$procwaterbody,"Loading..."),
+      need(input$procstationname,"Loading..."),
+      need(input$procmodel,"Loading..."),
+      need(finaldatacomplete() == TRUE,"Loading..."),
+      need(summarydatacomplete() == TRUE,"Loading...")
+    )
+    message("metadatafinalprocessing")
+    
+    metaexportsettings = selectexportdata()
+    
+    print("Meta 1")
+    updateexportprogress(
+      sumprog = metaexportsettings$IncSum,
+      metaprog = metaexportsettings$IncMeta,
+      repprog = metaexportsettings$IncRep,
+      progsection = "Meta1"
+    )
+    
+    compiledmetadata = buildmeta(
+      programid = input$procprogram,
+      appid = input$procwaterbody,
+      stationid = input$procstationname,
+      deployid = deployid(),
+      modelid = input$procmodel,
+      programs = programs(),
+      programwbs = programwbs(),
+      wbnames = wbnames(),
+      stations = stations(),
+      logfiledefs = loggerfiledefs(),
+      deploylogs = deploylogs(),
+      qcconfig = qcconfig(),
+      export = export()
+    )
+    metadatafinal(compiledmetadata)
+    
+    compileqcsettings =  getqcsettings(
+      appid = input$procwaterbody,
+      stationid = input$procstationname,
+      deployid = deployid(),
+      deploylogs = deploylogs(),
+      qcconfig = qc_config(),
+      programwbs = programwbs(),
+      wbnames = wbnames(),
+      stations = stations()
+    )
+    qcsettingsfinal(compileqcsettings)
+    
+    print("Meta 2")
+    updateexportprogress(
+      sumprog = metaexportsettings$IncSum,
+      metaprog = metaexportsettings$IncMeta,
+      repprog = metaexportsettings$IncRep,
+      progsection = "Meta2"
+    )
+    
+    metadatafinalcomplete(TRUE)
+  }
+)
+
+# Compile Report
+observeEvent(
+  input$exportprocessbttn,
+  ignoreNULL = FALSE,{
+    validate(
+      need(finaldatacomplete() == TRUE,"Loading..."),
+      need(summarydatacomplete() == TRUE,"Loading..."),
+      need(metadatafinalcomplete() == TRUE,"Loading..."),
+      need(selectexportdata(),"Loading...")
+    )
+    
+    message("reportprocessing")
+    repexportsettings = selectexportdata()
+    if (repexportsettings$IncRep == TRUE){
+      
+      print("Report 1")
+      updateexportprogress(
+        sumprog = repexportsettings$IncSum,
+        metaprog = repexportsettings$IncMeta,
+        repprog = repexportsettings$IncRep,
+        progsection = "Report1"
+      )
+      #Delete Temp folder
+      unlink(paste0(getwd(),"/temp"),recursive = TRUE)
+      
+      dldname = storewbname()
+      dldnamestart = paste0(dldname)
+      dldnamestart = gsub("\\s+","_",gsub("[[:punct:]]","",dldnamestart))
+      
+      #Create Temp folder
+      dir.create(paste0(getwd(),"/temp"))
+      
+      print("Report 2")
+      updateexportprogress(
+        sumprog = repexportsettings$IncSum,
+        metaprog = repexportsettings$IncMeta,
+        repprog = repexportsettings$IncRep,
+        progsection = "Report2"
+      )
+      
+      repstation = stations()
+      repstation = repstation[which(repstation$StationID == input$procstationname),]
+
+      params = list(
+        inputdata = finaldata(),
+        metadata = metadatafinal(),
+        qcsettings = qcsettingsfinal(),
+        export = selectexportdata(),
+        stations = repstation,
+        app_version = baseconfigversion
+      )
+      
+      reportfile = paste0(getwd(),"/temp/",dldnamestart,"_report.html")
+      
+      print("Report 3")
+      updateexportprogress(
+        sumprog = repexportsettings$IncSum,
+        metaprog = repexportsettings$IncMeta,
+        repprog = repexportsettings$IncRep,
+        progsection = "Report3"
+      )
+      
+      rmarkdown::render(
+        input = "markdown/report.Rmd",
+        output_file = reportfile,
+        params = params,
+        envir = new.env(parent = globalenv())
+      )
+      
+      print("Report 4")
+      updateexportprogress(
+        sumprog = repexportsettings$IncSum,
+        metaprog = repexportsettings$IncMeta,
+        repprog = repexportsettings$IncRep,
+        progsection = "Report4"
+      )
     }
   }
 )
+
 
 #Process and Send Evaluation Data
 
@@ -729,22 +1099,31 @@ output$dlddata = downloadHandler(
   },
   content = function(fname){
     exportdldsettings = selectexportdata()
-    #Delete Temp folder
-    unlink(paste0(getwd(),"/temp"),recursive = FALSE)
     
-    #Create Temp folder
-    dir.create("temp")
+    if (exportdldsettings$IncRep == FALSE){
+      #Delete Temp folder
+      unlink(paste0(getwd(),"/temp"),recursive = TRUE)
+      
+      #Create Temp folder
+      dir.create("temp")
+    }
     
     #Get Waterbody Name
     wbnamedld = wbnames()
     dldname = storewbname()
+    dldnamestart = paste0(dldname)
+    dldnamestart = gsub("\\s+","_",gsub("[[:punct:]]","",dldnamestart))
+    
     
     #Process Data for Single File
     if (exportdldsettings$FileSep == "Single"){
-      
-      dldnamestart = paste0(dldname)
-      
-      dldnamestart = gsub("\\s+","_",gsub("[[:punct:]]","",dldnamestart))
+      updateProgressBar(
+        id = "dldprogress",
+        session = session,
+        value = 40,
+        status = "success",
+        title = "Packaging data"
+      )
       
       dldnameprime = paste0(dldnamestart,".csv")
       
@@ -762,6 +1141,14 @@ output$dlddata = downloadHandler(
       )
       
       if (exportdldsettings$IncSum == TRUE){
+        updateProgressBar(
+          id = "dldprogress",
+          session = session,
+          value = 60,
+          status = "success",
+          title = "Packaging summary data"
+        )
+        
         dldnamesum = paste0(dldnamestart,"_summary.csv")
         dldpathsum = paste0("temp/",dldnamesum)
         
@@ -780,14 +1167,18 @@ output$dlddata = downloadHandler(
       finaldataout = finaldata()
       #Get a list of logger types from the final data
       listnames = names(finaldataout)
-      
+      updateProgressBar(
+        id = "dldprogress",
+        session = session,
+        value = 40,
+        status = "success",
+        title = "Packaging data"
+      )
       #List containing file paths
       listoutput = NULL
       for (i in listnames){
         selectfinaldata = finaldataout[[i]]
-        dldname = paste0(dldname,collapse = "_")
-        dldname = gsub("\\s+","_",gsub("[[:punct:]]","",dldname))
-        dldname1 = paste0(dldname,"_",i,".csv")
+        dldname1 = paste0(dldnamestart,"_",i,".csv")
         dldpath = paste0("temp/",dldname1)
         
         #Write csv
@@ -804,20 +1195,27 @@ output$dlddata = downloadHandler(
       )
       
       if (exportdldsettings$IncSum == TRUE){
+        updateProgressBar(
+          id = "dldprogress",
+          session = session,
+          value = 60,
+          status = "success",
+          title = "Packaging summary data"
+        )
         summarydataout = summarydata()
         sumlistnames = names(summarydataout)
         
         sumlistoutput = NULL
         for (i in sumlistnames){
           selectsumdata = summarydataout[[i]]
-          sumdldname = paste0(dldname,coll = "_")
-          sumdldname = gsub("\\s+","_",gsub("[[:punct:]]","",sumdldname))
-          sumdldnameend = paste0(sumdldname,"_",i,"_summary.csv")
+
+          sumdldnameend = paste0(dldnamestart,"_",i,"_summary.csv")
           sumdldpath = paste0("temp/",sumdldnameend)
           
           write.csv(selectsumdata,sumdldpath,row.names = FALSE)
           sumlistoutput = c(sumlistoutput,sumdldpath)
         }
+        
         zip_append(
           zipfile = fname,
           files = sumlistoutput,
@@ -829,6 +1227,14 @@ output$dlddata = downloadHandler(
     }
     #Add Config File
     if (exportdldsettings$IncConfig == TRUE){
+      updateProgressBar(
+        id = "dldprogress",
+        session = session,
+        value = 70,
+        status = "success",
+        title = "Packaging configuration file"
+      )
+      
       zip_append(
         zipfile = fname,
         files = "config/baseconfig.RData",
@@ -839,41 +1245,55 @@ output$dlddata = downloadHandler(
     }
     
     if (exportdldsettings$IncMeta == TRUE){
-      buildmeta(
-        programid = input$procprogram,
-        appid = input$procwaterbody,
-        stationid = input$procstationname,
-        deployid = deployid(),
-        modelid = input$procmodel,
-        programs = programs(),
-        programwbs = programwbs(),
-        wbnames = wbnames(),
-        stations = stations(),
-        logfiledefs = loggerfiledefs(),
-        deploylogs = deploylogs(),
-        qcconfig = qcconfig(),
-        export = export()
+      updateProgressBar(
+        id = "dldprogress",
+        session = session,
+        value = 80,
+        status = "success",
+        title = "Packaging metadata"
       )
-      
-      getqcsettings(
-        appid = input$procwaterbody,
-        stationid = input$procstationname,
-        deployid = deployid(),
-        deploylogs = deploylogs(),
-        qcconfig = qc_config(),
-        programwbs = programwbs(),
-        wbnames = wbnames(),
-        stations = stations()
-      )
+
+
+      write.csv(metadatafinal(),paste0("temp/",dldnamestart,"_metadata.csv"),row.names = FALSE)
+      write.csv(qcsettingsfinal(),paste0("temp/",dldnamestart,"_qcsettings.csv"),row.names = FALSE)
       
       zip_append(
         zipfile = fname,
-        files = c("temp/metadata.csv","temp/qcsettings.csv"),
+        files = c(paste0("temp/",dldnamestart,"_metadata.csv"),paste0("temp/",dldnamestart,"_qcsettings.csv")),
         include_directories = FALSE,
         recurse = FALSE,
         mode = "cherry-pick"
       )
     }
+    
+    if(exportdldsettings$IncRep == TRUE){
+      updateProgressBar(
+        id = "dldprogress",
+        session = session,
+        value = 90,
+        status = "success",
+        title = "Packaging report"
+      )
+
+      reportfile = paste0(getwd(),"/temp/",dldnamestart,"_report.html")
+
+      zip_append(
+        zipfile = fname,
+        files = reportfile,
+        include_directories = FALSE,
+        recurse = FALSE,
+        mode = "cherry-pick"
+      )
+    }
+    
+    updateProgressBar(
+      id = "dldprogress",
+      session = session,
+      value = 100,
+      status = "success",
+      title = "Download complete"
+    )
+
   },
   contentType = "application/zip"
 )
