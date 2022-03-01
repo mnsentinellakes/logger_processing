@@ -85,12 +85,14 @@ output$exportsettingsUI = renderUI({
   
   if (nrow(supportfilesexport) > 0){
     sepfilevalue = supportfilesexport$FileSep
+    notesvalue = supportfilesexport$IncNotes
     metavalue = supportfilesexport$IncMeta
     reportvalue = supportfilesexport$IncRep
     configvalue = supportfilesexport$IncConfig
     summaryvalue = supportfilesexport$IncSum
   }else{
     sepfilevalue = "Single"
+    notesvalue = FALSE
     metavalue = TRUE
     reportvalue = TRUE
     configvalue = TRUE
@@ -115,7 +117,21 @@ output$exportsettingsUI = renderUI({
         )
       ),
       column(
-        width = 9,
+        width = 3,
+        style = "vertical-align:center; border:1px solid lightgray; padding-right:10px; padding-left:10px; background-color:ghostwhite;",
+        tags$h4("Notes"),
+        prettyCheckbox(
+          inputId = "incnotes",
+          label = "Include QC Notes",
+          value = notesvalue,
+          status = "success"
+        )
+      )
+    ),
+    tags$br(),
+    fluidRow(
+      column(
+        width = 12,
         tags$div(
           style = "vertical-align:center; border:1px solid lightgray; padding-right:10px; padding-left:10px; background-color:ghostwhite; 
           width: 100%",
@@ -901,6 +917,7 @@ observeEvent(
     if (nrow(exportselect()) > 0){
       #File Setup
       exportfinal$FileSep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$sepfile
+      exportfinal$IncNotes[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incnotes
       exportfinal$IncMeta[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incmeta
       exportfinal$IncRep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$increp
       exportfinal$IncConfig[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incconfig
@@ -1233,7 +1250,7 @@ observeEvent(
                                   "Lat" = latfinal,"Lon" = lonfinal,"IncUser" = input$incusernameexport,"User" = usernamefinal,
                                   "AirBP" = airbpfinal,"AirTemp" = airtempfinal,"Chlorophylla" = chlorophyllafinal,"Cond" = condfinal,
                                   "Discharge" = dischargefinal,"DO" = dofinal,"pH" = phfinal,
-                                  "Turbidity" = turbidityfinal,"WaterLevel" = waterlevelfinal,"WaterP" = waterpfinal,"WaterTemp" = watertempfinal,
+                                  "Turbidity" = turbidityfinal,"WaterLevel" = waterlevelfinal,"WaterP" = waterpfinal,"WaterTemp" = watertempfinal,"IncNotes" = input$incnotes,
                                   stringsAsFactors = FALSE)
       
       exportfinal = rbind(exportfinal,exportfinalrow)
