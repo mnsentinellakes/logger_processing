@@ -224,59 +224,86 @@ observeEvent(
 
 observeEvent(
   input$addbttn,{
-    if (!is.null(input$procmodel)){
-      if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) > 0){
-        addproclogs = processinglogs()
-        
-        addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = input$inputdepth,"Processed" = NA,
-                                    "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
-                                    "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
-        
-        addproclogs = rbind(addproclogs,addproclogsrow)
-        
-        processinglogs(addproclogs)
-        updatebaseconfig()
-        
-        updateTextInput(
+    if (!is.null(input$procprogram)){
+      if (!is.null(input$procwaterbody)){
+        if (!is.null(input$procstation)){
+          if (!is.null(input$procmodel)){
+            if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) > 0){
+              addproclogs = processinglogs()
+              
+              addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = input$inputdepth,"Processed" = NA,
+                                          "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
+                                          "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
+              
+              addproclogs = rbind(addproclogs,addproclogsrow)
+              
+              processinglogs(addproclogs)
+              updatebaseconfig()
+              
+              updateTextInput(
+                session = session,
+                inputId = "inputsn",
+                value = ""
+              )
+              
+              updateNumericInput(
+                session = session,
+                inputId = "inputdepth",
+                value = ""
+              )
+            }else if (nchar(input$inputsn) == 0 & nchar(input$inputdepth) > 0){
+            }else if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) == 0){
+              
+              addproclogs = processinglogs()
+              addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = NA,"Processed" = NA,
+                                          "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
+                                          "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
+              addproclogs = rbind(addproclogs,addproclogsrow)
+              
+              processinglogs(addproclogs)
+              updatebaseconfig()
+              
+              updateTextInput(
+                session = session,
+                inputId = "inputsn",
+                value = ""
+              )
+              
+              updateNumericInput(
+                session = session,
+                inputId = "inputdepth",
+                value = ""
+              )
+            }
+          }else{
+            sendSweetAlert(
+              session = session,
+              title = "Missing Logger Model",
+              text = "A Logger Model must be created and selected for this logger type before processing.",
+              type = "error"
+            )
+          }
+        }else{
+          sendSweetAlert(
+            session = session,
+            title = "Missing Station",
+            text = "A station must be selected for the data to be processed",
+            type = "error"
+          )
+        }
+      }else{
+        sendSweetAlert(
           session = session,
-          inputId = "inputsn",
-          value = ""
-        )
-        
-        updateNumericInput(
-          session = session,
-          inputId = "inputdepth",
-          value = ""
-        )
-      }else if (nchar(input$inputsn) == 0 & nchar(input$inputdepth) > 0){
-      }else if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) == 0){
-        
-        addproclogs = processinglogs()
-        addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = NA,"Processed" = NA,
-                                    "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
-                                    "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
-        addproclogs = rbind(addproclogs,addproclogsrow)
-        
-        processinglogs(addproclogs)
-        updatebaseconfig()
-        
-        updateTextInput(
-          session = session,
-          inputId = "inputsn",
-          value = ""
-        )
-        
-        updateNumericInput(
-          session = session,
-          inputId = "inputdepth",
-          value = ""
+          title = "Missing Waterbody",
+          text = "A waterbody must be selected for the data to be processed",
+          type = "error"
         )
       }
     }else{
       sendSweetAlert(
         session = session,
-        title = "Missing Logger Model",
-        text = "A Logger Model must be created and selected for this logger type before processing.",
+        title = "Missing Program",
+        text = "A program must be selected for the data to be processed",
         type = "error"
       )
     }
