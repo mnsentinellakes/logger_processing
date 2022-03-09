@@ -99,7 +99,8 @@ output$VisQCplot = renderPlotly({
           ylab(input$visqcloggerchoices) +
           scale_color_manual(values = flagcolors) +
           Theme
-      )
+      ) %>%
+        config(displayModeBar = TRUE)
     )
   )
 })
