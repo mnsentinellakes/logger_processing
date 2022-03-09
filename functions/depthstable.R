@@ -226,7 +226,7 @@ observeEvent(
   input$addbttn,{
     if (!is.null(input$procprogram)){
       if (!is.null(input$procwaterbody)){
-        if (!is.null(input$procstation)){
+        if (!is.null(input$procstationname)){
           if (!is.null(input$procmodel)){
             if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) > 0){
               addproclogs = processinglogs()
