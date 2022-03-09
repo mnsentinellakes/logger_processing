@@ -2,6 +2,17 @@
 logprocsidebar = function(id){
   dashboardSidebar(
     width = 275,
+    HTML("<CENTER>"),
+    downloadBttn(
+      outputId = "appinstruct",
+      label = "App Instructions",
+      style = "minimal",
+      color = "default",
+      icon = NULL,
+      size = "sm"
+      
+    ),
+    HTML("</CENTER>"),
     HTML("&nbsp;&nbsp;<font size=5><b>Steps</b></font>"),
     #Processing steps, to be followed sequentially----
     sidebarMenu(
@@ -15,7 +26,7 @@ logprocsidebar = function(id){
         "Configuration",
         icon = icon("sliders-h"),
         startExpanded = TRUE,
-        menuSubItem("Programs and Waterbodies",tabName = "programsandwaterbodiestab"),
+        menuSubItem("Programs, Waterbodies, and Stations",tabName = "programsandwaterbodiestab"),
         menuSubItem("QC Settings",tabName = "configqctab"),
         menuSubItem("Logger File Definitions",tabName = "logfiledefstab"),
         menuSubItem("Export Options",tabName = "exportoptionstab"),
