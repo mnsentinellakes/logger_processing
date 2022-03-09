@@ -123,7 +123,7 @@
           uiOutput("selectwbsUI")
         ),
         box(
-          title = "Parameter",
+          title = "Data Type",
           status = "primary",
           solidHeader = TRUE,
           width = NULL,
@@ -239,7 +239,7 @@
       column(
         width = 4,
         box(
-          title = "Upload logger data",
+          title = "Upload Logger Data",
           solidHeader = TRUE,
           collapsible = FALSE,
           status = "primary",
