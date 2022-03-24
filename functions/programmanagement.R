@@ -39,7 +39,7 @@ output$loadconfigfileUI = renderUI({
 
 #All code used to update potential changes to tables in baseconfig
 updatebaseconfigversion = function(baseconfigdata){
-  baseconfigdata = baseconfig
+  
   #Add a version object
   if("version" %notin% names(baseconfigdata)){
     baseconfigdata = c(baseconfigdata,"version" = 0.5)
@@ -68,7 +68,7 @@ updatebaseconfigversion = function(baseconfigdata){
     baseconfigdata$export$IncNotes = FALSE
   }
   
-  
+
   return(baseconfigdata)
 }
 
@@ -84,6 +84,9 @@ observeEvent(
         if (names(baseconfig)[1] == "programs"){
           
          baseconfig = updatebaseconfigversion(baseconfig)
+         
+         print(baseconfig$version)
+         
          save(baseconfig,file = "config/baseconfig.RData")
 
          #Assign programs data frame to a reactive value
@@ -104,6 +107,8 @@ observeEvent(
          deploylogs(baseconfig$deploylogs)
          #Assign Export Settings to a reactive value
          export(baseconfig$export)
+         
+         # updatebaseconfig()
          
          loadstatus("Configuration File Loaded")
         }else{
