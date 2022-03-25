@@ -47,7 +47,7 @@ updatebaseconfigversion = function(baseconfigdata){
     baseconfigdata
   }
   
-  if (baseconfigdata$version < 0.75){
+  if (as.numeric(baseconfigdata$version) < 0.75){
     #Change GaugeHeight to WaterLevel in the loggerfiledefs, export, and qc_config tables
     names(baseconfigdata$loggerfiledefs)[14] = "WaterLevel"
     baseconfigdata$loggerfiledefs = baseconfigdata$loggerfiledefs[,c(1:13,15,16,14,17:21)]
@@ -58,17 +58,18 @@ updatebaseconfigversion = function(baseconfigdata){
     baseconfigdata$qc_config$Logger_Type[which(baseconfigdata$qc_config$Logger_Type == "GageHeight")] = "WaterLevel"
   }
   
-  if (baseconfigdata$version < 0.9){
+  if (as.numeric(baseconfigdata$version) < 0.9){
     baseconfigdata$qc_config$Level = 1
     baseconfigdata$qc_config$Depth_1 = NA
     baseconfigdata$qc_config$Depth_2 = NA
   }
   
-  if(baseconfigdata$version < 1.0){
+  if(as.numeric(baseconfigdata$version) < 1.0){
     baseconfigdata$export$IncNotes = FALSE
   }
   
-
+  baseconfigdata$version = baseconfigversion
+  
   return(baseconfigdata)
 }
 
