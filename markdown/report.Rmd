@@ -282,17 +282,20 @@ monthtotals = as_tibble(
         )
       )
       
+      
       monthtib = tibble(
         "month" = monthcalc
       )
-      colnames(monthtib) = names(x)
+      
+      # colnames(monthtib) = names(monthvec[x])
+      
       monthsums = cbind(monthsums,monthtib)
     }
   )
 )
 
 #Fix monthtotals column names
-colnames(monthtotals) = gsub(".monthtib","",colnames(monthtotals))
+colnames(monthtotals) = gsub(".month","",colnames(monthtotals))
 #cbind monthresults and monthtotals
 monthresults = cbind(monthresults,monthtotals)
 #Calculate the sums for each row
