@@ -1,3 +1,4 @@
+#function to update configuration file used to store qc thresholds
 updateconfigfile = function(qcconfigdata,level,loggertype){
 
   qcconfigdata = qcconfigdata[which(qcconfigdata$AppID == input$procwaterbody),]
@@ -68,28 +69,6 @@ updateconfigfile = function(qcconfigdata,level,loggertype){
   }else{
     watertemp = qcconfigdata[which(qcconfigdata$Logger_Type == "WaterTemp" & qcconfigdata$Level == 1),]
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  # grossfailhi = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Hi"),]
-  # 
-  # 
-  # 
-  # grossfaillo = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Fail.Lo"),]
-  # grosssuspecthi = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Hi"),]
-  # grosssuspectlo = qcconfigdata[which(qcconfigdata$QC_Metric == "Gross.Suspect.Lo"),]
-  # spikehi = qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Hi"),]
-  # spikelo = qcconfigdata[which(qcconfigdata$QC_Metric == "Spike.Lo"),]
-  # rocsdnumber = qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.number"),]
-  # rocsdperiod = qcconfigdata[which(qcconfigdata$QC_Metric == "RoC.SD.period"),]
-  # flathi = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Hi"),]
-  # flatlo = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Lo"),]
-  # flattolerance = qcconfigdata[which(qcconfigdata$QC_Metric == "Flat.Tolerance"),]
   
   rowidname = "RowID"
   
@@ -697,10 +676,3 @@ updateconfigfile = function(qcconfigdata,level,loggertype){
   
   cat(configsettingsoutput,file = paste0("config/configfile.R"))
 }
-
-#Build the config file used by ContDataQC
-# observe({
-#   
-#   updateconfigfile(qcconfigdata = qc_config())
-#   
-# })
