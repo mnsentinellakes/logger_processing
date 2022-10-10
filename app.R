@@ -58,7 +58,7 @@ server <- function(input,output,session) {
     #Code for about page
     source("functions/about.R",local = TRUE)$value
     
-    # #code for validation of inputs
+    # #code for validation of inputs - possible future implementation
     # source("functions/validation.R", local = TRUE)$value
     
     #Code for loading baseconfig data, holding all metadata and configuration data
