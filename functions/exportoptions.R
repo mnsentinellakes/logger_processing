@@ -442,7 +442,7 @@ output$namesdeployexportUI = renderUI({
 #Unit ID Field UI
 output$unitidexportUI = renderUI({
   incunitidexportvalue = exportselect()
-  # if (input$incunitidexport == TRUE){
+  
   textInput(
     inputId = "unitidexport",
     label = "Unit ID Field Name",
@@ -907,12 +907,13 @@ output$exportdatafieldsUI = renderUI({
   )
 })
 
+#Observe saveexportoptions button and save to table
 observeEvent(
   input$saveexportoptionsbttn,{
     exportfinal = export()
     loggerexportfinal = loggerfiledefs()
     loggerexportfinal = loggerexportfinal[which(loggerexportfinal$ModelID == input$selectloggerexport),]
-
+    
     #If settings already exist for the program and model combination
     if (nrow(exportselect()) > 0){
       #File Setup
@@ -1018,7 +1019,6 @@ observeEvent(
       
       exportfinal$TZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$tzexport
       
-      
       #Data Field Names
       if (!is.na(loggerexportfinal$AirBP) & loggerexportfinal$AirBP != ""){
         exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airbpexport
@@ -1112,7 +1112,7 @@ observeEvent(
       }else{
         wbnamefinal = NA
       }
-
+      
       if (input$incwbtypeexport == TRUE){
         wbtypefinal = input$wbtypeexport
       }else{
@@ -1260,6 +1260,7 @@ observeEvent(
   }
 )
 
+#UI for descriptions
 output$exportoptionsdescUI = renderUI({
   tags$p(
     HTML("<font size = 4><i>"),
