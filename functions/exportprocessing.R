@@ -1,3 +1,4 @@
+#Reactive value to store data for export
 selectexportdata = reactiveVal()
 
 #Update the deployment table dates
@@ -32,9 +33,8 @@ observeEvent(
   }
 )
 
+#function for updating the export progress bar
 updateexportprogress = function(sumprog,metaprog,repprog,progsection,allparams = NULL,selectedparam = NULL){
-  # allparams = c("DO","WaterTemp")
-  # selectedparam  = allparams[1]
   if (!is.null(sumprog) & !is.null(metaprog) & !is.null(repprog)){
     
     if (sumprog == TRUE & metaprog == TRUE & repprog == TRUE){
@@ -165,7 +165,7 @@ observeEvent(
     deploydatesupdate()
     #Export Data Settings
     exportsettings = selectexportdata()
-    print("Data 1")
+    
     updateexportprogress(
       sumprog = exportsettings$IncSum,
       metaprog = exportsettings$IncMeta,
@@ -187,13 +187,13 @@ observeEvent(
     loggerfilesettings = loggerfiledefs()
     #Export Data
     processdata = VisQCdata()
-
+    
     #Select the first data frame to begin building the final table
     startfields = processdata[[1]]
     
     #Select the UnitId and DateTime Fields
     startfields = startfields[,c(1:2)]
-    print("Data 2")
+    
     updateexportprogress(
       sumprog = exportsettings$IncSum,
       metaprog = exportsettings$IncMeta,
@@ -220,35 +220,27 @@ observeEvent(
       names(startfields)[4] = exportsettings$Time
       startfields[,2] = NULL
     }
-
+    
     #Add Model Name
     if (exportsettings$IncModelName == TRUE){
-      #input$procmodel sourced from processingUI.R
-      # modname = loggerfilesettings$Logger_Model[which(loggerfilesettings$ModelID == input$procmodel)]
       startfields$modname = storeloggermodel()
       names(startfields)[ncol(startfields)] = exportsettings$ModelName
     }
     
     #Add Program Name
     if (exportsettings$IncProgramName == TRUE){
-      #input$procprogram sourced from processingUI.R
-      # progname = programsettings$Program_Name[which(programsettings$ProgramID == input$procprogram)]
       startfields$progname = storeprogram()
       names(startfields)[ncol(startfields)] = exportsettings$ProgramName
     }
     
     #Add WaterBody ID
     if (exportsettings$IncProgramWBID == TRUE){
-      #input$procwaterbody sourced from processingUI.R
-      # startfields$wbid = programwbssettings$ProgramWaterbodyID[which(programwbssettings$AppID == input$procwaterbody)]
       startfields$wbid = storewbid()
       names(startfields)[ncol(startfields)] = exportsettings$ProgramWBID
     }
     
     #Add WaterBody Name
     if (exportsettings$IncWBName == TRUE){
-      #input$procwaterbody sourced from processingUI.R
-      # startfields$wbname = wbnamessettings$Waterbody_Name[which(wbnamessettings$AppID == input$procwaterbody)]
       startfields$wbname = storewbname()
       names(startfields)[ncol(startfields)] = exportsettings$WBName
     }
@@ -262,16 +254,12 @@ observeEvent(
     
     #Add Station ID
     if (exportsettings$IncProgramStationID == TRUE){
-      #input$procstations sourced from processingUI.R
-      # startfields$stationid = stationssettings$ProgramStationID[which(stationssettings$StationID == input$procstationname)]
       startfields$stationid = storestationid()
       names(startfields)[ncol(startfields)] = exportsettings$ProgramStationID
     }
     
     #Add Station Name
     if (exportsettings$IncStationName == TRUE){
-      #input$procstations sourced from processingUI.R
-      # startfields$stationname = stationssettings$Station_Name[which(stationssettings$StationID == input$procstationname)]
       startfields$stationname = storestationname()
       names(startfields)[ncol(startfields)] = exportsettings$StationName
     }
@@ -286,16 +274,12 @@ observeEvent(
     
     #Add Deployment Count
     if (exportsettings$IncDeploy == TRUE){
-      #input$deploynum sourced from processingUI.R
-      # startfields$deploy = unique(deploylogssettings$Deployment_Count[which(deploylogssettings$DeployID == deployid())])
       startfields$deploy = storedepcount()
       names(startfields)[ncol(startfields)] = exportsettings$Deployment
     }
     
     #Add User Name
     if (exportsettings$IncUser == TRUE){
-      #input$username sourced from processingUI.R
-      # startfields$user = unique(deploylogssettings$Processedby[which(deploylogssettings$DeployID == deployid())])
       startfields$user = storeuser()
       names(startfields)[ncol(startfields)] = exportsettings$User
     }
@@ -304,7 +288,6 @@ observeEvent(
       combinefields = startfields
       #qcloggertypes() sourced from processing.R
       for (i in qcloggertypes()){
-        print("Data 3 Single")
         
         updateexportprogress(
           sumprog = exportsettings$IncSum,
@@ -327,7 +310,7 @@ observeEvent(
         }else if (exportsettings$IncZ == FALSE){
           paradata[,2] = NULL
         }
-
+        
         #Select Flag fields and rename them
         qcdata = processdata[[i]]
         
@@ -338,7 +321,6 @@ observeEvent(
         }
         
         if (length(qcloggertypes()) > 1){
-          # loggertypename = as.character(dplyr::select(exportsettings,matches(i)))
           names(qcdata) = paste0(i,"_",names(qcdata))
         }
         
@@ -413,7 +395,6 @@ observeEvent(
       #Add QC
       if (length(qcloggertypes()) > 1){
         for (i in qcloggertypes()){
-          # loggertypename = as.character(dplyr::select(exportsettings,matches(i)))
           
           if (exportsettings$IncNotes == TRUE){
             qcflags = c("FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis","Notes")
@@ -436,7 +417,7 @@ observeEvent(
     }else if (exportsettings$FileSep == "Multiple"){
       combinelist = list()
       for (i in qcloggertypes()){
-        print("Data 3 Multiple")
+        
         updateexportprogress(
           sumprog = exportsettings$IncSum,
           metaprog = exportsettings$IncMeta,
@@ -457,7 +438,7 @@ observeEvent(
         }else if (exportsettings$IncZ == FALSE){
           paradata[,2] = NULL
         }
-
+        
         #Select Flag fields
         qcdata = processdata[[i]]
         
@@ -541,7 +522,6 @@ observeEvent(
     }
     finaldatacomplete(TRUE)
     
-    print("Data 4")
     updateexportprogress(
       sumprog = exportsettings$IncSum,
       metaprog = exportsettings$IncMeta,
@@ -569,7 +549,7 @@ observeEvent(
     message("summarydataprocessing")
     sumexportsettings = selectexportdata()
     if (sumexportsettings$IncSum == TRUE){
-      print("Sum 1")
+      
       updateexportprogress(
         sumprog = sumexportsettings$IncSum,
         metaprog = sumexportsettings$IncMeta,
@@ -592,11 +572,10 @@ observeEvent(
       sumloggerfilesettings = loggerfiledefs()
       
       origdata = VisQCdata()
-    
+      
       #Summarize Data
       sumdata = NULL
       for (i in qcloggertypes()){
-        print("Sum 2")
         
         updateexportprogress(
           sumprog = sumexportsettings$IncSum,
@@ -612,7 +591,7 @@ observeEvent(
         origdataselect = origdataselect[,1:4]
         origdataselect$DateTime = with_tz(origdataselect$DateTime,tzone = sumexportsettings$TZ)
         origz = unique(origdataselect$Z)
-  
+        
         sumdataz = NULL
         for (j in origz){
           if (is.na(j)){
@@ -623,98 +602,85 @@ observeEvent(
           origzunitid = unique(origzselect$UnitID)
           for (k in origzunitid){
             origunit = origzselect[which(origzselect$UnitID == k),]
- 
-          sumdataz.xts = as.xts(as.numeric(as.numeric(origunit$Data)),order.by = origunit$DateTime)
-          sumdataz.mean.xts = apply.daily(sumdataz.xts,mean)
-          sumdataz.max.xts = apply.daily(sumdataz.xts,max)
-          sumdataz.min.xts = apply.daily(sumdataz.xts,min)
-          sumdataz.sd.xts = apply.daily(sumdataz.xts,sd)
-          sumdataz.count.xts = apply.daily(sumdataz.xts,nrow)
-          
-          sumdatazmean = data.frame("unitid" = k,"datetime" = index(sumdataz.mean.xts),"z" = j,"mean" = coredata(sumdataz.mean.xts))
-          sumdatazmax = data.frame("unitid" = k,"datetime" = index(sumdataz.max.xts),"z" = j,"max" = coredata(sumdataz.max.xts))
-          sumdatazmin = data.frame("unitid" = k,"datetime" = index(sumdataz.min.xts),"z" = j,"min" = coredata(sumdataz.min.xts))
-          sumdatazsd = data.frame("unitid" = k,"datetime" = index(sumdataz.sd.xts),"z" = j,"sd" = coredata(sumdataz.sd.xts))
-          sumdatazcount = data.frame("unitid" = k,"datetime" = index(sumdataz.count.xts),"z" = j,
-                                     "count" = coredata(sumdataz.count.xts))
-          sumdatazday = left_join(sumdatazmean,sumdatazmax,by = c("unitid","datetime","z"))
-          sumdatazday = left_join(sumdatazday,sumdatazmin,by = c("unitid","datetime","z"))
-          sumdatazday = left_join(sumdatazday,sumdatazsd,by = c("unitid","datetime","z"))
-          sumdatazday = left_join(sumdatazday,sumdatazcount,by = c("unitid","datetime","z"))
-
-          sumdataz = rbind(sumdataz,sumdatazday)
+            
+            sumdataz.xts = as.xts(as.numeric(as.numeric(origunit$Data)),order.by = origunit$DateTime)
+            sumdataz.mean.xts = apply.daily(sumdataz.xts,mean)
+            sumdataz.max.xts = apply.daily(sumdataz.xts,max)
+            sumdataz.min.xts = apply.daily(sumdataz.xts,min)
+            sumdataz.sd.xts = apply.daily(sumdataz.xts,sd)
+            sumdataz.count.xts = apply.daily(sumdataz.xts,nrow)
+            
+            sumdatazmean = data.frame("unitid" = k,"datetime" = index(sumdataz.mean.xts),"z" = j,"mean" = coredata(sumdataz.mean.xts))
+            sumdatazmax = data.frame("unitid" = k,"datetime" = index(sumdataz.max.xts),"z" = j,"max" = coredata(sumdataz.max.xts))
+            sumdatazmin = data.frame("unitid" = k,"datetime" = index(sumdataz.min.xts),"z" = j,"min" = coredata(sumdataz.min.xts))
+            sumdatazsd = data.frame("unitid" = k,"datetime" = index(sumdataz.sd.xts),"z" = j,"sd" = coredata(sumdataz.sd.xts))
+            sumdatazcount = data.frame("unitid" = k,"datetime" = index(sumdataz.count.xts),"z" = j,
+                                       "count" = coredata(sumdataz.count.xts))
+            sumdatazday = left_join(sumdatazmean,sumdatazmax,by = c("unitid","datetime","z"))
+            sumdatazday = left_join(sumdatazday,sumdatazmin,by = c("unitid","datetime","z"))
+            sumdatazday = left_join(sumdatazday,sumdatazsd,by = c("unitid","datetime","z"))
+            sumdatazday = left_join(sumdatazday,sumdatazcount,by = c("unitid","datetime","z"))
+            
+            sumdataz = rbind(sumdataz,sumdatazday)
           }
         }
         sumdata[[i]] = sumdataz
       }
-
+      
       #Select the first data frame to begin building the final table
       sumstartfields = sumdata[[1]]
       
       #Convert datetime to date
       sumstartfields$datetime = as.Date(sumstartfields$datetime)
-
+      
       #Select the UnitId and DateTime Fields
       sumstartfields = sumstartfields[,c(1:2)]
-
+      
       
       #Rename UnitID Field
       names(sumstartfields)[1] = sumexportsettings$UnitID
       
       #Rename Date Fields
       names(sumstartfields)[2] = "Date"
-
+      
       #Add Model Name
       if (sumexportsettings$IncModelName == TRUE){
-        #input$procmodel sourced from processingUI.R
-        # summodname = sumloggerfilesettings$Logger_Model[which(sumloggerfilesettings$ModelID == input$procmodel)]
         sumstartfields$summodname = storeloggermodel()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ModelName
       }
-
+      
       #Add Program Name
       if (sumexportsettings$IncProgramName == TRUE){
-        #input$procprogram sourced from processingUI.R
-        # sumprogname = sumprogramsettings$Program_Name[which(sumprogramsettings$ProgramID == input$procprogram)]
         sumstartfields$progname = storeprogram()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramName
       }
-
+      
       #Add WaterBody ID
       if (sumexportsettings$IncProgramWBID == TRUE){
-        #input$procwaterbody sourced from processingUI.R
-        # sumstartfields$wbid = sumprogramwbssettings$ProgramWaterbodyID[which(sumprogramwbssettings$AppID == input$procwaterbody)]
         sumstartfields$wbid = storewbid()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramWBID
       }
-
+      
       #Add WaterBody Name
       if (sumexportsettings$IncWBName == TRUE){
-        #input$procwaterbody sourced from processingUI.R
-        # sumstartfields$wbname = sumwbnamessettings$Waterbody_Name[which(sumwbnamessettings$AppID == input$procwaterbody)]
         sumstartfields$wbname = storewbname()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$WBName
       }
-
+      
       #Add WaterBody Type
       if (sumexportsettings$IncWBType == TRUE){
-        #input$procwaterbody sourced from processingUI.R
         sumstartfields$wbtype = sumwbnamessettings$programwbssettings$WB_Type[which(sumprogramwbssettings$AppID == input$procwaterbody)]
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$WBType
       }
-
+      
       #Add Station ID
       if (sumexportsettings$IncProgramStationID == TRUE){
-        #input$procstations sourced from processingUI.R
-        # sumstartfields$stationid = sumstationssettings$ProgramStationID[which(sumstationssettings$StationID == input$procstationname)]
         sumstartfields$stationid = storestationid()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$ProgramStationID
       }
-
+      
       #Add Station Name
       if (sumexportsettings$IncStationName == TRUE){
-        #input$procstations sourced from processingUI.R
-        # sumstartfields$stationname = sumstationssettings$Station_Name[which(sumstationssettings$StationID == input$procstationname)]
         sumstartfields$stationname = storestationname()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$StationName
       }
@@ -726,23 +692,19 @@ observeEvent(
         sumstartfields$lon = storelon()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$Lon
       }
-
+      
       #Add Deployment Count
       if (sumexportsettings$IncDeploy == TRUE){
-        #input$deploynum sourced from processingUI.R
-        # sumstartfields$deploy = unique(sumdeploylogssettings$Deployment_Count[which(sumdeploylogssettings$DeployID == deployid())])
         sumstartfields$deploy = storedepcount()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$Deployment
       }
-
+      
       #Add User Name
       if (sumexportsettings$IncUser == TRUE){
-        #input$username sourced from processingUI.R
-        # sumstartfields$user = unique(sumdeploylogssettings$Processedby[which(sumdeploylogssettings$DeployID == deployid())])
         sumstartfields$user = storeuser()
         names(sumstartfields)[ncol(sumstartfields)] = sumexportsettings$User
       }
-
+      
       if (sumexportsettings$FileSep == "Single"){
         #qcloggertypes() sourced from processing.R
         sumcombinefields = sumstartfields
@@ -822,15 +784,15 @@ observeEvent(
         }
         #Add Date and Time
         sumfieldorder = c(sumfieldorder,"Date")
-      
+        
         #Add Parameters
         for (i in qcloggertypes()){
           sumparametertype = as.character(dplyr::select(sumexportsettings,matches(i)))
           
           sumfieldorder = c(sumfieldorder,paste0(sumparametertype,"_mean"),paste0(sumparametertype,"_max"),paste0(sumparametertype,"_min"),
-                         paste0(sumparametertype,"_sd"),"Count")
+                            paste0(sumparametertype,"_sd"),"Count")
         }
-
+        
         sumcombinefields = sumcombinefields[,sumfieldorder]
         summarydata(sumcombinefields)
         
@@ -923,7 +885,6 @@ observeEvent(
         summarydata(sumcombinelist)
       }
       
-      print("Sum 3")
       updateexportprogress(
         sumprog = sumexportsettings$IncSum,
         metaprog = sumexportsettings$IncMeta,
@@ -956,7 +917,6 @@ observeEvent(
     
     metaexportsettings = selectexportdata()
     
-    print("Meta 1")
     updateexportprogress(
       sumprog = metaexportsettings$IncSum,
       metaprog = metaexportsettings$IncMeta,
@@ -993,7 +953,6 @@ observeEvent(
     )
     qcsettingsfinal(compileqcsettings)
     
-    print("Meta 2")
     updateexportprogress(
       sumprog = metaexportsettings$IncSum,
       metaprog = metaexportsettings$IncMeta,
@@ -1020,7 +979,6 @@ observeEvent(
     repexportsettings = selectexportdata()
     if (repexportsettings$IncRep == TRUE){
       
-      print("Report 1")
       updateexportprogress(
         sumprog = repexportsettings$IncSum,
         metaprog = repexportsettings$IncMeta,
@@ -1037,7 +995,6 @@ observeEvent(
       #Create Temp folder
       dir.create(paste0(getwd(),"/temp"))
       
-      print("Report 2")
       updateexportprogress(
         sumprog = repexportsettings$IncSum,
         metaprog = repexportsettings$IncMeta,
@@ -1047,7 +1004,7 @@ observeEvent(
       
       repstation = stations()
       repstation = repstation[which(repstation$StationID == input$procstationname),]
-
+      
       params = list(
         inputdata = finaldata(),
         metadata = metadatafinal(),
@@ -1059,7 +1016,6 @@ observeEvent(
       
       reportfile = paste0(getwd(),"/temp/",dldnamestart,"_report.html")
       
-      print("Report 3")
       updateexportprogress(
         sumprog = repexportsettings$IncSum,
         metaprog = repexportsettings$IncMeta,
@@ -1074,7 +1030,6 @@ observeEvent(
         envir = new.env(parent = globalenv())
       )
       
-      print("Report 4")
       updateexportprogress(
         sumprog = repexportsettings$IncSum,
         metaprog = repexportsettings$IncMeta,
@@ -1208,7 +1163,7 @@ output$dlddata = downloadHandler(
         sumlistoutput = NULL
         for (i in sumlistnames){
           selectsumdata = summarydataout[[i]]
-
+          
           sumdldnameend = paste0(dldnamestart,"_",i,"_summary.csv")
           sumdldpath = paste0("temp/",sumdldnameend)
           
@@ -1252,8 +1207,8 @@ output$dlddata = downloadHandler(
         status = "success",
         title = "Packaging metadata"
       )
-
-
+      
+      
       write.csv(metadatafinal(),paste0("temp/",dldnamestart,"_metadata.csv"),row.names = FALSE)
       write.csv(qcsettingsfinal(),paste0("temp/",dldnamestart,"_qcsettings.csv"),row.names = FALSE)
       
@@ -1274,9 +1229,9 @@ output$dlddata = downloadHandler(
         status = "success",
         title = "Packaging report"
       )
-
+      
       reportfile = paste0(getwd(),"/temp/",dldnamestart,"_report.html")
-
+      
       zip_append(
         zipfile = fname,
         files = reportfile,
@@ -1293,7 +1248,6 @@ output$dlddata = downloadHandler(
       status = "success",
       title = "Download complete"
     )
-
   },
   contentType = "application/zip"
 )
