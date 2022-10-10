@@ -1,5 +1,7 @@
+#Toggle for sendsweetalert
 sendask = TRUE
 
+#UI for front page
 output$aboutUI = renderUI({
   tagList(
     if (sendask == TRUE){
@@ -106,10 +108,6 @@ output$aboutUI = renderUI({
         title = "Contacts",
         uiOutput("contactsUI")
       ),
-      # tabPanel(
-      #   title = "R packages",
-      #   uiOutput("packagesUI")
-      # ),
       tabPanel(
         title = "Use",
         uiOutput("useUI")
@@ -118,6 +116,7 @@ output$aboutUI = renderUI({
   )
 })
 
+#UI for sections overview
 output$sectionsoverviewUI = renderUI({
   tagList(
     tags$style(
@@ -275,6 +274,7 @@ output$sectionsoverviewUI = renderUI({
   )
 })
 
+#UI for contacts
 output$contactsUI = renderUI({
   
   tagList(
@@ -364,198 +364,8 @@ output$contactsUI = renderUI({
   )
 })
 
-# output$packagesUI = renderUI({
-#   
-#   tagList(
-#     tags$style(
-#       HTML("
-#         .package-item {
-#           background-color: ghostwhite;
-#           border: 1px solid darkslategrey;
-#           color: darkslategrey;
-#           font-size: medium;
-#           padding: 6px;
-#           text-align:center;
-#         }
-#          ")
-#     ),
-#     HTML("<CENTER>"),
-#     tags$br(),
-#     tags$br(),
-#     tags$table(
-#       tags$tr(
-#         tags$td(
-#           style = "vertical-align: top;",
-#           tags$table(
-#             
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/shiny/index.html",
-#                   "shiny"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/shinydashboard/index.html",
-#                   "shinydashboard"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/shinydashboardplus/index.html",
-#                   "shinydashboardplus"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/shinyjs/index.html",
-#                   "shinyjs"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/shinyWidgets/index.html",
-#                   "shinyWidgets"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/devtools/index.html",
-#                   "devtools"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://github.com/leppott/ContDataQC",
-#                   "ContDataQC"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/dplyr/index.html",
-#                   "dplyr"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/readr/index.html",
-#                   "readr"
-#                 )
-#               )
-#             )
-#           )
-#         ),
-#         tags$td(
-#           style = "vertical-align: top;",
-#           tags$table(
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/ggplo2/index.html",
-#                   "ggplot2"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/plotly/index.html",
-#                   "plotly"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/grDevices/index.html",
-#                   "grDevices"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/DT/index.html",
-#                   "DT"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/xts/index.html",
-#                   "xts"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/ids/index.html",
-#                   "ids"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/lubridate/index.html",
-#                   "lubridate"
-#                 )
-#               )
-#             ),
-#             tags$tr(
-#               tags$td(
-#                 class = "package-item",
-#                 tags$a(
-#                   href = "https://cran.r-project.org/web/packages/zip/index.html",
-#                   "zip"
-#                 )
-#               )
-#             )
-#           )
-#         )
-#       )
-#     ),
-#     HTML("</CENTER>")
-#   )
-# })
-
+#UI for use statement
 output$useUI = renderUI({
-  
   tagList(
     tags$style(
       HTML(
@@ -591,9 +401,9 @@ output$useUI = renderUI({
     tags$br(),
     HTML("</CENTER>")
   )
-  
 })
 
+#UI for further development
 output$furtherdevUI = renderUI({
   tagList(
     tags$style(
@@ -726,20 +536,6 @@ output$furtherdevUI = renderUI({
         tags$td(
           class = "sections-text",
           "Priority Medium"
-        )
-      ),
-      tags$tr(
-        tags$td(
-          class = "sections-name",
-          "Generate Report"
-        ),
-        tags$td(
-          class = "sections-text",
-          "Develop code for exporting a report along with the processed data"
-        ),
-        tags$td(
-          class = "sections-text",
-          "Priority High"
         )
       )
     )
