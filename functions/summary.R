@@ -1,13 +1,12 @@
-#Export Data----
-
+#Function for box to display data values
 #Updated Valuebox from: https://jkunst.com/blog/posts/2020-06-26-valuebox-and-sparklines/
-valueBox2 <- function(value, title, subtitle, icon = NULL, color = "aqua", width = 4, href = NULL){
+valueBox2 = function(value, title, subtitle, icon = NULL, color = "aqua", width = 4, href = NULL){
   shinydashboard:::validateColor(color)
   
   if (!is.null(icon))
     shinydashboard:::tagAssert(icon, type = "i")
   
-  boxContent <- div(
+  boxContent = div(
     class = paste0("small-box bg-", color),
     div(
       class = "inner",
@@ -19,7 +18,7 @@ valueBox2 <- function(value, title, subtitle, icon = NULL, color = "aqua", width
   )
   
   if (!is.null(href)) 
-    boxContent <- a(href = href, boxContent)
+    boxContent = a(href = href, boxContent)
   
   div(
     class = if (!is.null(width)) paste0("col-sm-", width), 
@@ -27,6 +26,7 @@ valueBox2 <- function(value, title, subtitle, icon = NULL, color = "aqua", width
   )
 }
 
+#Function for unique value boxes based on flag status
 valueBoxFlags = function(inputdata,flagfield,status){
   if (flagfield == "Gross"){
     if (status == 'F'){
@@ -91,7 +91,6 @@ valueBoxFlags = function(inputdata,flagfield,status){
     width = NULL,
     href = NULL
   )
-  
   return(outputvb)
 }
 
@@ -306,12 +305,14 @@ output$summaryUI = renderUI({
   )
 })
 
+#Vector of available data types
 summarydatatypes = reactive({
   summarydataselect = VisQCdata()
   summarydata = summarydataselect[[input$summaryloggerchoices]]
   return(summarydata)
 })
 
+#UI for select logger ids
 output$summarysnchoicesUI = renderUI({
   summarysn = summarydatatypes()
   summarysn = unique(summarysn$UnitID)
@@ -333,6 +334,7 @@ output$summarysnchoicesUI = renderUI({
   )
 })
 
+#Select data based upon unitid
 summaryselectdata = reactive({
   summaryselect = summarydatatypes()
   summaryselect = summaryselect[which(summaryselect$UnitID == input$summarysnchoices),]
@@ -340,6 +342,7 @@ summaryselectdata = reactive({
   return(summaryselect)
 })
 
+#UI for data stats for select logger
 output$summaryloggerinfoUI = renderUI({
   validate(
     need(summaryselectdata(),"Loading...")
@@ -361,7 +364,6 @@ output$summaryloggerinfoUI = renderUI({
   }else{
     summaryzname = "Z"
   }
-  
   
   tags$table(
     tags$tr(
@@ -411,6 +413,7 @@ output$summaryloggerinfoUI = renderUI({
   )
 })
 
+#UI for fail valuebox
 output$vbfailUI = renderUI({
   tagList(
     valueBoxFlags(
@@ -421,6 +424,7 @@ output$vbfailUI = renderUI({
   )
 })
 
+#UI for suspect valuebox
 output$vbsuspectUI = renderUI({
   tagList(
     valueBoxFlags(
@@ -431,6 +435,7 @@ output$vbsuspectUI = renderUI({
   )
 })
 
+#UI for pass valuebox
 output$vbpassUI = renderUI({
   tagList(
     valueBoxFlags(
@@ -441,6 +446,7 @@ output$vbpassUI = renderUI({
   )
 })
 
+#Plotly plot of selected flag
 output$summaryplot = renderPlotly({
   validate(
     need(summaryselectdata(),"Loading...")
