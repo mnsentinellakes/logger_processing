@@ -1,7 +1,7 @@
 #Setup and Processing Tab----
 
 #Interface for setting up the data for processing and processing
-  tabItems(
+tabItems(
   #About Tab----
   tabItem(
     tabName = "abouttab",
@@ -343,4 +343,3 @@
     uiOutput("exportUI")
   )
 )
-# })
