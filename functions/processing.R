@@ -1,3 +1,4 @@
+#For Testing Purposes
 turnoffprocessupdate = FALSE
 
 #Format Raw input data for QC
@@ -7,6 +8,7 @@ turnoffprocessupdate = FALSE
 #model - selected model
 #loggerdefs - logger file definition table
 
+#function to format the data for QC by ContDataQC package
 formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qcconfig,depthstable){
   
   #Function for reading data
@@ -75,7 +77,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   )
   
   #Throw error if DateTime doesnt match
-
+  
   #Standardize field names
   datetimefieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$qcfield),perl = TRUE))
   datetimefieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$datafield),perl = TRUE))
@@ -91,43 +93,43 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     builddatacolumn = data.frame(datafile[which(names(datafile) == datafieldnames$datafield[i])])
     
     if (nrow(builddatacolumn) > 0){
-    names(builddatacolumn) = datafieldnames$qcfield[i]
-
-    builddata = cbind(builddata,builddatacolumn)
-
-    #Convert Date and Time to correct format
-    datetimeformat = paste0(loggerfields$Date_Format," ",loggerfields$Time_Format)
-    if ("DateTime" %in% datetimefieldnames$qcfield){
-      builddatecolumn = datafile[which(names(datafile) == datetimefieldnames$datafield[which(datetimefieldnames$qcfield == "DateTime")])]
-    }else{
-      builddatecolumn = paste0(datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Date"])]," ",
-                               datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Time"])])
-    }
-
-    names(builddatecolumn) = "DateTime"
-    builddata = cbind(builddata,builddatecolumn)
-    
-    builddata$DateTime = as.POSIXct(builddata$DateTime,format = datetimeformat,tz = timezone)
-    
-    #Add SiteID
-    builddata$SiteID = siteid
-    
-    #Extract start and end dates to name the file
-    startdate = gsub("-","",as.character(min(as.Date(builddata$DateTime))))
-    enddate = gsub("-","",as.character(max(as.Date(builddata$DateTime))))
-    
-    foldername = paste0("processing/",datafieldnames$type[i])
-    
-    #Determine if file should be named with Air or Water
-    if (datafieldnames$type[i] %in% c("AirTemp","AirBP")){
-      qctypename = "Air"
-    }else{
-      qctypename = "Water"
-    }
-    
-    dir.create(foldername,showWarnings = FALSE)
-    write.csv(builddata,paste0(foldername,"/",siteid,"_",qctypename,"_",startdate,"_",enddate,".csv"),row.names = FALSE,
-              fileEncoding = "ISO-8859-1")
+      names(builddatacolumn) = datafieldnames$qcfield[i]
+      
+      builddata = cbind(builddata,builddatacolumn)
+      
+      #Convert Date and Time to correct format
+      datetimeformat = paste0(loggerfields$Date_Format," ",loggerfields$Time_Format)
+      if ("DateTime" %in% datetimefieldnames$qcfield){
+        builddatecolumn = datafile[which(names(datafile) == datetimefieldnames$datafield[which(datetimefieldnames$qcfield == "DateTime")])]
+      }else{
+        builddatecolumn = paste0(datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Date"])]," ",
+                                 datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Time"])])
+      }
+      
+      names(builddatecolumn) = "DateTime"
+      builddata = cbind(builddata,builddatecolumn)
+      
+      builddata$DateTime = as.POSIXct(builddata$DateTime,format = datetimeformat,tz = timezone)
+      
+      #Add SiteID
+      builddata$SiteID = siteid
+      
+      #Extract start and end dates to name the file
+      startdate = gsub("-","",as.character(min(as.Date(builddata$DateTime))))
+      enddate = gsub("-","",as.character(max(as.Date(builddata$DateTime))))
+      
+      foldername = paste0("processing/",datafieldnames$type[i])
+      
+      #Determine if file should be named with Air or Water
+      if (datafieldnames$type[i] %in% c("AirTemp","AirBP")){
+        qctypename = "Air"
+      }else{
+        qctypename = "Water"
+      }
+      
+      dir.create(foldername,showWarnings = FALSE)
+      write.csv(builddata,paste0(foldername,"/",siteid,"_",qctypename,"_",startdate,"_",enddate,".csv"),row.names = FALSE,
+                fileEncoding = "ISO-8859-1")
     }else{
       sendSweetAlert(
         session = session,
@@ -141,7 +143,6 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   #Build Levels table
   
   # Select depthstable by station select
-  # depthstable = depthstable[which(depthstable$StationID == stationselect & is.na(depthstable$Processed)),]
   #Select qcconfig according to logger types
   selectqcconfig = qcconfig[which(qcconfig$Logger_Type %in% qctypes),]
   
@@ -157,7 +158,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
       if (length(snselect) > 0){
         
         snlevelsrow = data.frame("sn" = snselect,"logger_type" = i,"level" = j)
-        print(snlevelsrow)
+        
         snlevels = rbind(snlevels,snlevelsrow)
       }
     }
@@ -186,11 +187,8 @@ QCProcess = function(qcinfo,siteid,qcconfig){
         contdataqctype = "Water"
       }
       
-      
       qclevels = qcinfo$snlevels
-      print(qclevels)
       qclevels = unique(qclevels$level[which(qclevels$logger_type == i & qclevels$sn == siteid)])
-      print(qclevels)
       
       updateconfigfile(
         qcconfigdata = qcconfig,
@@ -245,7 +243,7 @@ compileQCdata = function(qcinfo,depthstable,exporttable){
           readdata = read.csv(qcfile,stringsAsFactors = FALSE)
           
           datafieldname = datafields$qcfield[which(datafields$type == i)]
-
+          
           datafield = readdata[[datafieldname]]
           
           datacompile = data.frame("UnitID" = j,"DateTime" = as.POSIXct(readdata$DateTime,format = "%Y-%m-%d %H:%M:%S",tz = "UTC"),
@@ -288,8 +286,6 @@ compileQCdata = function(qcinfo,depthstable,exporttable){
     }
   }
   finaloutput = list(datalist,stopprocess)
-  
-  # save(datalist,file = "C:/Projects/Shiny_App_Development/Logger_Processing/Test/datalisttest.RDATA")
   return(finaloutput)
   gc()
 }
@@ -330,11 +326,8 @@ storedepcount = reactiveVal()
 #Create Reactive to store current deployid
 deployid = reactiveVal()
 
-
-
 #Process and QC data----
 #Observes the Processing button and begins reformating and QCing the data
-
 #Run Data Processing and QC
 observeEvent(
   input$processingbttn,{
@@ -405,7 +398,7 @@ observeEvent(
       
       #Selects lookup table rows for selected lake that have not been processed
       depthstableselect = depthstable[which(depthstable$StationID == input$procstationname & depthstable$ModelID == input$procmodel & 
-                                            is.na(depthstable$Processed)),]
+                                              is.na(depthstable$Processed)),]
       #Export settings
       exportsettings = export()
       exportsettings = exportsettings[which(exportsettings$ProgramID == input$procprogram & exportsettings$ModelID == input$procmodel),]
@@ -430,7 +423,7 @@ observeEvent(
         inputname = as.character(gsub(".csv","",inputname))
         inputname = as.character(gsub(".TXT","",inputname))
         inputname = as.character(gsub(".txt","",inputname))
-      
+        
         #Continue if input name is in the depthstable
         if (inputname %in% depthstableselect$UnitID){
           #Create processing folder
@@ -539,7 +532,7 @@ observeEvent(
           #Update the depths table processed date
           if (turnoffprocessupdate == FALSE){
             updateproclogs$Processed[which(updateproclogs$StationID == input$procstationname &
-                                          updateproclogs$ModelID == input$procmodel & is.na(updateproclogs$Processed))] = Sys.Date()
+                                             updateproclogs$ModelID == input$procmodel & is.na(updateproclogs$Processed))] = Sys.Date()
           }
           processinglogs(updateproclogs)
           
@@ -572,7 +565,7 @@ observeEvent(
             deployaddrows = rbind(deployaddrows,deployaddrow)
           }
           deployadd = rbind(deployadd,deployaddrows)
-
+          
           deploylogs(deployadd)
           
           #Update stations table
