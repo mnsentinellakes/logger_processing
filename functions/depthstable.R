@@ -1,10 +1,10 @@
 ##!!!Potential Future Update - Read the data files in first to collect list of serial numbers and then associate depths with each
+#Get relevant field names for the selected logger model
 fieldnames = reactive({
   fieldnameselect = export()
   fieldnameselect = fieldnameselect[which(fieldnameselect$ProgramID == input$procprogram &  fieldnameselect$ModelID == input$procmodel),]
   return(fieldnameselect)
 })
-
 
 #A column of delete buttons for each row in the data frame for the first column
 deleteButtonColumn = function(df, id, fieldnames, ...) {
@@ -64,7 +64,6 @@ deleteButtonColumn = function(df, id, fieldnames, ...) {
       # Disable sorting for the delete column
       columnDefs = list(list(targets = 1, sortable = FALSE),
                         notvisible),
-      # dom = 't',
       scrollY = "250px",
       searching = FALSE,
       paging = FALSE
@@ -79,6 +78,7 @@ parseDeleteEvent = function(idstr) {
   if (! is.na(res)) res
 }
 
+#UI for the depths table
 output$depthstableoutputUI = renderUI({
   validate(
     need(!is.null(fieldnames()),"Loading...")
@@ -87,6 +87,7 @@ output$depthstableoutputUI = renderUI({
   if (nrow(fieldnames()) > 0){
     selectedinput = fieldnames()
     
+    #Determine what UnitID display should be based upon entry in the export options menu
     if (!is.na(selectedinput$UnitID)){
       unitidlabel = selectedinput$UnitID
     }else{
@@ -103,6 +104,7 @@ output$depthstableoutputUI = renderUI({
       col3 = 4
     }
     
+    #Display Box
     box(
       title = "Logger Units Table",
       solidHeader = TRUE,
@@ -160,12 +162,9 @@ output$depthstableoutputUI = renderUI({
   }
 })
 
+#UI output for Z field in the logger units (depths) table
 output$zoptionUI = renderUI({
-  
   if (nrow(fieldnames()) > 0){
-    # validate(
-    #   need(fieldnames(),"Loading...")
-    # )
     zfields = fieldnames()
     
     if (nrow(zfields) > 0){
@@ -184,6 +183,7 @@ output$zoptionUI = renderUI({
   }
 })
 
+#Filter out rows for data that have already been processed
 depthstablefilter = reactive({
   validate(
     need(input$procwaterbody,"Loading...")
@@ -195,10 +195,6 @@ depthstablefilter = reactive({
 
 #Depths Table UI Display
 output$depthstableoutput = renderDataTable({
-  # validate(
-  #   need(fieldnames(),"Loading...")
-  # )  
-  
   deleteButtonColumn(
     df = depthstablefilter(),
     id = "delete_button",
@@ -222,6 +218,7 @@ observeEvent(
   }
 )
 
+#Observe add button and add data to table when pressed
 observeEvent(
   input$addbttn,{
     if (!is.null(input$procprogram)){
