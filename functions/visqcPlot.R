@@ -1,5 +1,6 @@
 #Plot Data for Visual QC---------------
 
+#Translate flagselect to field name
 flagtype = reactive({
   if(input$flagselect == "Visual"){
     flagfield = "FlagVis"
@@ -15,6 +16,7 @@ flagtype = reactive({
   return(flagfield)
 })
 
+#Interactive plotly plot to update flag values
 output$VisQCplot = renderPlotly({
   validate(
     need(!is.null(VisQCdata()),"Loading..."),
@@ -27,7 +29,7 @@ output$VisQCplot = renderPlotly({
   #datatypedf() from visqcUI code file
   QCdata = datatypedf()
   QCdata = QCdata[which(QCdata$UnitID == input$unitidchoice),]
-
+  
   incexportnotes = export()
   incexportnotes = incexportnotes$IncNotes[which(incexportnotes$ProgramID == input$procprogram & incexportnotes$ModelID == input$procmodel)]
   
@@ -49,7 +51,7 @@ output$VisQCplot = renderPlotly({
     legend.key.height = unit(20,"mm"),
     legend.key.width = unit(12,"mm")
   )
-
+  
   suppressWarnings(
     if (incexportnotes == TRUE){
       p = geom_point(
@@ -78,7 +80,7 @@ output$VisQCplot = renderPlotly({
             "DateTime: ",DateTime,
             "\nData: ",Data,
             "\nFlag ",input$flagselect,": ",!!flagfield
-
+            
           )
         ),
         size = 2.5
@@ -105,7 +107,7 @@ output$VisQCplot = renderPlotly({
   )
 })
 
-# #Reactively update browser dimensions
+#Reactively update browser dimensions
 browserdim = reactive({
   dimensiondata=c(input$dimension[1],input$dimension[2])
   dimensiondata
@@ -120,12 +122,13 @@ notestoggle = reactive({
   return(outputtoggle)
 })
 
+#UI for displaying plotly plot
 output$VisQCplotUI = renderUI({
   validate(
     need(input$procprogram,"Loading..."),
     need(input$procmodel,"Loading...")
   )
-
+  
   #Import export table for dimensions
   if(notestoggle()[1] == FALSE ){
     dimdiv = 1.25
@@ -146,7 +149,7 @@ notesentry = reactive({
       event = "plotly_selected",
       source = "V"
     )
-
+    
     selectednotes = unique(qcnotesdata$Notes[which(qcnotesdata$UnitID == input$unitidchoice & as.character(qcnotesdata$DateTime) %in% notesselectdata$key)])
     
     if (length(selectednotes) > 1){
