@@ -492,7 +492,6 @@ output$lfeditmodeltableconfigUI = renderUI({
   )
 })
 
-
 #Edit Logger Date and Time Fields----
 #Date and Time Fields Config
 output$lfeditmodeltimeconfigUI = renderUI({
@@ -874,6 +873,7 @@ output$aedoptionsdescUI = renderUI({
   )
 })
 
+#Description UI
 output$lfloggerconfigdescUI = renderUI({
   tags$p(
     HTML("<font size = 4><i>This section allows the user to define the data table organization for unique logger models. <br><br>In the 
