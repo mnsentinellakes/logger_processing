@@ -61,14 +61,14 @@ procwaterbody_names = reactive({
 #Processing Waterbody Choices
 output$procwaterbodyUI = renderUI({
   
-    pickerInput(
-      inputId = "procwaterbody",
-      label = "Waterbody",
-      choices = procwaterbody_names(),
-      options = list(
-        style = "btn-success"
-      )
+  pickerInput(
+    inputId = "procwaterbody",
+    label = "Waterbody",
+    choices = procwaterbody_names(),
+    options = list(
+      style = "btn-success"
     )
+  )
 })
 
 #Select Station
@@ -112,6 +112,7 @@ output$procmodelUI = renderUI({
   )
 })
 
+#Select the coordinates in the stations() table for display in the upload logger data box
 coordselect = reactive({
   stationcoord = stations()
   stationcoord = stationcoord[which(stationcoord$StationID == input$procstationname),]
@@ -128,13 +129,13 @@ deploycounter = reactive({
     #Check if all DeployIDs are NA or not
     if (all(is.na(deployidselect$DeployID))){
       deploycountdata = 1
-    # If DeployID contains non-NA values
+      # If DeployID contains non-NA values
     }else{
       deployidselect = unique(deployidselect$DeployID[which(deployidselect$StationID == input$procstationname & 
-                                                          deployidselect$ModelID == input$procmodel)])
+                                                              deployidselect$ModelID == input$procmodel)])
       if (length(deployidselect) > 0){
         if (any(!is.na(deployidselect))){
-        deploycountdata = as.numeric(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)],na.rm = TRUE)) + 1
+          deploycountdata = as.numeric(max(deploycountdata$Deployment[which(deploycountdata$DeployID %in% deployidselect)],na.rm = TRUE)) + 1
         }else{
           deploycountdata = 1
         }
@@ -146,13 +147,10 @@ deploycounter = reactive({
     deploycountdata = 1
   }
   
-  # if (is.na(deploycountdata)){
-  #   deploycountdata = 1
-  # }
-  
   return(deploycountdata)
 })
 
+#UI for latitude, longitude, deployment, and user name inputs along with the process data button
 output$procmetadataUI = renderUI({
   coords = coordselect()
   deploynumber = deploycounter()
