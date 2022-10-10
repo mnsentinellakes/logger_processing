@@ -1,5 +1,4 @@
 #Vis QC Options----
-
 output$visqcoptionsUI = renderUI({
   isolate(
     tagList(
@@ -66,6 +65,7 @@ datatypedf = reactive({
   return(datatypeselect)
 })
 
+#Reactive value for the select unit id
 selectedsn = reactiveVal(NULL)
 
 #Picker input to select serial number/unitid
@@ -146,8 +146,8 @@ output$depthoutUI = renderUI({
   }
 })
 
+#Description UI
 output$visqcdescUI = renderUI({
-  
   tags$p(
     HTML("<font size = 4><i>"),
     "These tools allow the user to interactively select and flag data points for QC. The QC Tools choices can be used to cycle through the 
