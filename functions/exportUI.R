@@ -1,3 +1,4 @@
+#Primary UI for export
 output$exportUI = renderUI({
   fluidRow(
     column(
@@ -34,6 +35,7 @@ output$exportUI = renderUI({
   )
 })
 
+#UI for button and progress bar
 output$exportprocesstoolsUI = renderUI({
   fluidRow(
     column(
@@ -58,6 +60,7 @@ output$exportprocesstoolsUI = renderUI({
   )
 })
 
+#UI for export process button
 output$exportprocessbuttonUI = renderUI({
   if (!is.null(VisQCdata())){
     actionBttn(
@@ -70,6 +73,7 @@ output$exportprocessbuttonUI = renderUI({
   }
 })
 
+#UI for download bttn
 output$dlddataUI = renderUI({
   if (!is.null(finaldata())){
     fluidRow(
@@ -140,6 +144,7 @@ output$finaltable = renderDT(
   }
 )
 
+#Description UI
 output$exportdescUI = renderUI({
   tags$p(
     HTML("<font size = 4><i>"),
