@@ -1,3 +1,4 @@
+#Reactive value for loading baseconfig
 loadstatus = reactiveVal("")
 `%notin%` = Negate(`%in%`)
 
@@ -85,8 +86,6 @@ observeEvent(
         if (names(baseconfig)[1] == "programs"){
           
          baseconfig = updatebaseconfigversion(baseconfig)
-         
-         print(baseconfig$version)
          
          save(baseconfig,file = "config/baseconfig.RData")
 
@@ -602,6 +601,7 @@ observeEvent(
   }
 )
 
+#UI for the add, edit, and delete stations box
 output$aedstationsUI = renderUI({
   tagList(
     fluidRow(
@@ -659,6 +659,7 @@ output$stationwaterbodiesselectUI = renderUI({
   )
 })
 
+#Select stations based upon the selected waterbody
 wbstationnameselect = reactive({
   stationselect = stations()
   stationselectid = stationselect$StationID[which(stationselect$AppID == input$stationwaterbodiesselect)]
@@ -667,6 +668,7 @@ wbstationnameselect = reactive({
   return(stationselectid)
 })
 
+#UI for adding stations in the Add/Edit/Delete Stations box
 output$aedstationsselectchoiceUI = renderUI({
   if (input$aedstations == "Add"){
     tagList(
@@ -805,6 +807,7 @@ output$editstationnameUI = renderUI({
   )
 })
 
+#Description of the aed box
 output$aedstationsdescUI = renderUI({
   tags$p(
     HTML("<font size = 4><i>"),
