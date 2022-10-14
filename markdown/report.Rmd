@@ -28,7 +28,7 @@ thresh = params$qcsettings
 ```
 
 ```{r setup test,include=FALSE,echo=FALSE,eval=FALSE}
-# dat = read.csv("C:\\Projects\\Datasets\\Water_Temperature\\Demo\\Testing\\with_meta\\Shaokotan.csv",stringsAsFactors = FALSE)
+dat = read.csv("C:\\Projects\\Datasets\\Water_Temperature\\Demo\\Testing\\with_meta\\Shaokotan.csv",stringsAsFactors = FALSE)
 
 wt = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\Greenwood_WaterTemp.csv",stringsAsFactors = FALSE)
 wt$Serial_Number = as.character(wt$Serial_Number)
@@ -235,6 +235,7 @@ if (is.data.frame(dat)){
   monthdat = dat[[1]]
 }
 
+
 # if (is.list(dat)){
 #   monthdat = dat[[1]]
 # }else{
@@ -275,8 +276,8 @@ monthtotals = as_tibble(
           monthyears,
           function(y){
             c(
-              nrow(monthdat[which(year(monthdat$Date_Time) == y & month(monthdat$Date_Time) == x & monthdat$FlagVis != 'F'),]),
-              nrow(monthdat[which(year(monthdat$Date_Time) == y & month(monthdat$Date_Time) == x),])
+              nrow(monthdat[which(year(monthdat[,yrname]) == y & month(monthdat[,yrname]) == x & monthdat$FlagVis != 'F'),]),
+              nrow(monthdat[which(year(monthdat[,yrname]) == y & month(monthdat[,yrname]) == x),])
             )
           }
         )
