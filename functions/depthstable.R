@@ -225,52 +225,75 @@ observeEvent(
       if (!is.null(input$procwaterbody)){
         if (!is.null(input$procstationname)){
           if (!is.null(input$procmodel)){
-            if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) > 0){
-              addproclogs = processinglogs()
-              
-              addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = input$inputdepth,"Processed" = NA,
-                                          "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
-                                          "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
-              
-              addproclogs = rbind(addproclogs,addproclogsrow)
-              
-              processinglogs(addproclogs)
-              updatebaseconfig()
-              
-              updateTextInput(
-                session = session,
-                inputId = "inputsn",
-                value = ""
-              )
-              
-              updateNumericInput(
-                session = session,
-                inputId = "inputdepth",
-                value = ""
-              )
-            }else if (nchar(input$inputsn) == 0 & nchar(input$inputdepth) > 0){
-            }else if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) == 0){
-              
-              addproclogs = processinglogs()
-              addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = NA,"Processed" = NA,
-                                          "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
-                                          "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
-              addproclogs = rbind(addproclogs,addproclogsrow)
-              
-              processinglogs(addproclogs)
-              updatebaseconfig()
-              
-              updateTextInput(
-                session = session,
-                inputId = "inputsn",
-                value = ""
-              )
-              
-              updateNumericInput(
-                session = session,
-                inputId = "inputdepth",
-                value = ""
-              )
+            
+            includez = fieldnames()
+            includez = includez$IncZ
+            if (includez == TRUE){
+              if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) > 0){
+                addproclogs = processinglogs()
+                
+                addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = input$inputdepth,"Processed" = NA,
+                                            "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
+                                            "ProcID" = random_id(n = 1,bytes = 12),stringsAsFactors = FALSE)
+                
+                addproclogs = rbind(addproclogs,addproclogsrow)
+                
+                processinglogs(addproclogs)
+                updatebaseconfig()
+                
+                updateTextInput(
+                  session = session,
+                  inputId = "inputsn",
+                  value = ""
+                )
+                
+                updateNumericInput(
+                  session = session,
+                  inputId = "inputdepth",
+                  value = ""
+                )
+              }else if (nchar(input$inputsn) == 0 & nchar(input$inputdepth) > 0){
+              }else if (nchar(input$inputsn) > 0 & nchar(input$inputdepth) == 0){
+                addproclogs = processinglogs()
+                addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = NA,"Processed" = NA,
+                                            "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
+                                            "ProcID" = random_id(n=1,bytes = 12),stringsAsFactors = FALSE)
+                addproclogs = rbind(addproclogs,addproclogsrow)
+                
+                processinglogs(addproclogs)
+                updatebaseconfig()
+                
+                updateTextInput(
+                  session = session,
+                  inputId = "inputsn",
+                  value = ""
+                )
+                
+                updateNumericInput(
+                  session = session,
+                  inputId = "inputdepth",
+                  value = ""
+                )
+              }
+            }else{
+              if (nchar(input$inputsn) > 0){
+                addproclogs = processinglogs()
+                
+                addproclogsrow = data.frame("UnitID" = input$inputsn,"Z" = NA,"Processed" = NA,
+                                            "ModelID" = input$procmodel,"StationID" = input$procstationname,"DeployID" = NA,
+                                            "ProcID" = random_id(n = 1,bytes = 12),stringsAsFactors = FALSE)
+                
+                addproclogs = rbind(addproclogs,addproclogsrow)
+                
+                processinglogs(addproclogs)
+                updatebaseconfig()
+                
+                updateTextInput(
+                  session = session,
+                  inputId = "inputsn",
+                  value = ""
+                )
+              }
             }
           }else{
             sendSweetAlert(
