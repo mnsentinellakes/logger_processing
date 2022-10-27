@@ -7,11 +7,9 @@ output$aboutUI = renderUI({
     if (sendask == TRUE){
       sendSweetAlert(
         session = session,
-        title = "Help Develop the Logger Processing App",
-        text = "This app has been developed to be open-source and community-run. We are looking for aquatic natural resources professionals who
-        are interested in helping further develop the app to increase its functionality and ensure its long-term viability. If this interest 
-        you, please e-mail one of the individuals listed under the Contacts tab on the About page.",
-        type = "info"
+        title = "User Agreement",
+        text = "NALMS does not guarantee the results produced by this app. By using this app, the user agrees to take on all risks associated with its use.",
+        type = "warning"
       )
     },
     tags$style(
