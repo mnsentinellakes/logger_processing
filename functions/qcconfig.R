@@ -375,29 +375,27 @@ observe({
 })
 
 #Update levelcounter() if the add level button is clicked
-observeEvent(
-  input$addlevel,
-  {
-    if (levelcounter() + 1 != 6){
-      lvlup = levelcounter() + 1
-      levelcounter(lvlup)
-      
-      return(levelcounter)
-    }
-  }
-)
+# observeEvent(
+#   input$addlevel,
+#   {
+#     if (levelcounter() + 1 != 6){
+#       lvlup = levelcounter() + 1
+#       levelcounter(lvlup)
+#     }
+#   }
+# )
 
-#Update levelcounter() if the remove level button is clicked
-observeEvent(
-  input$removelevel,
-  {
-    
-    if (levelcounter() - 1 > 0){
-      lvldwn = levelcounter() - 1
-      levelcounter(lvldwn)
-    }
-  }
-)
+# #Update levelcounter() if the remove level button is clicked
+# observeEvent(
+#   input$removelevel,
+#   {
+#     
+#     if (levelcounter() - 1 > 0){
+#       lvldwn = levelcounter() - 1
+#       levelcounter(lvldwn)
+#     }
+#   }
+# )
 
 #Add rows to qc_config
 observeEvent(
@@ -408,15 +406,22 @@ observeEvent(
       need(input$loggerconfigselect,"Loading..."),
       need(levelcounter(),"Loading...")
     )
+    if (levelcounter() + 1 != 6){
+      lvlup = levelcounter() + 1
+      levelcounter(lvlup)
+    }
     
     qcconfigadd = qc_config()
     
     qcconfigaddnew = qcconfigadd[which(qcconfigadd$AppID == input$selectedwb & qcconfigadd$Logger_Type == input$loggerconfigselect),]
     
+    
+    
     if (levelcounter() == 2){
       qcconfiglevel1 = qcconfigaddnew[which(qcconfigaddnew$Level == 1),]
       qcconfiglevel1$Level = 2
       
+      print(qcconfiglevel1)
       qcconfigadd = rbind(qcconfigadd,qcconfiglevel1)
     }
     
@@ -441,7 +446,6 @@ observeEvent(
       qcconfigadd = rbind(qcconfigadd,qcconfiglevel4)
     }
     row.names(qcconfigadd) = NULL
-    
     qc_config(qcconfigadd)
     updatebaseconfig()
   }
@@ -451,6 +455,12 @@ observeEvent(
 observeEvent(
   input$removelevel,
   {
+    
+    if (levelcounter() - 1 > 0){
+      lvldwn = levelcounter() - 1
+      levelcounter(lvldwn)
+    }
+    
     qcconfigremove = qc_config()
     
     row.names(qcconfigremove) = NULL
@@ -554,7 +564,7 @@ output$qcleveleditorUI = renderUI({
           numericInput(
             inputId = "lowlevel1",
             label = NULL,
-            value = unique(levelsqc$Depth_1[which(levelsqc$Level == 1)]),
+            value = unique(levelsqc$Z_1[which(levelsqc$Level == 1)]),
             step = 0.01
           )
         )
@@ -584,10 +594,10 @@ output$qcleveleditorUI = renderUI({
 updatelvlranges = function(level,rangeside,rangeinput){
   lvlrngqcconfig = qc_config()
   if (rangeside == "High"){
-    lvlrngqcconfig$Depth_2[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)] = rangeinput
+    lvlrngqcconfig$Z_2[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)] = rangeinput
   }else if (rangeside == "Low"){
-    
-    lvlrngqcconfig$Depth_1[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)] = rangeinput
+    print(lvlrngqcconfig$Z_1[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)])
+    lvlrngqcconfig$Z_1[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)] = rangeinput
   }
   qc_config(lvlrngqcconfig)
   updatebaseconfig()
@@ -623,7 +633,7 @@ output$leveleditor1highUI = renderUI({
     numericInput(
       inputId = "highlevel1",
       label = NULL,
-      value = unique(levelsqc$Depth_2[which(levelsqc$Level == 1)]),
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 1)]),
       step = 0.01
     )
   )
@@ -664,7 +674,7 @@ output$leveleditor2UI = renderUI({
           numericInput(
             inputId = "lowlevel2",
             label = NULL,
-            value = unique(levels2qc$Depth_1[which(levels2qc$Level == 2)]),
+            value = unique(levels2qc$Z_1[which(levels2qc$Level == 2)]),
             step = 0.01
           )
         )
@@ -716,7 +726,7 @@ output$leveleditor2highUI = renderUI({
     numericInput(
       inputId = "highlevel2",
       label = NULL,
-      value = unique(levelsqc$Depth_2[which(levelsqc$Level == 2)]),
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 2)]),
       step = 0.01
     )
   )
@@ -757,7 +767,7 @@ output$leveleditor3UI = renderUI({
           numericInput(
             inputId = "lowlevel3",
             label = NULL,
-            value = unique(levels3qc$Depth_1[which(levels3qc$Level == 3)]),
+            value = unique(levels3qc$Z_1[which(levels3qc$Level == 3)]),
             step = 0.01
           )
         )
@@ -808,7 +818,7 @@ output$leveleditor3highUI = renderUI({
     numericInput(
       inputId = "highlevel3",
       label = NULL,
-      value = unique(levelsqc$Depth_2[which(levelsqc$Level == 3)]),
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 3)]),
       step = 0.01
     )
   )
@@ -849,7 +859,7 @@ output$leveleditor4UI = renderUI({
           numericInput(
             inputId = "lowlevel4",
             label = NULL,
-            value = unique(levels4qc$Depth_1[which(levels4qc$Level == 4)]),
+            value = unique(levels4qc$Z_1[which(levels4qc$Level == 4)]),
             step = 0.01
           )
         )
@@ -900,7 +910,7 @@ output$leveleditor4highUI = renderUI({
     numericInput(
       inputId = "highlevel4",
       label = NULL,
-      value = unique(levelsqc$Depth_2[which(levelsqc$Level == 4)]),
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 4)]),
       step = 0.01
     )
   )
@@ -942,7 +952,7 @@ output$leveleditor5UI = renderUI({
           numericInput(
             inputId = "lowlevel5",
             label = NULL,
-            value = unique(levels5qc$Depth_1[which(levels5qc$Level == 5)]),
+            value = unique(levels5qc$Z_1[which(levels5qc$Level == 5)]),
             step = 0.01
           )
         )
@@ -993,7 +1003,7 @@ output$leveleditor5highUI = renderUI({
     numericInput(
       inputId = "highlevel5",
       label = NULL,
-      value = unique(levelsqc$Depth_2[which(levelsqc$Level == 5)]),
+      value = unique(levelsqc$Z_2[which(levelsqc$Level == 5)]),
       step = 0.01
     )
   )
