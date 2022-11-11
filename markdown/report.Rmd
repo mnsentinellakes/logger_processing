@@ -28,27 +28,27 @@ thresh = params$qcsettings
 ```
 
 ```{r setup test,include=FALSE,echo=FALSE,eval=FALSE}
-dat = read.csv("C:\\Projects\\Datasets\\Water_Temperature\\Demo\\Testing\\with_meta\\Shaokotan.csv",stringsAsFactors = FALSE)
-
-wt = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\Greenwood_WaterTemp.csv",stringsAsFactors = FALSE)
-wt$Serial_Number = as.character(wt$Serial_Number)
-wt$Date_Time = as.POSIXct(wt$Date_Time,tz = "UTC")
-do = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\Greenwood_DO.csv",stringsAsFactors = FALSE)
-do$Serial_Number = as.character(do$Serial_Number)
-do$Date_Time = as.POSIXct(do$Date_Time,tz = "UTC")
-
-# dat = list("WaterTemp" = wt,"DO" = do)
-dat = wt
-meta = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\metadata.csv",stringsAsFactors = FALSE)
-meta$Logger_Types = "WaterTemp"
-
-
-export = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\export.csv",stringsAsFactors = FALSE)
-export$DO = NA
-
-load("C:/Projects/Shiny_App_Development/Logger_Processing/config/baseconfig.RData")
-thresh = baseconfig$qc_config
-thresh = thresh[which(thresh$AppID == 1111111111111111 & thresh$Logger_Type %in% c("WaterTemp","DO")),]
+# dat = read.csv("C:\\Projects\\Datasets\\Water_Temperature\\Demo\\Testing\\with_meta\\Shaokotan.csv",stringsAsFactors = FALSE)
+# 
+# wt = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\Greenwood_WaterTemp.csv",stringsAsFactors = FALSE)
+# wt$Serial_Number = as.character(wt$Serial_Number)
+# wt$Date_Time = as.POSIXct(wt$Date_Time,tz = "UTC")
+# do = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\Greenwood_DO.csv",stringsAsFactors = FALSE)
+# do$Serial_Number = as.character(do$Serial_Number)
+# do$Date_Time = as.POSIXct(do$Date_Time,tz = "UTC")
+# 
+# # dat = list("WaterTemp" = wt,"DO" = do)
+# dat = wt
+# meta = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\metadata.csv",stringsAsFactors = FALSE)
+# meta$Logger_Types = "WaterTemp"
+# 
+# 
+# export = read.csv("C:\\Projects\\Datasets\\DO\\Continuous\\Demo\\export.csv",stringsAsFactors = FALSE)
+# export$DO = NA
+# 
+# load("C:/Projects/Shiny_App_Development/Logger_Processing/config/baseconfig.RData")
+# thresh = baseconfig$qc_config
+# thresh = thresh[which(thresh$AppID == 1111111111111111 & thresh$Logger_Type %in% c("WaterTemp","DO")),]
 ```
 
 ```{r packages, include = FALSE,echo = FALSE}
