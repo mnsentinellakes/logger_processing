@@ -420,8 +420,6 @@ observeEvent(
     if (levelcounter() == 2){
       qcconfiglevel1 = qcconfigaddnew[which(qcconfigaddnew$Level == 1),]
       qcconfiglevel1$Level = 2
-      
-      print(qcconfiglevel1)
       qcconfigadd = rbind(qcconfigadd,qcconfiglevel1)
     }
     
@@ -596,7 +594,6 @@ updatelvlranges = function(level,rangeside,rangeinput){
   if (rangeside == "High"){
     lvlrngqcconfig$Z_2[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)] = rangeinput
   }else if (rangeside == "Low"){
-    print(lvlrngqcconfig$Z_1[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)])
     lvlrngqcconfig$Z_1[which(lvlrngqcconfig$AppID == input$selectedwb & lvlrngqcconfig$Logger_Type == input$loggerconfigselect & lvlrngqcconfig$Level == level)] = rangeinput
   }
   qc_config(lvlrngqcconfig)
