@@ -43,7 +43,20 @@ ui <- dashboardPage(
       #External Javascript
       tags$head(
         #Get Screen Dimensions
-        tags$script(src = "screen_dim.txt")
+        tags$script(
+            'var dimension = [0, 0];
+            $(document).on("shiny:connected", function(e) {
+                dimension[0] = window.innerWidth;
+                dimension[1] = window.innerHeight;
+                Shiny.onInputChange("dimension", dimension);
+            });
+            $(window).resize(function(e) {
+                dimension[0] = window.innerWidth;
+                dimension[1] = window.innerHeight;
+                Shiny.onInputChange("dimension", dimension);
+            });'
+        )
+        # tags$script(src = "screen_dim.txt")
       ),
       #Code for maintab
       source("functions/maintabs.R",local = TRUE)$value  
