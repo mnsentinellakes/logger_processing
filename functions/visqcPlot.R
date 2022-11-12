@@ -18,6 +18,7 @@ flagtype = reactive({
 
 #Interactive plotly plot to update flag values
 output$VisQCplot = renderPlotly({
+  
   validate(
     need(!is.null(VisQCdata()),"Loading..."),
     need(!is.null(export()),"Loading..."),
@@ -109,7 +110,7 @@ output$VisQCplot = renderPlotly({
 
 #Reactively update browser dimensions
 browserdim = reactive({
-  dimensiondata=c(input$dimension[1],input$dimension[2])
+  dimensiondata = c(input$dimension[1],input$dimension[2])
   dimensiondata
 })
 
@@ -131,12 +132,16 @@ output$VisQCplotUI = renderUI({
   
   #Import export table for dimensions
   if(notestoggle()[1] == FALSE ){
+    
     dimdiv = 1.25
   }else{
+    
     dimdiv = 1.75
   }
+  plotheight = browserdim()[2]/dimdiv
+  
   tagList(
-    plotlyOutput("VisQCplot",height = browserdim()[2]/dimdiv)
+    plotlyOutput("VisQCplot",height = plotheight)
   )
 })
 
