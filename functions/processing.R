@@ -75,17 +75,16 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     loggerfile = datafilepath,
     loggerfields = loggerfields
   )
-  print(class(readdatafile))
+  
   #Continue Processing if datafile is a data.frame
   if (is.data.frame(readdatafile)){
-    
-    
+  
   #Standardize field names
   datetimefieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$qcfield),perl = TRUE))
   datetimefieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$datafield),perl = TRUE))
   datafieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$qcfield),perl = TRUE))
   datafieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$datafield),perl = TRUE))
-  names(datafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(datafile)),perl = TRUE))
+  names(readdatafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(readdatafile)),perl = TRUE))
   
   #Rebuild dataset
   for (i in 1:nrow(datafieldnames)){
