@@ -36,7 +36,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
         delrow = seq(1,endrow)
         datafile = datafile[-delrow,]
       }
-      datafile = "continue"
+      # datafile = "continue"
     }else{
       datafile = "stop"
     }
@@ -75,9 +75,11 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     loggerfile = datafilepath,
     loggerfields = loggerfields
   )
-  
-  #Continue Processing if datafile[[2]] is set to pass
-  if (readdatafile != "stop"){
+  print(class(readdatafile))
+  #Continue Processing if datafile is a data.frame
+  if (is.data.frame(readdatafile)){
+    
+    
   #Standardize field names
   datetimefieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$qcfield),perl = TRUE))
   datetimefieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$datafield),perl = TRUE))
