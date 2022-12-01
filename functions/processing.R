@@ -76,7 +76,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     loggerfields = loggerfields
   )
   
-  #Continue Processing if datafile is a data.frame
+  #Continue Processing if readdatafile is a data.frame
   if (is.data.frame(readdatafile)){
   
   #Standardize field names
@@ -88,9 +88,9 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   
   #Rebuild dataset
   for (i in 1:nrow(datafieldnames)){
-    builddata = data.frame("RowID" = seq(1:nrow(datafile)))
+    builddata = data.frame("RowID" = seq(1:nrow(readdatafile)))
     
-    builddatacolumn = data.frame(datafile[which(names(datafile) == datafieldnames$datafield[i])])
+    builddatacolumn = data.frame(readdatafile[which(names(readdatafile) == datafieldnames$datafield[i])])
     
     if (nrow(builddatacolumn) > 0){
       if (length(names(builddatacolumn)) == 1){
@@ -102,10 +102,10 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
         #Convert Date and Time to correct format
         datetimeformat = paste0(loggerfields$Date_Format," ",loggerfields$Time_Format)
         if ("DateTime" %in% datetimefieldnames$qcfield){
-          builddatecolumn = datafile[which(names(datafile) == datetimefieldnames$datafield[which(datetimefieldnames$qcfield == "DateTime")])]
+          builddatecolumn = readdatafile[which(names(readdatafile) == datetimefieldnames$datafield[which(datetimefieldnames$qcfield == "DateTime")])]
         }else{
-          builddatecolumn = paste0(datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Date"])]," ",
-                                   datafile[which(names(datafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Time"])])
+          builddatecolumn = paste0(readdatafile[which(names(readdatafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Date"])]," ",
+                                   readdatafile[which(names(readdatafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Time"])])
         }
         
         names(builddatecolumn) = "DateTime"
