@@ -410,7 +410,9 @@ observeEvent(
     toggleState("processing")
     unlink("processing/*",recursive = TRUE,force = TRUE)
     #Ensures that data have been uploaded
-    if(length(input$dataupload) > 0){
+    
+    print(input$dataupload)
+    if(nrow(input$dataupload) > 0){
       
       #Update processing reactiveVals
       #Program
