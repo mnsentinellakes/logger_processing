@@ -15,6 +15,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   continue = TRUE
   #Function for reading data
   readloggerdata = function(loggerfile,loggerfields){
+    message("Initialize readloggerdata function")
     skiprows = loggerfields$FieldNamesRow - 1
     if (skiprows == 0){
       skiprows = FALSE
@@ -45,23 +46,28 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   }
   
   #Filter qc_config field by waterbody
+  message("Filter qc_config table by waterbody")
   qcconfig = qcconfig[which(qcconfig$AppID == waterbody),]
   
   #Select which fields should be included
+  message("Select which fields should be included")
   loggerfields = loggerfields[which(loggerfields$ModelID == loggermodel),]
   timezone = loggerfields$TZ
   
   #Select datetime fields
+  message("Select datetime fields")
   datetimefields = Filter(function(x)!all(is.na(x)),loggerfields[,2:4])
   datetimefieldnames = data.frame("qcfield"=names(datetimefields),"datafield"=unname(unlist(datetimefields[1,])),stringsAsFactors = FALSE)
   
   #Select data fields
+  message("Select data fields")
   datafields = Filter(function(x)!all(is.na(x)),loggerfields[,c(8:18)])
   datafieldnames = data.frame("qcfield"=names(datafields),"datafield"=unname(unlist(datafields[1,])),stringsAsFactors = FALSE)
   datafieldnames = datafieldnames[which(nchar(datafieldnames$datafield) > 0),]
   qctypes = datafieldnames$qcfield
   
   #Add units to to datafields table
+  message("Add units to the datafields table")
   datafieldnames$Units = NA
   for (i in 1:nrow(datafieldnames)){
     datafieldnames[i,3] = unique(qcconfig$Units[which(qcconfig$Logger_Type == datafieldnames[i,1] & qcconfig$QC_Metric == "Gross.Fail.Hi")])
@@ -78,77 +84,118 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   
   #Continue Processing if readdatafile is a data.frame
   if (is.data.frame(readdatafile)){
-  
-  #Standardize field names
-  datetimefieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$qcfield),perl = TRUE))
-  datetimefieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$datafield),perl = TRUE))
-  datafieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$qcfield),perl = TRUE))
-  datafieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$datafield),perl = TRUE))
-  names(readdatafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(readdatafile)),perl = TRUE))
-  
-  #Rebuild dataset
-  for (i in 1:nrow(datafieldnames)){
-    builddata = data.frame("RowID" = seq(1:nrow(readdatafile)))
-    
-    builddatacolumn = data.frame(readdatafile[which(names(readdatafile) == datafieldnames$datafield[i])])
-    
-    if (nrow(builddatacolumn) > 0){
-      if (length(names(builddatacolumn)) == 1){
-        
-        names(builddatacolumn) = datafieldnames$qcfield[i]
-        
-        builddata = cbind(builddata,builddatacolumn)
-        
-        #Convert Date and Time to correct format
-        datetimeformat = paste0(loggerfields$Date_Format," ",loggerfields$Time_Format)
-        if ("DateTime" %in% datetimefieldnames$qcfield){
-          builddatecolumn = readdatafile[which(names(readdatafile) == datetimefieldnames$datafield[which(datetimefieldnames$qcfield == "DateTime")])]
-        }else{
-          builddatecolumn = paste0(readdatafile[which(names(readdatafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Date"])]," ",
-                                   readdatafile[which(names(readdatafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Time"])])
-        }
-        
-        names(builddatecolumn) = "DateTime"
-        builddata = cbind(builddata,builddatecolumn)
-        
-        #Function to check date time format
-        checkdatetimeformat = function(datetime,dtformat,tz){
-          verdict = "stop"
-          if (all(!is.na(as.POSIXct(datetime,format = dtformat,tz = tz)))){
-            verdict = "continue"
-          }
-          return(verdict)
-        }
-        
-        checkdt = checkdatetimeformat(builddata$DateTime,dtformat = datetimeformat,tz = timezone)
-        
-        if (checkdt == "continue"){
-          builddata$DateTime = as.POSIXct(builddata$DateTime,format = datetimeformat,tz = timezone)
+    print(1)
+    #Standardize field names
+    message("Standardize field names")
+    datetimefieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$qcfield),perl = TRUE))
+    datetimefieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$datafield),perl = TRUE))
+    datafieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$qcfield),perl = TRUE))
+    datafieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$datafield),perl = TRUE))
+    names(readdatafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(readdatafile)),perl = TRUE))
+    print(2)
+    #Rebuild dataset
+    message("Rebuild the dataset")
+    for (i in 1:nrow(datafieldnames)){
+      builddata = data.frame("RowID" = seq(1:nrow(readdatafile)))
+      message(paste("Building Column",datafieldnames$datafiel[i]))
+      builddatacolumn = data.frame(readdatafile[which(names(readdatafile) == datafieldnames$datafield[i])])
+      
+      if (nrow(builddatacolumn) > 0){
+        if (length(names(builddatacolumn)) == 1){
+          message(paste("Apply Name to Column",datafieldnames$qcfield[i]))
+          names(builddatacolumn) = datafieldnames$qcfield[i]
           
-          #Add SiteID
-          builddata$SiteID = siteid
+          builddata = cbind(builddata,builddatacolumn)
           
-          #Extract start and end dates to name the file
-          startdate = gsub("-","",as.character(min(as.Date(builddata$DateTime))))
-          enddate = gsub("-","",as.character(max(as.Date(builddata$DateTime))))
-          
-          foldername = paste0("processing/",datafieldnames$type[i])
-          
-          #Determine if file should be named with Air or Water
-          if (datafieldnames$type[i] %in% c("AirTemp","AirBP")){
-            qctypename = "Air"
+          #Convert Date and Time to correct format
+          message("Convert Date and Time to correct format")
+          datetimeformat = paste0(loggerfields$Date_Format," ",loggerfields$Time_Format)
+          if ("DateTime" %in% datetimefieldnames$qcfield){
+            builddatecolumn = readdatafile[which(names(readdatafile) == datetimefieldnames$datafield[which(datetimefieldnames$qcfield == "DateTime")])]
           }else{
-            qctypename = "Water"
+            builddatecolumn = paste0(readdatafile[which(names(readdatafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Date"])]," ",
+                                     readdatafile[which(names(readdatafile) == datetimefieldnames[which(datetimefieldnames$qcfield) == "Time"])])
           }
           
-          dir.create(foldername,showWarnings = FALSE)
-          write.csv(builddata,paste0(foldername,"/",siteid,"_",qctypename,"_",startdate,"_",enddate,".csv"),row.names = FALSE,
-                    fileEncoding = "ISO-8859-1")
+          message("Apply name to DateTime column")
+          print(names(builddatecolumn))
+          if (length(names(builddatecolumn)) > 0){
+          names(builddatecolumn) = "DateTime"
+          builddata = cbind(builddata,builddatecolumn)
+          
+          #Function to check date time format
+          checkdatetimeformat = function(datetime,dtformat,tz){
+            verdict = "stop"
+            message("Checking that datetime column is in the correct format")
+            if (all(!is.na(as.POSIXct(datetime,format = dtformat,tz = tz)))){
+              verdict = "continue"
+            }
+            return(verdict)
+          }
+          checkdt = checkdatetimeformat(builddata$DateTime,dtformat = datetimeformat,tz = timezone)
+          
+          if (checkdt == "continue"){
+            builddata$DateTime = as.POSIXct(builddata$DateTime,format = datetimeformat,tz = timezone)
+            
+            #Add SiteID
+            builddata$SiteID = siteid
+            
+            message("Build the file name and save to file")
+            #Extract start and end dates to name the file
+            startdate = gsub("-","",as.character(min(as.Date(builddata$DateTime))))
+            enddate = gsub("-","",as.character(max(as.Date(builddata$DateTime))))
+            
+            foldername = paste0("processing/",datafieldnames$type[i])
+            
+            #Determine if file should be named with Air or Water
+            if (datafieldnames$type[i] %in% c("AirTemp","AirBP")){
+              qctypename = "Air"
+            }else{
+              qctypename = "Water"
+            }
+            
+            dir.create(foldername,showWarnings = FALSE)
+            write.csv(builddata,paste0(foldername,"/",siteid,"_",qctypename,"_",startdate,"_",enddate,".csv"),row.names = FALSE,
+                      fileEncoding = "ISO-8859-1")
+          }else{
+            sendSweetAlert(
+              session = session,
+              title = "Expected Date Time column name not found",
+              text = paste("The name of the Date Time column in",siteid," does not match the Date Time column name set in the Logger File Definition"),
+              type = "error"
+            )
+            continue = FALSE
+            updateProgressBar(
+              id = "processprogress",
+              session = session,
+              value = 0,
+              status = "danger",
+              title = "Date Time Column Name Error"
+            )
+            break
+          }
+          }else{
+            sendSweetAlert(
+              session = session,
+              title = "Expected Date Time Format not found",
+              text = paste("The Date Time format in",siteid,"does not match the Date Time format set in the Logger File Definition"),
+              type = "error"
+            )
+            continue = FALSE
+            updateProgressBar(
+              id = "processprogress",
+              session = session,
+              value = 0,
+              status = "danger",
+              title = "Date Time Format Error"
+            )
+            break
+          }
         }else{
           sendSweetAlert(
             session = session,
-            title = "Date Time format in the data does not match expected Date Time format",
-            text = "Please ensure the correct Date Time format is entered in the Logger File Definitions section",
+            title = "Logger types not in file",
+            text = "Please ensure the correct logger model is selected",
             type = "error"
           )
           continue = FALSE
@@ -157,7 +204,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
             session = session,
             value = 0,
             status = "danger",
-            title = "Date Time Format Error"
+            title = "Logger Type Error"
           )
           break
         }
@@ -178,52 +225,36 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
         )
         break
       }
-    }else{
-      sendSweetAlert(
-        session = session,
-        title = "Logger types not in file",
-        text = "Please ensure the correct logger model is selected",
-        type = "error"
-      )
-      continue = FALSE
-      updateProgressBar(
-        id = "processprogress",
-        session = session,
-        value = 0,
-        status = "danger",
-        title = "Logger Type Error"
-      )
-      break
     }
-  }
-  
-  #Build Levels table
-  if (continue == TRUE){
     
-    # Select depthstable by station select
-    #Select qcconfig according to logger types
-    selectqcconfig = qcconfig[which(qcconfig$Logger_Type %in% qctypes),]
-    
-    snlevels = NULL
-    for (i in qctypes){
-      levelnum = unique(selectqcconfig$Level[which(selectqcconfig$Logger_Type == i)])
-      for (j in levelnum){
-        
-        rangelow = unique(selectqcconfig$Z_1[which(selectqcconfig$Logger_Type == i & selectqcconfig$Level == j)])
-        rangehigh = unique(selectqcconfig$Z_2[which(selectqcconfig$Logger_Type == i & selectqcconfig$Level == j)])
-        
-        snselect = depthstable$UnitID[which(as.numeric(depthstable$Z) >= rangelow & as.numeric(depthstable$Z) < rangehigh)]
-        if (length(snselect) > 0){
-          snlevelsrow = data.frame("sn" = snselect,"logger_type" = i,"level" = j)
-          snlevels = rbind(snlevels,snlevelsrow)
+    #Build Levels table
+    if (continue == TRUE){
+      
+      # Select depthstable by station select
+      #Select qcconfig according to logger types
+      message("Select qcconfig according to the relevant logger types")
+      selectqcconfig = qcconfig[which(qcconfig$Logger_Type %in% qctypes),]
+      
+      message("Building config file according to qc levels")
+      snlevels = NULL
+      for (i in qctypes){
+        levelnum = unique(selectqcconfig$Level[which(selectqcconfig$Logger_Type == i)])
+        for (j in levelnum){
+          rangelow = unique(selectqcconfig$Z_1[which(selectqcconfig$Logger_Type == i & selectqcconfig$Level == j)])
+          rangehigh = unique(selectqcconfig$Z_2[which(selectqcconfig$Logger_Type == i & selectqcconfig$Level == j)])
+          
+          snselect = depthstable$UnitID[which(as.numeric(depthstable$Z) >= rangelow & as.numeric(depthstable$Z) < rangehigh)]
+          if (length(snselect) > 0){
+            snlevelsrow = data.frame("sn" = snselect,"logger_type" = i,"level" = j)
+            snlevels = rbind(snlevels,snlevelsrow)
+          }
         }
       }
+      
+      #Compile QC metadata
+      qcinfo = list("qcnames" = qctypes,"startdate" = as.character(max(as.Date(builddata$DateTime))),
+                    "enddate" = as.character(min(as.Date(builddata$DateTime))),"fieldnames" = datafieldnames,"snlevels" = snlevels)
     }
-    
-    #Compile QC metadata
-    qcinfo = list("qcnames" = qctypes,"startdate" = as.character(max(as.Date(builddata$DateTime))),
-                  "enddate" = as.character(min(as.Date(builddata$DateTime))),"fieldnames" = datafieldnames,"snlevels" = snlevels)
-  }
   }else{
     sendSweetAlert(
       session = session,
@@ -246,7 +277,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
 #Run QC Processes on data
 #Siteid == Serial_Number
 QCProcess = function(qcinfo,siteid,qcconfig){
-  
+  message("Beginning QCProcess function")
   loggertypes = qcinfo$qcnames
   
   if (!is.na(qcinfo$startdate) & !is.na(qcinfo$enddate)){
@@ -255,12 +286,14 @@ QCProcess = function(qcinfo,siteid,qcconfig){
       dir.create(paste0("processing/",i,"/QC"),showWarnings = FALSE)
       
       #Determine if ContDataQC should look for Air or Water in file name
+      message("Determining if ContDataQC should look for Air or Water in the file name")
       if (i %in% c("AirTemp","AirBP")){
         contdataqctype = "Air"
       }else{
         contdataqctype = "Water"
       }
       
+      message("Selecting QC Levels")
       qclevels = qcinfo$snlevels
       qclevels = unique(qclevels$level[which(qclevels$logger_type == i & qclevels$sn == siteid)])
       
@@ -270,6 +303,7 @@ QCProcess = function(qcinfo,siteid,qcconfig){
         loggertype = i
       )
       
+      message("Running ContDataQC")
       ContDataQC::ContDataQC(
         fun.myData.Operation = "QCRaw",
         fun.myDir.import = paste0("processing/",i),
@@ -295,6 +329,7 @@ QCProcess = function(qcinfo,siteid,qcconfig){
 
 #import QC data and apply depths
 compileQCdata = function(qcinfo,depthstable,exporttable){
+  message("Beginning compileQCdata function")
   loggertypes = qcinfo$qcnames
   
   datafields = qcinfo$fieldnames
@@ -303,6 +338,7 @@ compileQCdata = function(qcinfo,depthstable,exporttable){
   stopprocess = FALSE
   datalist = list()
   
+  message("Looping through logger types and siteids to build data tables")
   for (i in loggertypes){
     loggertypecompile = NULL
     for (j in siteids){
@@ -314,8 +350,9 @@ compileQCdata = function(qcinfo,depthstable,exporttable){
         qcfile = qcfiles[which(grepl(j,qcfiles))]
         
         if(length(qcfile) > 0){
+          message("Reading QCed data")
           readdata = read.csv(qcfile,stringsAsFactors = FALSE)
-          
+          messate("Compile data")
           datafieldname = datafields$qcfield[which(datafields$type == i)]
           
           datafield = readdata[[datafieldname]]
@@ -405,15 +442,14 @@ deployid = reactiveVal()
 #Run Data Processing and QC
 observeEvent(
   input$processingbttn,{
-    
+    message("Begin Processing")
     #Disable processing button to prevent duplicate processing
     toggleState("processing")
     unlink("processing/*",recursive = TRUE,force = TRUE)
     #Ensures that data have been uploaded
     
-    print(input$dataupload)
     if(nrow(input$dataupload) > 0){
-      
+      message("Data Have Been Uploaded")
       #Update processing reactiveVals
       #Program
       storeprogram(
