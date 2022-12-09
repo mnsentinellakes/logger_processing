@@ -352,7 +352,7 @@ compileQCdata = function(qcinfo,depthstable,exporttable){
         if(length(qcfile) > 0){
           message("Reading QCed data")
           readdata = read.csv(qcfile,stringsAsFactors = FALSE)
-          messate("Compile data")
+          message("Compile data")
           datafieldname = datafields$qcfield[which(datafields$type == i)]
           
           datafield = readdata[[datafieldname]]
