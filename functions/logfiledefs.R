@@ -274,6 +274,11 @@ output$lfadddatetimeformatUI = renderUI({
 #Date Time UI
 output$lfaddtimesettingsUI = renderUI({
   
+  #Select only usable olson names for time zone
+  tzs = OlsonNames()
+  tzs = tzs[which(grepl("Etc/",tzs))]
+  tzs = gsub("Etc/","",tzs)
+  
   fluidRow(
     column(
       width = 6,
@@ -284,7 +289,7 @@ output$lfaddtimesettingsUI = renderUI({
       pickerInput(
         inputId = "tzadd",
         label = "Time Zone",
-        choices = OlsonNames()
+        choices = tzs
       )
     )
   )
@@ -409,12 +414,14 @@ observeEvent(
       
       generatemodelid = random_id(1,6)
       
+      tzfix = paste0("Etc/",input$tzadd)
+      
       newloggerdf=data.frame("Logger_Model" = input$addloggermodelnametxt,"ModelID" = generatemodelid,"Date" = dateentry,"Time" = timeentry,
                              "DateTime" = datetimeentry,"Date_Format" = input$dateformatadd,"Time_Format" = input$timeformatadd,
                              "AirBP" = input$airbpfieldadd,"AirTemp" = input$airtempfieldadd,"Chlorophylla" = input$chlorophyllafieldadd,
                              "Cond" = input$condfieldadd,"Discharge" = input$dischargefieldadd,"DO" = input$dofieldadd,
                              "pH" = input$phfieldadd,"Turbidity" = input$turbidityfieldadd,"WaterLevel" = input$waterlevelfieldadd,
-                             "WaterP" = input$waterpfieldadd,"WaterTemp" = input$watertempfieldadd,"TZ" = input$tzadd,
+                             "WaterP" = input$waterpfieldadd,"WaterTemp" = input$watertempfieldadd,"TZ" = tzfix,
                              "FieldNamesRow" = input$fieldnamerownumadd,"DataStartRow" = input$datarownumadd)
       
       newloggerdefs=rbind(newloggerdefs,newloggerdf)
@@ -594,7 +601,19 @@ output$lfeditdatetimeUI = renderUI({
 #Date Time UI
 output$lfedittimesettingsUI = renderUI({
   
+  tzs = OlsonNames()
+  tzs = tzs[which(grepl("Etc/",tzs))]
+  tzs = gsub("Etc/","",tzs)
+  
   timezoneselect = loggermodelselectedit()
+  
+  timezoneselect = timezoneselect$TZ
+  
+  if (timezoneselect %in% tzs){
+    timezoneselect = timezoneselect
+  }else{
+    timezoneselect = "UTC"
+  }
   
   fluidRow(
     column(
@@ -606,8 +625,8 @@ output$lfedittimesettingsUI = renderUI({
       pickerInput(
         inputId = "tzedit",
         label = "Time Zone",
-        choices = OlsonNames(),
-        selected = timezoneselect$TZ
+        choices = tzs,
+        selected = timezoneselect
       )
     )
   )
