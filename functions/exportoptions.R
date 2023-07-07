@@ -914,349 +914,368 @@ observeEvent(
     loggerexportfinal = loggerfiledefs()
     loggerexportfinal = loggerexportfinal[which(loggerexportfinal$ModelID == input$selectloggerexport),]
     
-    #If settings already exist for the program and model combination
-    if (nrow(exportselect()) > 0){
-      #File Setup
-      exportfinal$FileSep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$sepfile
-      exportfinal$IncNotes[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incnotes
-      exportfinal$IncMeta[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incmeta
-      exportfinal$IncRep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$increp
-      exportfinal$IncConfig[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incconfig
-      exportfinal$IncSum[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incsummary
-      #Identification Field Names
-      exportfinal$UnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$unitidexport
-      
-      exportfinal$IncModelName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incmodelnameexport
-      if (input$incmodelnameexport == TRUE){
-        exportfinal$ModelName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$modelnameexport
+    nchecked = sum(c(input$incmodelnameexport,input$incprogramnameexport,input$incwbidexport,input$incwbnameexport,input$incwbtypeexport,
+                     input$incstationidexport,input$incstationnameexport,input$incdeploymentexport,input$incusernameexport,input$inczexport,input$inclocexport))
+    
+    print(nchecked)
+    
+    ncomplete = sum(c(input$modelnameexport != "",input$programnameexport != "",input$wbidexport != "",input$wbnameexport != "",
+                      input$wbtypeexport != "",input$stationidexport != "",input$stationnameexport != "",input$deploymentexport != "",
+                      input$usernameexport != "",input$zexport != "",input$locexport != ""))
+    
+    if (nchecked == ncomplete){
+      #If settings already exist for the program and model combination
+      if (nrow(exportselect()) > 0){
+        #File Setup
+        exportfinal$FileSep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$sepfile
+        exportfinal$IncNotes[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incnotes
+        exportfinal$IncMeta[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incmeta
+        exportfinal$IncRep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$increp
+        exportfinal$IncConfig[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incconfig
+        exportfinal$IncSum[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incsummary
+        #Identification Field Names
+        exportfinal$UnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$unitidexport
+        
+        exportfinal$IncModelName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incmodelnameexport
+        if (input$incmodelnameexport == TRUE){
+          exportfinal$ModelName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$modelnameexport
+        }else{
+          exportfinal$ModelName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        exportfinal$IncProgramName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incprogramnameexport
+        if (input$incprogramnameexport == TRUE){
+          exportfinal$ProgramName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$programnameexport
+        }else{
+          exportfinal$ProgramName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        exportfinal$IncProgramWBID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incwbidexport
+        if (input$incwbidexport == TRUE){
+          exportfinal$ProgramWBID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$wbidexport
+        }else{
+          exportfinal$ProgramWBID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        exportfinal$IncWBName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incwbnameexport
+        if (input$incwbnameexport == TRUE){
+          exportfinal$WBName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$wbnameexport
+        }else{
+          exportfinal$WBName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        exportfinal$IncWBType[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incwbtypeexport
+        if (input$incwbtypeexport == TRUE){
+          exportfinal$WBType[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$wbtypeexport
+        }else{
+          exportfinal$WBType[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        exportfinal$IncProgramStationID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incstationidexport
+        if (input$incstationidexport == TRUE){
+          exportfinal$ProgramStationID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$stationidexport  
+        }else{
+          exportfinal$ProgramStationID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        exportfinal$IncStationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incstationnameexport
+        if (input$incstationnameexport == TRUE){
+          exportfinal$StationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$stationnameexport
+        }else{
+          exportfinal$StationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        exportfinal$IncDeploy[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incdeploymentexport
+        if (input$incdeploymentexport == TRUE){
+          exportfinal$Deployment[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$deploymentexport
+        }else{
+          exportfinal$Deployment[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        exportfinal$IncUser[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incusernameexport
+        if (input$incusernameexport == TRUE){
+          exportfinal$User[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$usernameexport
+        }else{
+          exportfinal$User[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        #Location Field Names
+        exportfinal$IncZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$inczexport
+        if (input$inczexport == TRUE){
+          exportfinal$Z[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$zexport
+        }else{
+          exportfinal$Z[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        exportfinal$IncLoc[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$inclocexport
+        if (input$inclocexport == TRUE){
+          exportfinal$Lat[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$latexport
+          exportfinal$Lon[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$lonexport
+        }else{
+          exportfinal$Lat[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+          exportfinal$Lon[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        #Date and Time Field Names
+        exportfinal$DateTimeSep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datetypeexport
+        if (input$datetypeexport == "Combined"){
+          exportfinal$Date_Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datetimecombinecolexport
+          exportfinal$Date[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+          exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }else if (input$datetypeexport == "Separate"){
+          exportfinal$Date_Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+          exportfinal$Date[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datecolexport
+          exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timecolexport
+        }
+        
+        exportfinal$TZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$tzexport
+        
+        #Data Field Names
+        if (!is.na(loggerexportfinal$AirBP) & loggerexportfinal$AirBP != ""){
+          exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airbpexport
+        }else{
+          exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        if (!is.na(loggerexportfinal$AirTemp) & loggerexportfinal$AirTemp != ""){
+          exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airtempexport
+        }else{
+          exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        if (!is.na(loggerexportfinal$Chlorophylla) & loggerexportfinal$Chlorophylla != ""){
+          exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$chlorophyllaexport
+        }else{
+          exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        if (!is.na(loggerexportfinal$Cond) & loggerexportfinal$Cond != ""){
+          exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$condexport
+        }else{
+          exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        if (!is.na(loggerexportfinal$Discharge) & loggerexportfinal$Discharge != ""){
+          exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dischargeexport
+        }else{
+          exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        if (!is.na(loggerexportfinal$DO) & loggerexportfinal$DO != ""){
+          exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$doexport
+        }else{
+          exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        if (!is.na(loggerexportfinal$pH) & loggerexportfinal$pH != ""){
+          exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$phexport
+        }else{
+          exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        if (!is.na(loggerexportfinal$Turbidity) & loggerexportfinal$Turbidity != ""){
+          exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$turbidityexport
+        }else{
+          exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        if (!is.na(loggerexportfinal$WaterLevel) & loggerexportfinal$WaterLevel != ""){
+          exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterlevelexport
+        }else{
+          exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        if (!is.na(loggerexportfinal$WaterP) & loggerexportfinal$WaterP != ""){
+          exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterpexport
+        }else{
+          exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        if (!is.na(loggerexportfinal$WaterTemp) & loggerexportfinal$WaterTemp != ""){
+          exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$watertempexport
+        }else{
+          exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        }
+        
+        #If settings do not exist for Program and Logger Model combination
       }else{
-        exportfinal$ModelName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
+        unitidfinal = input$unitidexport
+        
+        if (input$incmodelnameexport == TRUE){
+          modelnamefinal = input$modelnameexport
+        }else{
+          modelnamefinal = NA
+        }
+        
+        if (input$incprogramnameexport == TRUE){
+          programnamefinal = input$programnameexport
+        }else{
+          programnamefinal = NA
+        }
+        
+        if (input$incwbidexport == TRUE){
+          wbidfinal = input$wbidexport
+        }else{
+          wbidfinal = NA
+        }
+        
+        if (input$incwbnameexport == TRUE){
+          wbnamefinal = input$wbnameexport
+        }else{
+          wbnamefinal = NA
+        }
+        
+        if (input$incwbtypeexport == TRUE){
+          wbtypefinal = input$wbtypeexport
+        }else{
+          wbtypefinal = NA
+        }
+        
+        if (input$incstationidexport == TRUE){
+          stationidfinal = input$stationidexport
+        }else{
+          stationidfinal = NA
+        }
+        
+        if (input$incstationnameexport == TRUE){
+          stationnamefinal = input$stationnameexport
+        }else{
+          stationnamefinal = NA
+        }
+        
+        if (input$incdeploymentexport == TRUE){
+          deploymentfinal = input$deploymentexport
+        }else{
+          deploymentfinal = NA
+        }
+        
+        if (input$incusernameexport == TRUE){
+          usernamefinal = input$usernameexport
+        }else{
+          usernamefinal = NA
+        }
+        
+        #Location Fields
+        if (input$inczexport == TRUE){
+          zfinal = input$zexport
+        }else{
+          zfinal = NA
+        }
+        
+        if (input$inclocexport == TRUE){
+          latfinal = input$latexport
+          lonfinal = input$lonexport
+        }else{
+          latfinal = NA
+          lonfinal = NA
+        }
+        
+        #Date Time Fields
+        if (input$datetypeexport == "Combined"){
+          datetimecombined = input$datetimecombinecolexport
+          dateonly = NA
+          timeonly = NA
+        }else if (input$datetypeexport == "Separate"){
+          datetimecombined = NA
+          dateonly = input$datecolexport
+          timeonly = input$timecolexport
+        }
+        
+        #Data Fields
+        if (!is.na(loggerexportfinal$AirBP) & loggerexportfinal$AirBP != ""){
+          airbpfinal = input$airbpexport
+        }else{
+          airbpfinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$AirTemp) & loggerexportfinal$AirTemp != ""){
+          airtempfinal = input$airtempexport
+        }else{
+          airtempfinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$Chlorophylla) & loggerexportfinal$Chlorophylla != ""){
+          chlorophyllafinal = input$chlorophyllaexport
+        }else{
+          chlorophyllafinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$Cond) & loggerexportfinal$Cond != ""){
+          condfinal = input$condexport
+        }else{
+          condfinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$Discharge) & loggerexportfinal$Discharge != ""){
+          dischargefinal = input$dischargeexport
+        }else{
+          dischargefinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$DO) & loggerexportfinal$DO != ""){
+          dofinal = input$doexport
+        }else{
+          dofinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$pH) & loggerexportfinal$pH != ""){
+          phfinal = input$phexport
+        }else{
+          phfinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$Turbidity) & loggerexportfinal$Turbidity != ""){
+          turbidityfinal = input$turbidityexport
+        }else{
+          turbidityfinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$WaterLevel) & loggerexportfinal$WaterLevel != ""){
+          waterlevelfinal = input$waterlevelexport
+        }else{
+          waterlevelfinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$WaterP) & loggerexportfinal$WaterP != ""){
+          waterpfinal = input$waterpexport
+        }else{
+          waterpfinal = NA
+        }
+        
+        if (!is.na(loggerexportfinal$WaterTemp) & loggerexportfinal$WaterTemp != ""){
+          watertempfinal = input$watertempexport
+        }else{
+          watertempfinal = NA
+        }
+        
+        exportfinalrow = data.frame("ProgramID" = input$selectedprogramexport,"ModelID" = input$selectloggerexport,"FileSep" = input$sepfile,
+                                    "IncMeta" = input$incmeta,"IncRep" = input$increp,"IncConfig" = input$incconfig,
+                                    "IncSum" = input$incsummary,"UnitID" = unitidfinal,"IncModelName" = input$incmodelnameexport,
+                                    "ModelName" = modelnamefinal,"IncProgramName" = input$incprogramnameexport,
+                                    "ProgramName" = programnamefinal,"IncProgramWBID" = input$incwbidexport,"ProgramWBID" = wbidfinal,
+                                    "IncWBName" = input$incwbnameexport,"WBName" = wbnamefinal,"IncWBType" = input$incwbtypeexport,
+                                    "WBType" = wbtypefinal,"IncProgramStationID" = input$incstationidexport,
+                                    "ProgramStationID" = stationidfinal,"IncStationName" = input$incstationnameexport,
+                                    "StationName" = stationnamefinal,"IncDeploy" = input$incdeploymentexport,"Deployment" = deploymentfinal,
+                                    "DateTimeSep" = input$datetypeexport,"Date_Time" = datetimecombined,"Date" = dateonly,"Time" = timeonly,
+                                    "TZ" = input$tzexport,"IncZ" = input$inczexport,"Z" = zfinal,"IncLoc" = input$inclocexport,
+                                    "Lat" = latfinal,"Lon" = lonfinal,"IncUser" = input$incusernameexport,"User" = usernamefinal,
+                                    "AirBP" = airbpfinal,"AirTemp" = airtempfinal,"Chlorophylla" = chlorophyllafinal,"Cond" = condfinal,
+                                    "Discharge" = dischargefinal,"DO" = dofinal,"pH" = phfinal,
+                                    "Turbidity" = turbidityfinal,"WaterLevel" = waterlevelfinal,"WaterP" = waterpfinal,"WaterTemp" = watertempfinal,
+                                    "IncNotes" = input$incnotes,
+                                    stringsAsFactors = FALSE)
+        
+        exportfinal = rbind(exportfinal,exportfinalrow)
       }
-      
-      exportfinal$IncProgramName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incprogramnameexport
-      if (input$incprogramnameexport == TRUE){
-        exportfinal$ProgramName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$programnameexport
-      }else{
-        exportfinal$ProgramName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      exportfinal$IncProgramWBID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incwbidexport
-      if (input$incwbidexport == TRUE){
-        exportfinal$ProgramWBID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$wbidexport
-      }else{
-        exportfinal$ProgramWBID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      exportfinal$IncWBName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incwbnameexport
-      if (input$incwbnameexport == TRUE){
-        exportfinal$WBName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$wbnameexport
-      }else{
-        exportfinal$WBName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      exportfinal$IncWBType[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incwbtypeexport
-      if (input$incwbtypeexport == TRUE){
-        exportfinal$WBType[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$wbtypeexport
-      }else{
-        exportfinal$WBType[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      exportfinal$IncProgramStationID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incstationidexport
-      if (input$incstationidexport == TRUE){
-        exportfinal$ProgramStationID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$stationidexport  
-      }else{
-        exportfinal$ProgramStationID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      exportfinal$IncStationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incstationnameexport
-      if (input$incstationnameexport == TRUE){
-        exportfinal$StationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$stationnameexport
-      }else{
-        exportfinal$StationName[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      exportfinal$IncDeploy[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incdeploymentexport
-      if (input$incdeploymentexport == TRUE){
-        exportfinal$Deployment[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$deploymentexport
-      }else{
-        exportfinal$Deployment[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      exportfinal$IncUser[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incusernameexport
-      if (input$incusernameexport == TRUE){
-        exportfinal$User[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$usernameexport
-      }else{
-        exportfinal$User[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      #Location Field Names
-      exportfinal$IncZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$inczexport
-      if (input$inczexport == TRUE){
-        exportfinal$Z[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$zexport
-      }else{
-        exportfinal$Z[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      exportfinal$IncLoc[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$inclocexport
-      if (input$inclocexport == TRUE){
-        exportfinal$Lat[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$latexport
-        exportfinal$Lon[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$lonexport
-      }else{
-        exportfinal$Lat[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-        exportfinal$Lon[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      #Date and Time Field Names
-      exportfinal$DateTimeSep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datetypeexport
-      if (input$datetypeexport == "Combined"){
-        exportfinal$Date_Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datetimecombinecolexport
-        exportfinal$Date[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-        exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }else if (input$datetypeexport == "Separate"){
-        exportfinal$Date_Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-        exportfinal$Date[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datecolexport
-        exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timecolexport
-      }
-      
-      exportfinal$TZ[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$tzexport
-      
-      #Data Field Names
-      if (!is.na(loggerexportfinal$AirBP) & loggerexportfinal$AirBP != ""){
-        exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airbpexport
-      }else{
-        exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      if (!is.na(loggerexportfinal$AirTemp) & loggerexportfinal$AirTemp != ""){
-        exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airtempexport
-      }else{
-        exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      if (!is.na(loggerexportfinal$Chlorophylla) & loggerexportfinal$Chlorophylla != ""){
-        exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$chlorophyllaexport
-      }else{
-        exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      if (!is.na(loggerexportfinal$Cond) & loggerexportfinal$Cond != ""){
-        exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$condexport
-      }else{
-        exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      if (!is.na(loggerexportfinal$Discharge) & loggerexportfinal$Discharge != ""){
-        exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dischargeexport
-      }else{
-        exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      if (!is.na(loggerexportfinal$DO) & loggerexportfinal$DO != ""){
-        exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$doexport
-      }else{
-        exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      if (!is.na(loggerexportfinal$pH) & loggerexportfinal$pH != ""){
-        exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$phexport
-      }else{
-        exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      if (!is.na(loggerexportfinal$Turbidity) & loggerexportfinal$Turbidity != ""){
-        exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$turbidityexport
-      }else{
-        exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      if (!is.na(loggerexportfinal$WaterLevel) & loggerexportfinal$WaterLevel != ""){
-        exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterlevelexport
-      }else{
-        exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      if (!is.na(loggerexportfinal$WaterP) & loggerexportfinal$WaterP != ""){
-        exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterpexport
-      }else{
-        exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      if (!is.na(loggerexportfinal$WaterTemp) & loggerexportfinal$WaterTemp != ""){
-        exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$watertempexport
-      }else{
-        exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
-      }
-      
-      #If settings do not exist for Program and Logger Model combination
+      export(exportfinal)
+      updatebaseconfig()
     }else{
-      unitidfinal = input$unitidexport
-      
-      if (input$incmodelnameexport == TRUE){
-        modelnamefinal = input$modelnameexport
-      }else{
-        modelnamefinal = NA
-      }
-      
-      if (input$incprogramnameexport == TRUE){
-        programnamefinal = input$programnameexport
-      }else{
-        programnamefinal = NA
-      }
-      
-      if (input$incwbidexport == TRUE){
-        wbidfinal = input$wbidexport
-      }else{
-        wbidfinal = NA
-      }
-      
-      if (input$incwbnameexport == TRUE){
-        wbnamefinal = input$wbnameexport
-      }else{
-        wbnamefinal = NA
-      }
-      
-      if (input$incwbtypeexport == TRUE){
-        wbtypefinal = input$wbtypeexport
-      }else{
-        wbtypefinal = NA
-      }
-      
-      if (input$incstationidexport == TRUE){
-        stationidfinal = input$stationidexport
-      }else{
-        stationidfinal = NA
-      }
-      
-      if (input$incstationnameexport == TRUE){
-        stationnamefinal = input$stationnameexport
-      }else{
-        stationnamefinal = NA
-      }
-      
-      if (input$incdeploymentexport == TRUE){
-        deploymentfinal = input$deploymentexport
-      }else{
-        deploymentfinal = NA
-      }
-      
-      if (input$incusernameexport == TRUE){
-        usernamefinal = input$usernameexport
-      }else{
-        usernamefinal = NA
-      }
-      
-      #Location Fields
-      if (input$inczexport == TRUE){
-        zfinal = input$zexport
-      }else{
-        zfinal = NA
-      }
-      
-      if (input$inclocexport == TRUE){
-        latfinal = input$latexport
-        lonfinal = input$lonexport
-      }else{
-        latfinal = NA
-        lonfinal = NA
-      }
-      
-      #Date Time Fields
-      if (input$datetypeexport == "Combined"){
-        datetimecombined = input$datetimecombinecolexport
-        dateonly = NA
-        timeonly = NA
-      }else if (input$datetypeexport == "Separate"){
-        datetimecombined = NA
-        dateonly = input$datecolexport
-        timeonly = input$timecolexport
-      }
-      
-      #Data Fields
-      if (!is.na(loggerexportfinal$AirBP) & loggerexportfinal$AirBP != ""){
-        airbpfinal = input$airbpexport
-      }else{
-        airbpfinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$AirTemp) & loggerexportfinal$AirTemp != ""){
-        airtempfinal = input$airtempexport
-      }else{
-        airtempfinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$Chlorophylla) & loggerexportfinal$Chlorophylla != ""){
-        chlorophyllafinal = input$chlorophyllaexport
-      }else{
-        chlorophyllafinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$Cond) & loggerexportfinal$Cond != ""){
-        condfinal = input$condexport
-      }else{
-        condfinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$Discharge) & loggerexportfinal$Discharge != ""){
-        dischargefinal = input$dischargeexport
-      }else{
-        dischargefinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$DO) & loggerexportfinal$DO != ""){
-        dofinal = input$doexport
-      }else{
-        dofinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$pH) & loggerexportfinal$pH != ""){
-        phfinal = input$phexport
-      }else{
-        phfinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$Turbidity) & loggerexportfinal$Turbidity != ""){
-        turbidityfinal = input$turbidityexport
-      }else{
-        turbidityfinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$WaterLevel) & loggerexportfinal$WaterLevel != ""){
-        waterlevelfinal = input$waterlevelexport
-      }else{
-        waterlevelfinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$WaterP) & loggerexportfinal$WaterP != ""){
-        waterpfinal = input$waterpexport
-      }else{
-        waterpfinal = NA
-      }
-      
-      if (!is.na(loggerexportfinal$WaterTemp) & loggerexportfinal$WaterTemp != ""){
-        watertempfinal = input$watertempexport
-      }else{
-        watertempfinal = NA
-      }
-      
-      exportfinalrow = data.frame("ProgramID" = input$selectedprogramexport,"ModelID" = input$selectloggerexport,"FileSep" = input$sepfile,
-                                  "IncMeta" = input$incmeta,"IncRep" = input$increp,"IncConfig" = input$incconfig,
-                                  "IncSum" = input$incsummary,"UnitID" = unitidfinal,"IncModelName" = input$incmodelnameexport,
-                                  "ModelName" = modelnamefinal,"IncProgramName" = input$incprogramnameexport,
-                                  "ProgramName" = programnamefinal,"IncProgramWBID" = input$incwbidexport,"ProgramWBID" = wbidfinal,
-                                  "IncWBName" = input$incwbnameexport,"WBName" = wbnamefinal,"IncWBType" = input$incwbtypeexport,
-                                  "WBType" = wbtypefinal,"IncProgramStationID" = input$incstationidexport,
-                                  "ProgramStationID" = stationidfinal,"IncStationName" = input$incstationnameexport,
-                                  "StationName" = stationnamefinal,"IncDeploy" = input$incdeploymentexport,"Deployment" = deploymentfinal,
-                                  "DateTimeSep" = input$datetypeexport,"Date_Time" = datetimecombined,"Date" = dateonly,"Time" = timeonly,
-                                  "TZ" = input$tzexport,"IncZ" = input$inczexport,"Z" = zfinal,"IncLoc" = input$inclocexport,
-                                  "Lat" = latfinal,"Lon" = lonfinal,"IncUser" = input$incusernameexport,"User" = usernamefinal,
-                                  "AirBP" = airbpfinal,"AirTemp" = airtempfinal,"Chlorophylla" = chlorophyllafinal,"Cond" = condfinal,
-                                  "Discharge" = dischargefinal,"DO" = dofinal,"pH" = phfinal,
-                                  "Turbidity" = turbidityfinal,"WaterLevel" = waterlevelfinal,"WaterP" = waterpfinal,"WaterTemp" = watertempfinal,"IncNotes" = input$incnotes,
-                                  stringsAsFactors = FALSE)
-      
-      exportfinal = rbind(exportfinal,exportfinalrow)
+      sendSweetAlert(
+        session = session,
+        title = "Missing Field Names",
+        text = "Ensure a Field Name has been supplied for every checked box.",
+        type = "error"
+      )
     }
-    export(exportfinal)
-    updatebaseconfig()
   }
 )
 
