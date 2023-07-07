@@ -331,6 +331,7 @@ observeEvent(
         combinefields = cbind(combinefields,loggercombine)
         
       }
+
       
       #Create vector for sorting fields in the table
       #Start with UnitID (required)
@@ -392,6 +393,7 @@ observeEvent(
         parametertype = as.character(dplyr::select(exportsettings,matches(i)))
         fieldorder = c(fieldorder,parametertype)
       }
+      
       #Add QC
       if (length(qcloggertypes()) > 1){
         for (i in qcloggertypes()){
@@ -413,6 +415,7 @@ observeEvent(
       }
       
       combinefields = combinefields[,fieldorder]
+      
       finaldata(combinefields)
     }else if (exportsettings$FileSep == "Multiple"){
       combinelist = list()
@@ -520,6 +523,7 @@ observeEvent(
       finaldata(combinelist)
       
     }
+    
     finaldatacomplete(TRUE)
     
     updateexportprogress(
