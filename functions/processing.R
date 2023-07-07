@@ -17,18 +17,16 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   readloggerdata = function(loggerfile,loggerfields){
     message("Initialize readloggerdata function")
     skiprows = loggerfields$FieldNamesRow - 1
-    if (skiprows == 0){
-      skiprows = FALSE
-    }
+    # if (skiprows == 0){
+    #   skiprows = FALSE
+    # }
     
-    datafile = read.table(
-      header = TRUE,
+    datafile = read_csv(
       file = loggerfile,
-      sep = ",",
-      skip = skiprows,
-      stringsAsFactors = FALSE,
-      encoding = "UTF-8"
+      col_names = TRUE,
+      skip = skiprows
     )
+    datafile = as.data.frame(datafile)
     
     #Check if row numbers line up with what was entered by the user
     if (ncol(datafile) > 1){
@@ -84,7 +82,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   
   #Continue Processing if readdatafile is a data.frame
   if (is.data.frame(readdatafile)){
-    print(1)
+
     #Standardize field names
     message("Standardize field names")
     datetimefieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datetimefieldnames$qcfield),perl = TRUE))
@@ -92,7 +90,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     datafieldnames$qcfield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$qcfield),perl = TRUE))
     datafieldnames$datafield = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(datafieldnames$datafield),perl = TRUE))
     names(readdatafile) = gsub("Â","",gsub("[^[:alnum:][:blank:]?&/\\-]", "",make.names(names(readdatafile)),perl = TRUE))
-    print(2)
+
     #Rebuild dataset
     message("Rebuild the dataset")
     for (i in 1:nrow(datafieldnames)){
@@ -118,62 +116,71 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
           }
           
           message("Apply name to DateTime column")
-          print(names(builddatecolumn))
+
           if (length(names(builddatecolumn)) > 0){
-          names(builddatecolumn) = "DateTime"
-          builddata = cbind(builddata,builddatecolumn)
-          
-          #Function to check date time format
-          checkdatetimeformat = function(datetime,dtformat,tz){
-            verdict = "stop"
-            message("Checking that datetime column is in the correct format")
-            if (all(!is.na(as.POSIXct(datetime,format = dtformat,tz = tz)))){
-              verdict = "continue"
+            names(builddatecolumn) = "DateTime"
+            builddata = cbind(builddata,builddatecolumn)
+            
+            #Function to check date time format
+            checkdatetimeformat = function(datetime,dtformat,tz){
+              verdict = "stop"
+              message("Checking that datetime column is in the correct format")
+              if (all(!is.na(as.POSIXct(datetime,format = dtformat,tz = tz)))){
+                verdict = "continue"
+              }
+              return(verdict)
             }
-            return(verdict)
-          }
-          checkdt = checkdatetimeformat(builddata$DateTime,dtformat = datetimeformat,tz = timezone)
-          
-          if (checkdt == "continue"){
-            builddata$DateTime = as.POSIXct(builddata$DateTime,format = datetimeformat,tz = timezone)
+            checkdt = checkdatetimeformat(builddata$DateTime,dtformat = datetimeformat,tz = timezone)
             
-            #Add SiteID
-            builddata$SiteID = siteid
-            
-            message("Build the file name and save to file")
-            #Extract start and end dates to name the file
-            startdate = gsub("-","",as.character(min(as.Date(builddata$DateTime))))
-            enddate = gsub("-","",as.character(max(as.Date(builddata$DateTime))))
-            
-            foldername = paste0("processing/",datafieldnames$type[i])
-            
-            #Determine if file should be named with Air or Water
-            if (datafieldnames$type[i] %in% c("AirTemp","AirBP")){
-              qctypename = "Air"
+            if (checkdt == "continue"){
+              builddata$DateTime = as.POSIXct(builddata$DateTime,format = datetimeformat,tz = timezone)
+              
+              #Add SiteID
+              builddata$SiteID = siteid
+              
+              message("Build the file name and save to file")
+              #Extract start and end dates to name the file
+              startdate = gsub("-","",as.character(min(as.Date(builddata$DateTime),na.rm = TRUE)))
+              enddate = gsub("-","",as.character(max(as.Date(builddata$DateTime),na.rm = TRUE)))
+              
+              foldername = paste0("processing/",datafieldnames$type[i])
+              
+              #Determine if file should be named with Air or Water
+              if (datafieldnames$type[i] %in% c("AirTemp","AirBP")){
+                qctypename = "Air"
+              }else{
+                qctypename = "Water"
+              }
+              
+              #Create directory
+              dir.create(foldername,showWarnings = FALSE)
+              
+              #Convert DateTime field to character because of weird new issue with write.csv not saving out 00:00:00 times if in Posixct format
+              if ("DateTime" %in% colnames(builddata)){
+                builddata$DateTime = as.character(format(builddata$DateTime))
+              }
+              
+              message(paste0("Saving reconfigured csv for: ",siteid))
+              #Write to csv
+              write.csv(builddata,paste0(foldername,"/",siteid,"_",qctypename,"_",startdate,"_",enddate,".csv"),row.names = FALSE,
+                        fileEncoding = "ISO-8859-1")
             }else{
-              qctypename = "Water"
+              sendSweetAlert(
+                session = session,
+                title = "Date Time column formatting error",
+                text = paste("The formatting of the Date Time column in",siteid," does not match the Date Time column format set in the Logger File Definition"),
+                type = "error"
+              )
+              continue = FALSE
+              updateProgressBar(
+                id = "processprogress",
+                session = session,
+                value = 0,
+                status = "danger",
+                title = "Date Time Column Name Error"
+              )
+              break
             }
-            
-            dir.create(foldername,showWarnings = FALSE)
-            write.csv(builddata,paste0(foldername,"/",siteid,"_",qctypename,"_",startdate,"_",enddate,".csv"),row.names = FALSE,
-                      fileEncoding = "ISO-8859-1")
-          }else{
-            sendSweetAlert(
-              session = session,
-              title = "Expected Date Time column name not found",
-              text = paste("The name of the Date Time column in",siteid," does not match the Date Time column name set in the Logger File Definition"),
-              type = "error"
-            )
-            continue = FALSE
-            updateProgressBar(
-              id = "processprogress",
-              session = session,
-              value = 0,
-              status = "danger",
-              title = "Date Time Column Name Error"
-            )
-            break
-          }
           }else{
             sendSweetAlert(
               session = session,
@@ -252,8 +259,8 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
       }
       
       #Compile QC metadata
-      qcinfo = list("qcnames" = qctypes,"startdate" = as.character(max(as.Date(builddata$DateTime))),
-                    "enddate" = as.character(min(as.Date(builddata$DateTime))),"fieldnames" = datafieldnames,"snlevels" = snlevels)
+      qcinfo = list("qcnames" = qctypes,"startdate" = as.character(max(as.Date(builddata$DateTime),na.rm = TRUE)),
+                    "enddate" = as.character(min(as.Date(builddata$DateTime),na.rm = TRUE)),"fieldnames" = datafieldnames,"snlevels" = snlevels)
     }
   }else{
     sendSweetAlert(
@@ -281,7 +288,6 @@ QCProcess = function(qcinfo,siteid,qcconfig){
   loggertypes = qcinfo$qcnames
   
   if (!is.na(qcinfo$startdate) & !is.na(qcinfo$enddate)){
-    
     for (i in loggertypes){
       dir.create(paste0("processing/",i,"/QC"),showWarnings = FALSE)
       
