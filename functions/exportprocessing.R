@@ -161,7 +161,7 @@ observeEvent(
     validate(
       need(selectexportdata(),"Loading...")
     )
-    message("finaldataprocessing")
+    message("Final Data Processing")
     deploydatesupdate()
     #Export Data Settings
     exportsettings = selectexportdata()
@@ -173,6 +173,7 @@ observeEvent(
       progsection = "Data1"
     )
     
+    message("Compiling Data Sources from configuration file")
     #Program Names
     programsettings = programs()
     #Waterbodies
@@ -189,9 +190,11 @@ observeEvent(
     processdata = VisQCdata()
     
     #Select the first data frame to begin building the final table
+    message("Begin building the final data table")
     startfields = processdata[[1]]
     
     #Select the UnitId and DateTime Fields
+    message("Select the UnitID and DateTime Fields")
     startfields = startfields[,c(1:2)]
     
     updateexportprogress(
@@ -202,9 +205,11 @@ observeEvent(
     )
     
     #Rename UnitID Field
+    message("Applying name to the UnitID field")
     names(startfields)[1] = exportsettings$UnitID
     #Format Date Fields
     #Set TZ
+    message("Applying time zone to date")
     startfields[,2] = with_tz(
       time = startfields[,2],
       tzone = exportsettings$TZ
@@ -212,8 +217,10 @@ observeEvent(
     
     #Split or separate dates
     if (exportsettings$DateTimeSep == "Combined"){
+      message("Applying name to DateTime field")
       names(startfields)[2] = exportsettings$Date_Time
     }else if (exportsettings$DateTimeSep == "Separate"){
+      message("Separating DateTime fields and applying names")
       startfields$date = as.Date(startfields[,2])
       names(startfields)[3] = exportsettings$Date
       startfields$time = format(startfields[,2], format = "%H:%M:%S")
@@ -223,30 +230,35 @@ observeEvent(
     
     #Add Model Name
     if (exportsettings$IncModelName == TRUE){
+      message("Applying name to Model Name field")
       startfields$modname = storeloggermodel()
       names(startfields)[ncol(startfields)] = exportsettings$ModelName
     }
     
     #Add Program Name
     if (exportsettings$IncProgramName == TRUE){
+      message("Applying name to Program Name field")
       startfields$progname = storeprogram()
       names(startfields)[ncol(startfields)] = exportsettings$ProgramName
     }
     
     #Add WaterBody ID
     if (exportsettings$IncProgramWBID == TRUE){
+      message("Applying name to Program Waterbody ID field")
       startfields$wbid = storewbid()
       names(startfields)[ncol(startfields)] = exportsettings$ProgramWBID
     }
     
     #Add WaterBody Name
     if (exportsettings$IncWBName == TRUE){
+      message("Applying name to Waterbody Name field")
       startfields$wbname = storewbname()
       names(startfields)[ncol(startfields)] = exportsettings$WBName
     }
     
     #Add WaterBody Type
     if (exportsettings$IncWBType == TRUE){
+      message("Applying name to Waterbody Type field")
       #input$procwaterbody sourced from processingUI.R
       startfields$wbtype = wbnamessettings$programwbssettings$WB_Type[which(programwbssettings$AppID == input$procwaterbody)]
       names(startfields)[ncol(startfields)] = exportsettings$WBType
@@ -254,18 +266,21 @@ observeEvent(
     
     #Add Station ID
     if (exportsettings$IncProgramStationID == TRUE){
+      message("Applying name to Station ID field")
       startfields$stationid = storestationid()
       names(startfields)[ncol(startfields)] = exportsettings$ProgramStationID
     }
     
     #Add Station Name
     if (exportsettings$IncStationName == TRUE){
+      message("Applying name Station Name field")
       startfields$stationname = storestationname()
       names(startfields)[ncol(startfields)] = exportsettings$StationName
     }
     
     #Add Coordinates
     if (exportsettings$IncLoc == TRUE){
+      message("Applying names to Location fields")
       startfields$lat = storelat()
       names(startfields)[ncol(startfields)] = exportsettings$Lat
       startfields$lon = storelon()
@@ -274,21 +289,25 @@ observeEvent(
     
     #Add Deployment Count
     if (exportsettings$IncDeploy == TRUE){
+      message("Applying name to Deployment Count field")
       startfields$deploy = storedepcount()
       names(startfields)[ncol(startfields)] = exportsettings$Deployment
     }
     
     #Add User Name
     if (exportsettings$IncUser == TRUE){
+      message("Applying name to User Name field")
       startfields$user = storeuser()
       names(startfields)[ncol(startfields)] = exportsettings$User
     }
     
     if (exportsettings$FileSep == "Single"){
+      message("Data combined into a single table")
       combinefields = startfields
+      
+      #Process logger data and associated Z values
       #qcloggertypes() sourced from processing.R
       for (i in qcloggertypes()){
-        
         updateexportprogress(
           sumprog = exportsettings$IncSum,
           metaprog = exportsettings$IncMeta,
@@ -297,7 +316,7 @@ observeEvent(
           allparams = qcloggertypes(),
           selectedparam = i
         )
-        
+        message(paste0("Organizing", i))
         #Select parameter Data and Depth Fields and rename them
         paradata = processdata[[i]]
         paradata = paradata[,c(3,4)]
@@ -329,59 +348,60 @@ observeEvent(
         
         #Combine logger types
         combinefields = cbind(combinefields,loggercombine)
-        
       }
 
       
       #Create vector for sorting fields in the table
+      message("Building field order vector")
       #Start with UnitID (required)
       fieldorder = c(exportsettings$UnitID)
+      
       #Model Name
-      if (exportsettings$IncModelName == TRUE){
+      if (exportsettings$IncModelName == TRUE & (!is.null(exportsettings$ModelName) & exportsettings$ModelName != "")){
         fieldorder = c(fieldorder,exportsettings$ModelName)
       }
-      
       #Program Name
-      if (exportsettings$IncProgramName == TRUE){
+      if (exportsettings$IncProgramName == TRUE & (!is.null(exportsettings$ProgramName) & exportsettings$ProgramName != "")){
         fieldorder = c(fieldorder,exportsettings$ProgramName)
       }
       #Waterbody ID
-      if (exportsettings$IncProgramWBID == TRUE){
+      if (exportsettings$IncProgramWBID == TRUE & (!is.null(exportsettings$ProgramWBID) & exportsettings$ProgramWBID != "")){
         fieldorder = c(fieldorder,exportsettings$ProgramWBID)
       }
       #Waterbody Name
-      if (exportsettings$IncWBName == TRUE){
+      if (exportsettings$IncWBName == TRUE & (!is.null(exportsettings$WBName) & exportsettings$WBName != "")){
         fieldorder = c(fieldorder,exportsettings$WBName)
       }
       #Waterbody Type
-      if (exportsettings$IncWBType == TRUE){
+      if (exportsettings$IncWBType == TRUE & (!is.null(exportsettings$WBType) & exportsettings$WBType != "")){
         fieldorder = c(fieldorder,exportsettings$WBType)
       }
       #Station ID
-      if (exportsettings$IncProgramStationID == TRUE){
+      if (exportsettings$IncProgramStationID == TRUE & (!is.null(exportsettings$ProgramStationID) & exportsettings$ProgramStationID != "")){
         fieldorder = c(fieldorder,exportsettings$ProgramStationID)
       }
       #Station Name
-      if (exportsettings$IncStationName == TRUE){
+      if (exportsettings$IncStationName == TRUE & (!is.null(exportsettings$StationName) & exportsettings$StationName != "")){
         fieldorder = c(fieldorder,exportsettings$StationName)
       }
       #Location
-      if(exportsettings$IncLoc == TRUE){
+      if(exportsettings$IncLoc == TRUE & ((!is.null(exportsettings$Lat) & !is.null(exportsettings$Lon)) & (exportsettings$Lat != "" & exportsettings$Lon != ""))){
         fieldorder = c(fieldorder,exportsettings$Lat,exportsettings$Lon)
       }
       #Deployment
-      if (exportsettings$IncDeploy == TRUE){
+      if (exportsettings$IncDeploy == TRUE & (!is.null(exportsettings$Deployment) & exportsettings$Deployment != "")){
         fieldorder = c(fieldorder,exportsettings$Deployment)
       }
       #User Name
-      if (exportsettings$IncUser == TRUE){
+      print(paste0("User: ",exportsettings$User))
+      if (exportsettings$IncUser == TRUE & (!is.null(exportsettings$User) & exportsettings$User != "")){
         fieldorder = c(fieldorder,exportsettings$User)
       }
       #Z
-      if (exportsettings$IncZ == TRUE){
+      if (exportsettings$IncZ == TRUE & (!is.null(exportsettings$Z) & exportsettings$Z != "")){
         fieldorder = c(fieldorder,exportsettings$Z)
       }
-      
+
       #Add Date and Time
       if (exportsettings$DateTimeSep == "Combined"){
         fieldorder = c(fieldorder,exportsettings$Date_Time)
@@ -391,13 +411,13 @@ observeEvent(
       #Add Parameters
       for (i in qcloggertypes()){
         parametertype = as.character(dplyr::select(exportsettings,matches(i)))
+        message(paste0("Processing ", parametertype))
         fieldorder = c(fieldorder,parametertype)
       }
       
       #Add QC
       if (length(qcloggertypes()) > 1){
         for (i in qcloggertypes()){
-          
           if (exportsettings$IncNotes == TRUE){
             qcflags = c("FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis","Notes")
           }else{
@@ -413,11 +433,12 @@ observeEvent(
           fieldorder = c(fieldorder,"FlagGross","FlagSpike","FlagRoC","FlagFlat","FlagVis")
         }
       }
-      
+
       combinefields = combinefields[,fieldorder]
       
       finaldata(combinefields)
     }else if (exportsettings$FileSep == "Multiple"){
+      message("Data separated into individual tables")
       combinelist = list()
       for (i in qcloggertypes()){
         
@@ -430,6 +451,7 @@ observeEvent(
           selectedparam = i
         )
         
+        message(paste0("Processing ", parametertype))
         #Select data by logger type
         paradata = processdata[[i]]
         
