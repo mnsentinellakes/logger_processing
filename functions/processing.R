@@ -50,17 +50,17 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
   #Select which fields should be included
   message("Select which fields should be included")
   loggerfields = loggerfields[which(loggerfields$ModelID == loggermodel),]
-  timezone = loggerfields$TZ
+  timezone = paste0("Etc/",loggerfields$TZ)
   
   #Select datetime fields
   message("Select datetime fields")
   datetimefields = Filter(function(x)!all(is.na(x)),loggerfields[,2:4])
-  datetimefieldnames = data.frame("qcfield"=names(datetimefields),"datafield"=unname(unlist(datetimefields[1,])),stringsAsFactors = FALSE)
+  datetimefieldnames = data.frame("qcfield" = names(datetimefields),"datafield" = unname(unlist(datetimefields[1,])),stringsAsFactors = FALSE)
   
   #Select data fields
   message("Select data fields")
-  datafields = Filter(function(x)!all(is.na(x)),loggerfields[,c(8:18)])
-  datafieldnames = data.frame("qcfield"=names(datafields),"datafield"=unname(unlist(datafields[1,])),stringsAsFactors = FALSE)
+  datafields = Filter(function(x) !all(is.na(x)),loggerfields[,c(8:18)])
+  datafieldnames = data.frame("qcfield" = names(datafields),"datafield" = unname(unlist(datafields[1,])),stringsAsFactors = FALSE)
   datafieldnames = datafieldnames[which(nchar(datafieldnames$datafield) > 0),]
   qctypes = datafieldnames$qcfield
   
@@ -95,7 +95,7 @@ formatforQC = function(datafilepath,siteid,waterbody,loggermodel,loggerfields,qc
     message("Rebuild the dataset")
     for (i in 1:nrow(datafieldnames)){
       builddata = data.frame("RowID" = seq(1:nrow(readdatafile)))
-      message(paste("Building Column",datafieldnames$datafiel[i]))
+      message(paste("Building Column",datafieldnames$datafield[i]))
       builddatacolumn = data.frame(readdatafile[which(names(readdatafile) == datafieldnames$datafield[i])])
       
       if (nrow(builddatacolumn) > 0){
