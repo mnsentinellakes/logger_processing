@@ -914,15 +914,23 @@ observeEvent(
     loggerexportfinal = loggerfiledefs()
     loggerexportfinal = loggerexportfinal[which(loggerexportfinal$ModelID == input$selectloggerexport),]
     
+    #Number of Checked Column Names
     nchecked = sum(c(input$incmodelnameexport,input$incprogramnameexport,input$incwbidexport,input$incwbnameexport,input$incwbtypeexport,
                      input$incstationidexport,input$incstationnameexport,input$incdeploymentexport,input$incusernameexport,input$inczexport,input$inclocexport))
     
-    print(nchecked)
-    
+    #Number of Column Names with Name filled out
     ncomplete = sum(c(input$modelnameexport != "",input$programnameexport != "",input$wbidexport != "",input$wbnameexport != "",
                       input$wbtypeexport != "",input$stationidexport != "",input$stationnameexport != "",input$deploymentexport != "",
-                      input$usernameexport != "",input$zexport != "",input$locexport != ""))
+                      input$usernameexport != "",input$zexport != "",input$latexport != ""))
     
+    message(paste0("Include Model Name: ",input$incmodelnameexport,";\n Include Program Name: ",input$incprogramnameexport,";\n Include Waterbody ID: ",
+                   input$incwbidexport,";\n Include Waterbody Name: ",input$incwbnameexport,";\n Include Waterbody Type: ",input$incwbtypeexport,
+                   ";\n Include Station ID: ",input$incstationidexport,";\n Include Station Name: ",input$incstationnameexport,";\n Include Deployment Count: ",
+                   input$incdeploymentexport,";\n Include User Name: ",input$incusernameexport,";\n Include Z Value: ",input$inczexport,";\n Include Location: ",
+                   input$inclocexport,";"))
+    
+    message(paste0(nchecked," field names selected for inclusion"))
+    message(paste0(ncomplete," field names with names"))
     if (nchecked == ncomplete){
       #If settings already exist for the program and model combination
       if (nrow(exportselect()) > 0){
@@ -933,6 +941,7 @@ observeEvent(
         exportfinal$IncRep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$increp
         exportfinal$IncConfig[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incconfig
         exportfinal$IncSum[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$incsummary
+        
         #Identification Field Names
         exportfinal$UnitID[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$unitidexport
         
@@ -1018,10 +1027,12 @@ observeEvent(
         #Date and Time Field Names
         exportfinal$DateTimeSep[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datetypeexport
         if (input$datetypeexport == "Combined"){
+          message("Date and Time fields will be combined in the export")
           exportfinal$Date_Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datetimecombinecolexport
           exportfinal$Date[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
           exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }else if (input$datetypeexport == "Separate"){
+          message("Date and Time fields will be separate in the export")
           exportfinal$Date_Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
           exportfinal$Date[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$datecolexport
           exportfinal$Time[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$timecolexport
@@ -1031,67 +1042,89 @@ observeEvent(
         
         #Data Field Names
         if (!is.na(loggerexportfinal$AirBP) & loggerexportfinal$AirBP != ""){
+          message(paste0("The AirBP field will be in the export and is named ",input$airbpexport))
           exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airbpexport
         }else{
+          message("The AirBP field will not be included in the export")
           exportfinal$AirBP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
         if (!is.na(loggerexportfinal$AirTemp) & loggerexportfinal$AirTemp != ""){
+          message(paste0("The AirTemp field will be in the export and is named ",input$airtempexport))
           exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$airtempexport
         }else{
+          message("The AirTemp field will not be included in the export")
           exportfinal$AirTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
         if (!is.na(loggerexportfinal$Chlorophylla) & loggerexportfinal$Chlorophylla != ""){
+          message(paste0("The Chlorophylla field will be in the export and is named ",input$chlorophyllaexport))
           exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$chlorophyllaexport
         }else{
+          message("The Chlorophylla field will not be included in the export")
           exportfinal$Chlorophylla[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
         if (!is.na(loggerexportfinal$Cond) & loggerexportfinal$Cond != ""){
+          message(paste0("The Cond field will be in the export and is named ",input$condexport))
           exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$condexport
         }else{
+          message("The Cond field will not be included in the export")
           exportfinal$Cond[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
         if (!is.na(loggerexportfinal$Discharge) & loggerexportfinal$Discharge != ""){
+          message(paste0("The Discharge field will be in the export and is named ",input$dischargeexport))
           exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$dischargeexport
         }else{
+          message("The Discharge field will not be included in the export")
           exportfinal$Discharge[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         if (!is.na(loggerexportfinal$DO) & loggerexportfinal$DO != ""){
+          message(paste0("The DO field will be included in the export and is named ",input$doexport))
           exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$doexport
         }else{
+          message("The DO field will not be included in the export")
           exportfinal$DO[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
         if (!is.na(loggerexportfinal$pH) & loggerexportfinal$pH != ""){
+          message(paste0("The pH field will be in the export and is named ",input$phexport))
           exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$phexport
         }else{
+          message("The pH field will not be included in the export")
           exportfinal$pH[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
         if (!is.na(loggerexportfinal$Turbidity) & loggerexportfinal$Turbidity != ""){
+          message(paste0("The Turbidity field will be in the export and is named ",input$turbidityexport))
           exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$turbidityexport
         }else{
+          message("The Turbidity field will not be included in the export")
           exportfinal$Turbidity[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
         if (!is.na(loggerexportfinal$WaterLevel) & loggerexportfinal$WaterLevel != ""){
+          message(paste0("The WaterLevel field will be in the export and is named ",input$waterlevelexport))
           exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterlevelexport
         }else{
+          message("The WaterLevel field will not be included in the export")
           exportfinal$WaterLevel[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
         if (!is.na(loggerexportfinal$WaterP) & loggerexportfinal$WaterP != ""){
+          message(paste0("The WaterP field will be in the export and is named ",input$waterpexport))
           exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$waterpexport
         }else{
+          message("The WaterP field will not be included in the export")
           exportfinal$WaterP[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
         if (!is.na(loggerexportfinal$WaterTemp) & loggerexportfinal$WaterTemp != ""){
+          message(paste0("The WaterTemp field will be in the export and is named ",input$watertempexport))
           exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = input$watertempexport
         }else{
+          message("The WaterTemp field will not be included in the export")
           exportfinal$WaterTemp[which(exportfinal$ProgramID == input$selectedprogramexport & exportfinal$ModelID == input$selectloggerexport)] = NA
         }
         
@@ -1246,6 +1279,11 @@ observeEvent(
           watertempfinal = NA
         }
         
+        message(paste0("Model Name: ",input$modelnameexport,";\n Program Name: ",input$programnameexport,";\n Waterbody ID: ",input$wbidexport,
+                       ";\n Waterbody Name: ",input$wbnameexport,";\n Waterbody Type: ",input$wbtypeexport,";\n Station ID: ",input$stationidexport,
+                       ";\n Station Name: ",input$stationnameexport,";\n Deployment Count: ",input$deploymentexport,";\n User Name: ",input$usernameexport,
+                       ";\n Z Value: ",input$zexport,";\n Latitude: ",input$latexport,";\n Longitude: ",input$lonexport,";"))
+        
         exportfinalrow = data.frame("ProgramID" = input$selectedprogramexport,"ModelID" = input$selectloggerexport,"FileSep" = input$sepfile,
                                     "IncMeta" = input$incmeta,"IncRep" = input$increp,"IncConfig" = input$incconfig,
                                     "IncSum" = input$incsummary,"UnitID" = unitidfinal,"IncModelName" = input$incmodelnameexport,
@@ -1269,6 +1307,8 @@ observeEvent(
       export(exportfinal)
       updatebaseconfig()
     }else{
+      message("Field Names not provided for every selected field")
+      
       sendSweetAlert(
         session = session,
         title = "Missing Field Names",
