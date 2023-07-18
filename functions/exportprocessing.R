@@ -150,7 +150,6 @@ updateexportprogress = function(sumprog,metaprog,repprog,progsection,allparams =
   }
 }
 
-
 #Process data for export
 finaldata = reactiveVal()
 finaldatacomplete = reactiveVal(FALSE)
@@ -218,6 +217,7 @@ observeEvent(
     #Split or separate dates
     if (exportsettings$DateTimeSep == "Combined"){
       message("Applying name to DateTime field")
+      startfields[,2] = as.character(format(startfields[,2]))
       names(startfields)[2] = exportsettings$Date_Time
     }else if (exportsettings$DateTimeSep == "Separate"){
       message("Separating DateTime fields and applying names")
@@ -1111,6 +1111,8 @@ output$dlddata = downloadHandler(
       dldpathprime = paste0("temp/",dldnameprime)
       
       #Create the csv and zip it
+      outputdata = finaldata()
+      
       write.csv(finaldata(),dldpathprime,row.names = FALSE)
       
       zip(
