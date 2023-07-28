@@ -199,6 +199,12 @@ output$procmetadataUI = renderUI({
         )
       )
     ),
+    uiOutput("processingbttnUI")
+  )
+})
+
+output$processingbttnUI = renderUI({
+  if (!is.null(input$dataupload)){
     actionBttn(
       inputId = "processingbttn",
       label = "Process Data",
@@ -207,7 +213,8 @@ output$procmetadataUI = renderUI({
       size = "lg",
       icon = icon("desktop")
     )
-  )
+  }
+  
 })
 
 #Processing Description
