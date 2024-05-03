@@ -451,7 +451,7 @@ observeEvent(
           selectedparam = i
         )
         
-        message(paste0("Processing ", parametertype))
+        message(paste0("Processing ", i))
         #Select data by logger type
         paradata = processdata[[i]]
         
